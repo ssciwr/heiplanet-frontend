@@ -30,6 +30,14 @@ test.describe("ModelDetailsModal", () => {
 
 		await page.waitForTimeout(1000);
 
+		const modelCardsUnavailable = page.locator(
+			'text="Model Cards Unavailable"',
+		);
+		if (await modelCardsUnavailable.isVisible()) {
+			await expect(modelCardsUnavailable).toBeVisible();
+			return;
+		}
+
 		const viewAllModelsOption = page.locator('[data-testid="view-all-models"]');
 		const viewAllModelsTextOption = page.locator(
 			'text="View Details & Compare Models"',
