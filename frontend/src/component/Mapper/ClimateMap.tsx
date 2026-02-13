@@ -56,6 +56,8 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		setNoDataModalVisible,
 		userRequestedYear,
 		setUserRequestedYear,
+		userRequestedMonth,
+		setUserRequestedMonth,
 		dataFetchErrorMessage,
 		setDataFetchErrorMessage,
 		mapScreenshoter,
@@ -115,6 +117,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 					userStore.selectedModel,
 					userStore.setCurrentVariableType,
 					setUserRequestedYear,
+					setUserRequestedMonth,
 					setNoDataModalVisible,
 					setDataFetchErrorMessage,
 					mapDataStore.setIsLoadingRawData,
@@ -138,6 +141,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		models,
 		userStore.setCurrentVariableType,
 		setUserRequestedYear,
+		setUserRequestedMonth,
 		setNoDataModalVisible,
 		setDataFetchErrorMessage,
 		setGeneralError,
@@ -405,6 +409,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				mapDataStore.setProcessedEuropeNutsRegions(null);
 				mapDataStore.setIsProcessingEuropeNutsData(false);
 				mapDataStore.setIsProcessingWorldwideRegionData(false);
+				gridProcessingStore.setGridCells([]);
 			}
 		};
 
@@ -644,6 +649,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				onClose={() => setNoDataModalVisible(false)}
 				onLoadCurrentYear={handleLoadCurrentYear}
 				requestedYear={userRequestedYear}
+				requestedMonth={userRequestedMonth}
 				errorMessage={dataFetchErrorMessage}
 			/>
 

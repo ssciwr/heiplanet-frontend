@@ -56,6 +56,7 @@ export class TemperatureDataStore {
 		selectedModel: string,
 		setCurrentVariableType: (value: string) => void,
 		setUserRequestedYear: (year: number) => void,
+		setUserRequestedMonth: (month: number) => void,
 		setNoDataModalVisible: (visible: boolean) => void,
 		setDataFetchErrorMessage: (message: string) => void,
 		setIsLoadingRawData: (loading: boolean) => void,
@@ -87,6 +88,7 @@ export class TemperatureDataStore {
 				typeof month,
 			);
 			setUserRequestedYear(year);
+			setUserRequestedMonth(safeMonth);
 
 			const modelFindStart = performance.now();
 			const selectedModelData = models.find((m) => m.id === selectedModel);
@@ -156,6 +158,9 @@ export class TemperatureDataStore {
 			setIsLoadingRawData(false);
 
 			if (error.message.includes("API_ERROR:")) {
+				this.setRawRegionTemperatureData([]);
+				this.setProcessedDataExtremes(null);
+				this.setMapDataBounds(null);
 				const errorMsg = error.message.replace("API_ERROR: ", "");
 				setDataFetchErrorMessage(errorMsg);
 				setNoDataModalVisible(true);

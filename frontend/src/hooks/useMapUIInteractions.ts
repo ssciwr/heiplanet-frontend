@@ -22,6 +22,8 @@ export interface MapUIInteractionsState {
 	setNoDataModalVisible: (visible: boolean) => void;
 	userRequestedYear: number;
 	setUserRequestedYear: (year: number) => void;
+	userRequestedMonth: number;
+	setUserRequestedMonth: (month: number) => void;
 	dataFetchErrorMessage: string;
 	setDataFetchErrorMessage: (message: string) => void;
 }
@@ -41,6 +43,7 @@ export const useMapUIInteractions = (): MapUIInteractionsState => {
 		useState<L.SimpleMapScreenshoter | null>(null);
 	const [noDataModalVisible, setNoDataModalVisible] = useState(false);
 	const [userRequestedYear, setUserRequestedYear] = useState<number>(2025);
+	const [userRequestedMonth, setUserRequestedMonth] = useState<number>(1);
 	const [dataFetchErrorMessage, setDataFetchErrorMessage] =
 		useState<string>("");
 
@@ -61,6 +64,8 @@ export const useMapUIInteractions = (): MapUIInteractionsState => {
 		setNoDataModalVisible,
 		userRequestedYear,
 		setUserRequestedYear,
+		userRequestedMonth,
+		setUserRequestedMonth,
 		dataFetchErrorMessage,
 		setDataFetchErrorMessage,
 	};
