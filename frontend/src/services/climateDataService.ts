@@ -163,8 +163,19 @@ export async function fetchClimateData(
 		});
 
 		if (!response.ok) {
+			let backendError = "";
+			try {
+				const errorPayload = (await response.json()) as { error?: unknown };
+				if (typeof errorPayload?.error === "string") {
+					backendError = errorPayload.error;
+				}
+			} catch {
+				// no-op: fallback to HTTP status text below
+			}
 			throw new Error(
-				`API request failed: ${response.status} ${response.statusText}`,
+				backendError
+					? `API_ERROR: ${backendError}`
+					: `API request failed: ${response.status} ${response.statusText}`,
 			);
 		}
 

@@ -269,12 +269,24 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				mapDataStore.setIsProcessingEuropeNutsData(false);
 			} catch (error) {
 				console.error("Failed to load/process Europe-only NUTS data:", error);
-				const noDataMessage =
-					error instanceof Error && error.message === "NO_DATA"
-						? "Sorry, this map data is not available right now"
-						: "Failed to process Europe-only NUTS data";
-				setDataProcessingError(true);
-				setGeneralError(noDataMessage);
+				if (
+					error instanceof Error &&
+					(error.message === "NO_DATA" || error.message.includes("API_ERROR:"))
+				) {
+					setUserRequestedYear(userStore.currentYear);
+					setUserRequestedMonth(userStore.currentMonth);
+					setDataFetchErrorMessage(
+						error.message === "NO_DATA"
+							? "No data found for this request."
+							: error.message.replace("API_ERROR: ", ""),
+					);
+					setNoDataModalVisible(true);
+					setDataProcessingError(false);
+					setGeneralError(null);
+				} else {
+					setDataProcessingError(true);
+					setGeneralError("Failed to process Europe-only NUTS data");
+				}
 				mapDataStore.setIsProcessingEuropeNutsData(false);
 				mapDataStore.setIsLoadingRawData(false);
 			} finally {
@@ -294,6 +306,10 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		userStore.setCurrentVariableType,
 		setDataProcessingError,
 		setGeneralError,
+		setUserRequestedYear,
+		setUserRequestedMonth,
+		setDataFetchErrorMessage,
+		setNoDataModalVisible,
 	]);
 
 	// Worldwide/Grid mode effect (dependent on temperatureDataStore.rawRegionTemperatureData)

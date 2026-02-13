@@ -371,13 +371,29 @@ export const loadNutsData = async (
 			},
 		});
 
+		let data: unknown = null;
+		try {
+			data = await response.json();
+		} catch {
+			// no-op; handled below
+		}
+
 		if (!response.ok) {
+			const backendError =
+				typeof (data as { error?: unknown })?.error === "string"
+					? ((data as { error: string }).error ?? "")
+					: "";
 			throw new Error(
-				`API_ERROR: HTTP ${response.status} - ${response.statusText}`,
+				backendError
+					? `API_ERROR: ${backendError}`
+					: `API_ERROR: HTTP ${response.status} - ${response.statusText}`,
 			);
 		}
 
-		const data = await response.json();
+		if (typeof (data as { error?: unknown })?.error === "string") {
+			throw new Error(`API_ERROR: ${(data as { error: string }).error}`);
+		}
+
 		const normalized = normalizeNutsApiResponse(data);
 
 		console.log(
