@@ -87,6 +87,10 @@ export class GridProcessingStore {
 		const baseSize =
 			resolutionFactor > 0 ? resolutionFactor : derivedIntervalSize;
 		const gridSize = Number(baseSize.toFixed(6));
+		if (!Number.isFinite(gridSize) || gridSize <= 0) {
+			console.warn("⚠️ Invalid grid size calculated:", gridSize);
+			return [];
+		}
 
 		console.log(
 			`🔍 Grid size: ${gridSize}, zoom: ${zoom}, resolutionFactor: ${resolutionFactor}`,
@@ -99,13 +103,20 @@ export class GridProcessingStore {
 
 		const filterStart = performance.now();
 		const buffer = gridSize * 2;
-		const filteredData = dataPoints.filter(
-			(point: DataPoint) =>
-				point.lat >= south - buffer &&
-				point.lat <= north + buffer &&
-				point.lng >= west - buffer &&
-				point.lng <= east + buffer,
-		);
+		const filteredData = dataPoints
+			.filter(
+				(point: DataPoint) =>
+					Number.isFinite(point.lat) &&
+					Number.isFinite(point.lng) &&
+					Number.isFinite(point.temperature),
+			)
+			.filter(
+				(point: DataPoint) =>
+					point.lat >= south - buffer &&
+					point.lat <= north + buffer &&
+					point.lng >= west - buffer &&
+					point.lng <= east + buffer,
+			);
 		console.log(
 			`🔍 Filtering took ${(performance.now() - filterStart).toFixed(2)}ms - filtered from ${dataPoints.length} to ${filteredData.length} points`,
 		);

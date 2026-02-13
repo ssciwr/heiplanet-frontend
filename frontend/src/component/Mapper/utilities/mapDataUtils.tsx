@@ -523,9 +523,9 @@ export const loadTemperatureData = async (
 			}
 
 			if (
-				!Number.isNaN(lat) &&
-				!Number.isNaN(lng) &&
-				!Number.isNaN(temperature)
+				Number.isFinite(lat) &&
+				Number.isFinite(lng) &&
+				Number.isFinite(temperature)
 			) {
 				dataPoints.push({
 					point: turf.point([lng, lat]),

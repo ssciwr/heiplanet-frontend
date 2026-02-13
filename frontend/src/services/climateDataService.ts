@@ -6,7 +6,11 @@ export interface ClimateDataPoint {
 
 export interface ClimateApiResponse {
 	result: {
-		"latitude, longitude, var_value": [number, number, number][];
+		"latitude, longitude, var_value": [
+			number | string,
+			number | string,
+			number | string,
+		][];
 	};
 }
 
@@ -171,13 +175,30 @@ export async function fetchClimateData(
 			throw new Error(`API_ERROR: ${data.error}`);
 		}
 
-		return data.result["latitude, longitude, var_value"].map(
-			([latitude, longitude, temperature]: [number, number, number]) => ({
-				latitude, // "longitude": latitude,
-				longitude, // "latitude": longitude,
-				temperature,
-			}),
-		);
+		const rawRows = data.result["latitude, longitude, var_value"] as Array<
+			[number | string, number | string, number | string]
+		>;
+		const normalizedRows: ClimateDataPoint[] = [];
+
+		for (const row of rawRows) {
+			const latitude = Number(row[0]);
+			const longitude = Number(row[1]);
+			const temperature = Number(row[2]);
+
+			if (
+				Number.isFinite(latitude) &&
+				Number.isFinite(longitude) &&
+				Number.isFinite(temperature)
+			) {
+				normalizedRows.push({
+					latitude, // "longitude": latitude,
+					longitude, // "latitude": longitude,
+					temperature,
+				});
+			}
+		}
+
+		return normalizedRows;
 	} catch (error) {
 		console.error("Error fetching climate data:", error);
 		throw error;
