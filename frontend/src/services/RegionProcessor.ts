@@ -298,9 +298,15 @@ export class RegionProcessor {
 						// Created Forntend issue #77 for this.
 						WORLDWIDE_ID:
 							feature.properties?.name ||
+							feature.properties?.NAM_0 ||
 							feature.properties?.name_en ||
 							"Unknown",
-						countryName: feature.properties?.admin || "Unknown Country",
+						countryName:
+							feature.properties?.NAM_0 ||
+							feature.properties?.admin ||
+							feature.properties?.name ||
+							feature.properties?.name_en ||
+							"Unknown Country",
 						pointCount: sampledTemperatureData.filter((point) =>
 							this.isPointInRegion(
 								point.lat,

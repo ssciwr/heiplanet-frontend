@@ -40,6 +40,8 @@ const AdaptiveGridLayer = observer(() => {
 		};
 	};
 
+	// get country name this way for borders at world geojson (not NUTS), admin level 0: return (match?.properties as { NAM_0?: string } | undefined)?.NAM_0 || "Unknown";
+
 	// zIndex less than the city layer so those appear on top.
 	const result = (
 		<div style={{ zIndex: "335" }}>
@@ -62,12 +64,12 @@ const AdaptiveGridLayer = observer(() => {
 					>
 						<Popup className="grid-popup">
 							<p>{cell.temperature.toFixed(2)}</p>
-							<p>Coordinates: {cell.id}</p>
+							<p>Coordinates: {JSON.stringify(cell.bounds)}</p>
 						</Popup>
 					</Rectangle>
 				),
 			)}
-		</div>
+		</div> // todo: Add css class for grid-popup(it is transparent right now)
 	); // todo: Replace just teh cell.temperature above: rename temperature to .value (as it is used for R0 too etc) and provide the label.
 	// the label should be in some kind of mobx store or passed as prop.
 	// todo: Check this again. This relates to Ingas suggested changes today

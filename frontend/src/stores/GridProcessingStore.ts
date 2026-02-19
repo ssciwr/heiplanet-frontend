@@ -122,13 +122,14 @@ export class GridProcessingStore {
 		);
 
 		const processStart = performance.now();
-		const EPS = gridSize * 1e-6;
+		const halfGridSize = gridSize / 2;
 		for (const point of filteredData) {
-			// Align to a global origin to avoid seams from floating-point drift
-			const cellLatIndex = Math.floor((point.lat + 90 + EPS) / gridSize);
-			const cellLngIndex = Math.floor((point.lng + 180 + EPS) / gridSize);
-			const cellLat = cellLatIndex * gridSize - 90;
-			const cellLng = cellLngIndex * gridSize - 180;
+			const cellLatIndex = Math.round((point.lat + 90) / gridSize);
+			const cellLngIndex = Math.round((point.lng + 180) / gridSize);
+			const baseCellLat = cellLatIndex * gridSize - 90;
+			const baseCellLng = cellLngIndex * gridSize - 180;
+			const cellLat = baseCellLat - halfGridSize;
+			const cellLng = baseCellLng - halfGridSize;
 			const cellId = `${cellLatIndex}_${cellLngIndex}`;
 
 			const bounds: L.LatLngBoundsExpression = [
@@ -176,7 +177,7 @@ export class GridProcessingStore {
 		temperatureData: TemperatureDataPoint[],
 		viewport: ViewportBounds | null,
 		resolutionLevel: number,
-	) => {
+	): GridCell[] => {
 		const methodStart = performance.now();
 		console.log(
 			"🚀 generateGridCellsFromTemperatureData START with:",
@@ -191,8 +192,7 @@ export class GridProcessingStore {
 				!!viewport,
 				temperatureData.length,
 			);
-			this.setGridCells([]);
-			return;
+			return [];
 		}
 
 		const changeCheckStart = performance.now();
@@ -238,19 +238,23 @@ export class GridProcessingStore {
 			);
 
 			console.log("📈 Generated", cells.length, "grid cells");
-			this.setGridCells(cells);
 
 			this.prevViewport = viewport;
 			this.prevResolution = resolutionLevel;
 			this.prevFirstDatapointTemperature = currentFirstDatapointTemp;
-		} else {
-			console.log("♻️ Using cached grid cells - no recalculation needed");
+			const methodTotal = performance.now() - methodStart;
+			console.log(
+				`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
+			);
+			return cells;
 		}
 
+		console.log("♻️ Using cached grid cells - no recalculation needed");
 		const methodTotal = performance.now() - methodStart;
 		console.log(
 			`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 		);
+		return this.gridCells;
 	};
 }
 
