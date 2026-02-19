@@ -47,6 +47,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 	console.log("GRID-PROBLEM-DEBUG ClimateMap render");
 	const userStore = useUserSelectionsStore();
 	const lastInputKeyRef = useRef<string | null>(null);
+	const latestGridBuildRequestRef = useRef(0);
 	const {
 		generalError,
 		setGeneralError,
@@ -127,7 +128,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				);
 			}
 
-			if (userStore.mapMode === "worldwide") {
+			if (userStore.mapMode === "worldwide" || userStore.mapMode === "grid") {
 				await temperatureDataStore.loadWorldwideRegions();
 			}
 		};
@@ -368,6 +369,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 					mapDataStore.setIsProcessingWorldwideRegionData(false);
 				}
 			} else if (userStore.mapMode === "grid" && rawDataLength > 0) {
+				const gridBuildRequestId = ++latestGridBuildRequestRef.current;
 				console.log("GRID-PROBLEM-DEBUG grid branch entry", {
 					rawDataLength,
 					viewport: mapDataStore.mapViewportBounds,
@@ -398,11 +400,16 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 					viewportBounds,
 					resolution,
 				});
-				gridProcessingStore.generateGridCellsFromTemperatureData(
-					temperatureDataStore.rawRegionTemperatureData,
-					viewportBounds,
-					resolution,
-				);
+				const nextGridCells =
+					gridProcessingStore.generateGridCellsFromTemperatureData(
+						temperatureDataStore.rawRegionTemperatureData,
+						viewportBounds,
+						resolution,
+					);
+				if (gridBuildRequestId !== latestGridBuildRequestRef.current) {
+					return; // stale, ignore
+				}
+				gridProcessingStore.setGridCells(nextGridCells);
 				console.log("GRID-PROBLEM-DEBUG after gridProcessingStore.generate", {
 					gridCellCount: gridProcessingStore.gridCells.length,
 				});
@@ -413,6 +420,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				mapDataStore.setIsProcessingEuropeNutsData(false);
 				mapDataStore.setIsProcessingWorldwideRegionData(false);
 			} else {
+				latestGridBuildRequestRef.current += 1;
 				console.log("GRID-PROBLEM-DEBUG grid/worldwide else", {
 					mapMode: userStore.mapMode,
 					rawDataLength,
@@ -505,22 +513,27 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		(newViewport: { bounds: LatLngBounds; zoom: number }) => {
 			if (newViewport) {
 				const bounds = newViewport.bounds;
-				const zoom = newViewport.zoom;
+				const currentZoom = newViewport.zoom;
+				const lodZoom = Math.max(
+					// Level of Detail zoom
+					MIN_ZOOM,
+					Math.min(MAX_ZOOM, Math.round(currentZoom)),
+				);
 
 				const newViewportBounds = {
 					north: bounds.getNorth(),
 					south: bounds.getSouth(),
 					east: bounds.getEast(),
 					west: bounds.getWest(),
-					zoom: zoom,
+					zoom: lodZoom,
 				};
 
 				console.log("🎯 Setting new viewport bounds:", newViewportBounds);
 				mapDataStore.setMapViewportBounds(newViewportBounds);
-				mapDataStore.setMapZoomLevel(zoom);
+				mapDataStore.setMapZoomLevel(lodZoom);
 
-				// Set resolution based on zoom
-				mapDataStore.setDataResolution(getGridResolutionForZoom(zoom));
+				// Align to one discrete lod to avoid mixing adjacent zoom levels.
+				mapDataStore.setDataResolution(getGridResolutionForZoom(lodZoom));
 			}
 		},
 		[],
