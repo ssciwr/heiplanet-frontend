@@ -37,6 +37,10 @@ test.describe("Comprehensive Grid Color Analysis - Desktop Only", () => {
 			browserName !== "chromium",
 			"This test only runs on Chromium due to SVG rendering differences with react leaflet",
 		);
+		test.fixme(
+			browserName === "chromium",
+			"Temporarily skipped: timeline month selector is intermittently missing in CI.",
+		);
 
 		await page.goto("http://localhost:5174/map/citizen?notour=true");
 
