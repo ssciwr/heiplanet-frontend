@@ -10,12 +10,11 @@ import {
 	loadNutsData,
 	loadTemperatureData,
 } from "../component/Mapper/utilities/mapDataUtils";
-import type { Model } from "../hooks/useModelData";
+import type { Model } from "../types/model";
 import { errorStore } from "./ErrorStore";
 import { loadingStore } from "./LoadingStore";
 
-const NATURAL_EARTH_URL =
-	"https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson";
+const NATURAL_EARTH_URL = "/downsampled_initial.geojson";
 
 export class TemperatureDataStore {
 	rawRegionTemperatureData: TemperatureDataPoint[] = [];
@@ -23,6 +22,7 @@ export class TemperatureDataStore {
 	mapDataBounds: ViewportBounds | null = null;
 	baseWorldGeoJSON: GeoJSON.FeatureCollection | null = null;
 	worldwideRegionBoundaries: WorldwideGeoJSON | null = null;
+	private latestTemperatureLoadRequestId = 0;
 
 	constructor() {
 		makeAutoObservable(this);
@@ -56,6 +56,7 @@ export class TemperatureDataStore {
 		selectedModel: string,
 		setCurrentVariableType: (value: string) => void,
 		setUserRequestedYear: (year: number) => void,
+		setUserRequestedMonth: (month: number) => void,
 		setNoDataModalVisible: (visible: boolean) => void,
 		setDataFetchErrorMessage: (message: string) => void,
 		setIsLoadingRawData: (loading: boolean) => void,
@@ -69,6 +70,7 @@ export class TemperatureDataStore {
 		requestedGridResolution?: number,
 	) => {
 		const loadStart = performance.now();
+		const requestId = ++this.latestTemperatureLoadRequestId;
 		console.log(
 			`🌡️ TemperatureDataStore.loadTemperatureData START - year: ${year}, month: ${month}`,
 		);
@@ -87,6 +89,7 @@ export class TemperatureDataStore {
 				typeof month,
 			);
 			setUserRequestedYear(year);
+			setUserRequestedMonth(safeMonth);
 
 			const modelFindStart = performance.now();
 			const selectedModelData = models.find((m) => m.id === selectedModel);
@@ -122,6 +125,9 @@ export class TemperatureDataStore {
 				`📏 Data extremes for year ${year}, month ${safeMonth}:`,
 				extremes,
 			);
+			if (requestId !== this.latestTemperatureLoadRequestId) {
+				return; // stale, ignore
+			}
 
 			const storeUpdateStart = performance.now();
 			this.setRawRegionTemperatureData(dataPoints);
@@ -149,6 +155,9 @@ export class TemperatureDataStore {
 			setIsLoadingRawData(false);
 		} catch (err: unknown) {
 			const error = err as Error;
+			if (requestId !== this.latestTemperatureLoadRequestId) {
+				return; // stale, ignore
+			}
 			console.log(
 				`❌ TemperatureDataStore.loadTemperatureData FAILED in ${(performance.now() - loadStart).toFixed(2)}ms: ${error.message}`,
 			);
@@ -156,6 +165,9 @@ export class TemperatureDataStore {
 			setIsLoadingRawData(false);
 
 			if (error.message.includes("API_ERROR:")) {
+				this.setRawRegionTemperatureData([]);
+				this.setProcessedDataExtremes(null);
+				this.setMapDataBounds(null);
 				const errorMsg = error.message.replace("API_ERROR: ", "");
 				setDataFetchErrorMessage(errorMsg);
 				setNoDataModalVisible(true);

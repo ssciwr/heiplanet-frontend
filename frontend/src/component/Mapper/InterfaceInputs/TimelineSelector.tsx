@@ -293,7 +293,7 @@ const TimelineSelector: React.FC<AntdTimelineSelectorProps> = ({
 				</div>
 
 				{/* Custom CSS for styled modes */}
-				{true && !isMobile && (
+				{!isMobile && (
 					<style>
 						{`
 							/* White slider styling for styled modes */

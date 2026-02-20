@@ -6,7 +6,11 @@ export interface ClimateDataPoint {
 
 export interface ClimateApiResponse {
 	result: {
-		"latitude, longitude, var_value": [number, number, number][];
+		"latitude, longitude, var_value": [
+			number | string,
+			number | string,
+			number | string,
+		][];
 	};
 }
 
@@ -70,7 +74,7 @@ export async function fetchClimateData(
 					viewportBounds.south,
 					viewportBounds.east,
 				] // [N, W, S, E]
-			: [180, 0, 0, 180]; // global fallback
+			: [90, -180, -90, 180]; // global fallback
 
 		console.log("🔍 DEBUG: Viewport bounds received:", viewportBounds);
 		console.log("🔍 DEBUG: viewportBounds is null?", viewportBounds === null);
@@ -159,8 +163,19 @@ export async function fetchClimateData(
 		});
 
 		if (!response.ok) {
+			let backendError = "";
+			try {
+				const errorPayload = (await response.json()) as { error?: unknown };
+				if (typeof errorPayload?.error === "string") {
+					backendError = errorPayload.error;
+				}
+			} catch {
+				// no-op: fallback to HTTP status text below
+			}
 			throw new Error(
-				`API request failed: ${response.status} ${response.statusText}`,
+				backendError
+					? `API_ERROR: ${backendError}`
+					: `API request failed: ${response.status} ${response.statusText}`,
 			);
 		}
 
@@ -171,13 +186,30 @@ export async function fetchClimateData(
 			throw new Error(`API_ERROR: ${data.error}`);
 		}
 
-		return data.result["latitude, longitude, var_value"].map(
-			([latitude, longitude, temperature]: [number, number, number]) => ({
-				latitude, // "longitude": latitude,
-				longitude, // "latitude": longitude,
-				temperature,
-			}),
-		);
+		const rawRows = data.result["latitude, longitude, var_value"] as Array<
+			[number | string, number | string, number | string]
+		>;
+		const normalizedRows: ClimateDataPoint[] = [];
+
+		for (const row of rawRows) {
+			const latitude = Number(row[0]);
+			const longitude = Number(row[1]);
+			const temperature = Number(row[2]);
+
+			if (
+				Number.isFinite(latitude) &&
+				Number.isFinite(longitude) &&
+				Number.isFinite(temperature)
+			) {
+				normalizedRows.push({
+					latitude, // "longitude": latitude,
+					longitude, // "latitude": longitude,
+					temperature,
+				});
+			}
+		}
+
+		return normalizedRows;
 	} catch (error) {
 		console.error("Error fetching climate data:", error);
 		throw error;

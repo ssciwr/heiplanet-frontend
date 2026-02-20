@@ -1,4 +1,4 @@
-import type L from "leaflet";
+import type * as L from "leaflet";
 import { useState } from "react";
 
 export interface MapUIInteractionsState {
@@ -10,8 +10,10 @@ export interface MapUIInteractionsState {
 	setBorderStyle: (
 		style: "white" | "light-gray" | "black" | "half-opacity" | "black-80",
 	) => void;
-	mapHoverTimeout: NodeJS.Timeout | null;
-	setMapHoverTimeout: (timeout: NodeJS.Timeout | null) => void;
+	mapHoverTimeout: ReturnType<typeof window.setTimeout> | null;
+	setMapHoverTimeout: (
+		timeout: ReturnType<typeof window.setTimeout> | null,
+	) => void;
 	mapHoveredLayer: L.Layer | null;
 	setMapHoveredLayer: (layer: L.Layer | null) => void;
 	mapScreenshoter: L.SimpleMapScreenshoter | null;
@@ -20,6 +22,8 @@ export interface MapUIInteractionsState {
 	setNoDataModalVisible: (visible: boolean) => void;
 	userRequestedYear: number;
 	setUserRequestedYear: (year: number) => void;
+	userRequestedMonth: number;
+	setUserRequestedMonth: (month: number) => void;
 	dataFetchErrorMessage: string;
 	setDataFetchErrorMessage: (message: string) => void;
 }
@@ -31,14 +35,15 @@ export const useMapUIInteractions = (): MapUIInteractionsState => {
 	const [borderStyle, setBorderStyle] = useState<
 		"white" | "light-gray" | "black" | "half-opacity" | "black-80"
 	>("white");
-	const [mapHoverTimeout, setMapHoverTimeout] = useState<NodeJS.Timeout | null>(
-		null,
-	);
+	const [mapHoverTimeout, setMapHoverTimeout] = useState<ReturnType<
+		typeof window.setTimeout
+	> | null>(null);
 	const [mapHoveredLayer, setMapHoveredLayer] = useState<L.Layer | null>(null);
 	const [mapScreenshoter, setMapScreenshoter] =
 		useState<L.SimpleMapScreenshoter | null>(null);
 	const [noDataModalVisible, setNoDataModalVisible] = useState(false);
-	const [userRequestedYear, setUserRequestedYear] = useState<number>(2016);
+	const [userRequestedYear, setUserRequestedYear] = useState<number>(2025);
+	const [userRequestedMonth, setUserRequestedMonth] = useState<number>(1);
 	const [dataFetchErrorMessage, setDataFetchErrorMessage] =
 		useState<string>("");
 
@@ -59,6 +64,8 @@ export const useMapUIInteractions = (): MapUIInteractionsState => {
 		setNoDataModalVisible,
 		userRequestedYear,
 		setUserRequestedYear,
+		userRequestedMonth,
+		setUserRequestedMonth,
 		dataFetchErrorMessage,
 		setDataFetchErrorMessage,
 	};

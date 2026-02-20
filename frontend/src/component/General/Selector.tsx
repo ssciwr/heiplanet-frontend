@@ -5,7 +5,7 @@ import { isMobile } from "react-device-detect";
 interface SelectorItem {
 	id: string;
 	title: string;
-	description: string;
+	description?: string;
 	emoji?: string;
 	icon?: React.ComponentType<{ size?: number; className?: string }>;
 	color?: string;
@@ -160,7 +160,7 @@ const Selector: React.FC<SelectorProps> = ({
 								</div>
 								<div className="virus-info">
 									<h4>{item.title}</h4>
-									<p>{item.description}</p>
+									<p>{item.description ?? ""}</p>
 								</div>
 								{!isMobile && onInfoClick && (
 									<button

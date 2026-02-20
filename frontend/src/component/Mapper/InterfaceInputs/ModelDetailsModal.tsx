@@ -3,46 +3,13 @@ import {
 	FileTextOutlined,
 	UserOutlined,
 } from "@ant-design/icons";
-import {
-	Badge,
-	Button,
-	Image,
-	List,
-	Modal,
-	Space,
-	Spin,
-	Typography,
-} from "antd";
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import { Badge, Button, Image, List, Modal, Space, Typography } from "antd";
+import React, { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import {
-	type ModelChartData,
-	fetchModelChartData,
-} from "../../../services/modelApiService";
-import { errorStore } from "../../../stores/ErrorStore";
-import { loadingStore } from "../../../stores/LoadingStore";
-import SimpleLineChart from "../SimpleLineChart.tsx";
+import type { Model } from "../../../types/model";
+import SimpleMarkdown from "../../General/SimpleMarkdown";
 
 const { Title, Text, Paragraph, Link } = Typography;
-
-// Enhanced Model interface with optional fields
-interface Model {
-	id: string;
-	virusType?: string;
-	modelName?: string;
-	title?: string;
-	description?: string;
-	emoji?: string;
-	icon?: string;
-	color?: string;
-	details?: string;
-	image?: string;
-	authors?: string[];
-	paper?: {
-		paperTitle: string;
-		url: string;
-	};
-}
 
 interface ModelDetailsModalProps {
 	isOpen: boolean;
@@ -71,50 +38,6 @@ const ModelDetailsModal: React.FC<ModelDetailsModalProps> = React.memo(
 		const [singleModelDetailsHidden, setSingleModelDetailsHidden] = useState(
 			isMobile && !showCurrentModelFirst,
 		); // Show current model details if requested
-
-		// Cache for model chart data
-		const modelDataCache = useRef<Map<string, ModelChartData>>(new Map());
-		const [currentChartData, setCurrentChartData] =
-			useState<ModelChartData | null>(null);
-		const [isLoadingChartData, setIsLoadingChartData] = useState(false);
-
-		// Fetch chart data for a model
-		const fetchChartDataForModel = useCallback(async (modelId: string) => {
-			// Check cache first
-			if (modelDataCache.current.has(modelId)) {
-				const cachedData = modelDataCache.current.get(modelId);
-				if (cachedData) {
-					setCurrentChartData(cachedData);
-					return;
-				}
-				return;
-			}
-
-			setIsLoadingChartData(true);
-			loadingStore.start();
-
-			try {
-				const data = await fetchModelChartData();
-				modelDataCache.current.set(modelId, data);
-				setCurrentChartData(data);
-			} catch (error) {
-				errorStore.showError(
-					"Chart Data Error",
-					`Failed to load chart data for model: ${error instanceof Error ? error.message : "Unknown error"}`,
-				);
-				setCurrentChartData(null);
-			} finally {
-				setIsLoadingChartData(false);
-				loadingStore.complete();
-			}
-		}, []);
-
-		// Fetch chart data when selected model changes
-		useEffect(() => {
-			if (selectedDetailModelId && isOpen) {
-				fetchChartDataForModel(selectedDetailModelId);
-			}
-		}, [selectedDetailModelId, isOpen, fetchChartDataForModel]);
 
 		// Reset view state when modal opens/closes
 		useEffect(() => {
@@ -310,74 +233,31 @@ const ModelDetailsModal: React.FC<ModelDetailsModalProps> = React.memo(
 											<Title level={1} style={{ margin: "0 0 4px 0" }}>
 												{selectedDetailModel.title || "Untitled Model"}
 											</Title>
-											<Title
-												level={3}
-												style={{ margin: "0 0 4px 0" }}
-												className="tertiary"
-											>
-												{selectedDetailModel.modelName || "No model name"}
-											</Title>
 										</div>
 									</Space>
-									{selectedDetailModel.description && (
-										<div>
-											<Text className="tertiary">
-												{selectedDetailModel.description}
-											</Text>
-										</div>
-									)}
-
-									{/* Chart Section - shows loading state or data */}
-									{(currentChartData || isLoadingChartData) && (
-										<div style={{ marginTop: "16px" }}>
-											{isLoadingChartData ? (
-												<div
-													style={{
-														height: "200px",
-														display: "flex",
-														alignItems: "center",
-														justifyContent: "center",
-														backgroundColor: "#f5f5f5",
-														borderRadius: "8px",
-													}}
-												>
-													<Text type="secondary">
-														{" "}
-														<Spin size="large" />
-														&nbsp;Loading chart data...
-													</Text>
-												</div>
-											) : (
-												currentChartData && (
-													<SimpleLineChart data={currentChartData} />
-												)
-											)}
-										</div>
-									)}
+									{selectedDetailModel.description &&
+										!/^model card:/i.test(
+											selectedDetailModel.description.trim(),
+										) && (
+											<div>
+												<Text className="tertiary">
+													{selectedDetailModel.description}
+												</Text>
+											</div>
+										)}
 								</div>
 
-								{/* Debug Section - Remove this later */}
-								<div
-									style={{
-										marginBottom: "24px",
-										padding: "10px",
-										backgroundColor: "#f0f0f0",
-										fontSize: "12px",
-									}}
-								>
-									<strong>Debug Info:</strong>
-									<br />
-									Authors:{" "}
-									{selectedDetailModel.authors
-										? JSON.stringify(selectedDetailModel.authors)
-										: "null"}
-									<br />
-									Paper:{" "}
-									{selectedDetailModel.paper
-										? JSON.stringify(selectedDetailModel.paper)
-										: "null"}
-									<br />
-									Image: {selectedDetailModel.image || "null"}
+								{/* Model Card Section */}
+								<div style={{ marginBottom: "32px" }}>
+									{selectedDetailModel.cardMarkdown ? (
+										<SimpleMarkdown
+											markdown={selectedDetailModel.cardMarkdown}
+										/>
+									) : (
+										<Text type="secondary">
+											No model card content is available for this model.
+										</Text>
+									)}
 								</div>
 
 								{/* Authors Section */}
@@ -515,6 +395,15 @@ const ModelDetailsModal: React.FC<ModelDetailsModalProps> = React.memo(
 										gap: "12px",
 									}}
 								>
+									{selectedDetailModel.cardYamlUrl && (
+										<Button
+											href={selectedDetailModel.cardYamlUrl}
+											target="_blank"
+											rel="noreferrer"
+										>
+											YAML
+										</Button>
+									)}
 									<Button
 										onClick={
 											isMobile

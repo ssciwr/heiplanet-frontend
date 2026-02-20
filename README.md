@@ -1,8 +1,8 @@
-# OneHealth Frontend Mapping application
+# heiplanet Frontend Mapping application
 
 
 # Description
-The OneHealth Mapping project shows the predictions and predicted susceptibility in the future of different diseases by Infectious disease/Climate models from the group, across different regions in the map.
+The heiplanet Mapping project shows the predictions and predicted susceptibility in the future of different diseases by Infectious disease/Climate models from the group, across different regions in the map.
 
 This repository contains the frontend for the Climate Map. The user can browse for models with the Model Selector, and change the year to see future suspcetibility predictions
 

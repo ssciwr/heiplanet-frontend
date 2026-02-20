@@ -1,5 +1,5 @@
 /*
-const OneHealthHTMLFooter = () => <footer id="footer" className="footer">
+const HeiPlanetHTMLFooter = () => <footer id="footer" className="footer">
 	<div className="footer-inner container">
 		<div className="footer-content row">
 			<div className="region region__footer">
@@ -101,7 +101,7 @@ const OneHealthHTMLFooter = () => <footer id="footer" className="footer">
 
                <h3 className="gsc-heading__title ">
                   <span>GREIFSWALD</span>
-               </h3>               			                     <div className="gsc-heading__desc "><p>c/o Helmholtz-Institut für One Health</p>
+               </h3>               			                     <div className="gsc-heading__desc "><p>c/o Helmholtz-Institut für Hei-Planet</p>
 <p>Fleischmannstraße 42<br/>17489 Greifswald<br/><br/>Telefon: +49 3834 3916 101</p>
 <p><a href="https://virologie-ccm.charite.de/" target="_blank"
 	  rel="noopener noreferrer">https://www.helmholtz-hioh.de</a></p>
@@ -182,7 +182,7 @@ const OneHealthHTMLFooter = () => <footer id="footer" className="footer">
 </footer>
 */
 
-export default () => (
+const Footer = () => (
 	<div
 		style={{
 			minWidth: "100%",
@@ -190,16 +190,18 @@ export default () => (
 			backgroundColor: "var(--brand))",
 		}}
 	>
-		{/* <OneHealthHTMLFooter /> */}
+		{/* <HeiPlanetHTMLFooter /> */}
 	</div>
 );
+
+export default Footer;
 
 export const AboutContent = () => (
 	<div>
 		<h3 className="emphasize">About This Map</h3>
 
 		<p className="deemphasize">
-			Created with disease modelling by the OneHealth team.
+			Created with disease modelling by the Hei-Planet team.
 		</p>
 
 		<p className="deemphasize">
@@ -216,7 +218,7 @@ export const AboutContent = () => (
 		</p>
 
 		<div style={{ borderTop: "1px solid #DDDDDD", paddingTop: "16px" }}>
-			© Copyright {new Date().getFullYear()}&nbsp;OneHealth&nbsp;
+			© Copyright {new Date().getFullYear()}&nbsp;Hei-Planet&nbsp;
 			<a
 				href="https://onehealthplatform.net/node/2"
 				target="_blank"

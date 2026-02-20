@@ -20,6 +20,7 @@ export interface WorldwideProperties {
 	name?: string;
 	name_en?: string;
 	admin?: string;
+	NAM_0?: string;
 }
 
 export interface WorldwideGeometry {

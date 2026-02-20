@@ -14,9 +14,7 @@ import GeneralCard from "../General/GeneralCard.tsx";
 import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
 import OptimismLevelSelector from "./InterfaceInputs/OptimismSelector.tsx";
 
-type MapHeaderProps = {};
-
-export default observer(({}: MapHeaderProps) => {
+const MapHeader = observer(() => {
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
 	// Use MobX store directly instead of props
@@ -56,9 +54,10 @@ export default observer(({}: MapHeaderProps) => {
 						}}
 					>
 						<img
-							alt="OneHealth Logo - two objects on either side that appear to be holding a circular shape inbetween the them"
-							style={{ height: "30px", width: "30px" }}
-							src="/images/oneHealthLogoOnlySymbols.png"
+							alt="Hei-Planet logo"
+							className="hei-planet-logo"
+							style={{ height: "30px", width: "auto" }}
+							src="/images/hei-planet-logo.png"
 						/>
 
 						<div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
@@ -170,8 +169,8 @@ export default observer(({}: MapHeaderProps) => {
 			>
 				<div className="logo-section">
 					<h1 hidden className="map-title">
-						<span className="title-one">One</span>
-						<span className="title-health">Health</span>
+						<span className="title-one">Hei-</span>
+						<span className="title-health">Planet</span>
 						<span className="title-platform">Platform</span>
 						<small className="tertiary">
 							<i>&nbsp;{viewingMode.isExpert && "Expert Mode"}</i>
@@ -191,10 +190,12 @@ export default observer(({}: MapHeaderProps) => {
 					<img
 						style={{
 							height: "48px",
+							width: "auto",
 							marginRight: "10px",
 						}}
-						alt="OneHealth Logo - two objects on either side that appear to be holding a circular shape inbetween the them"
-						src="/images/oneHealthWhite.png"
+						className="hei-planet-logo"
+						alt="Hei-Planet logo"
+						src="/images/hei-planet-logo.png"
 					/>
 					<div
 						className="glass-button"
@@ -406,3 +407,5 @@ export default observer(({}: MapHeaderProps) => {
 		</div>
 	);
 });
+
+export default MapHeader;

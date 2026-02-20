@@ -30,8 +30,11 @@
 		"react-leaflet": "^5.0.0",
 		"react-leaflet-cluster": "^2.1.0",
 		"react-leaflet-heatmap-layer-v3": "3.0.3-beta-1",
+		"react-markdown": "^9.1.0",
 		"react-router-dom": "^7.5.3",
 		"react-top-loading-bar": "^3.0.2",
+		"remark-breaks": "^4.0.0",
+		"remark-gfm": "^4.0.1",
 		"topojson-client": "^3.1.0"
 	},
 	"devDependencies": {

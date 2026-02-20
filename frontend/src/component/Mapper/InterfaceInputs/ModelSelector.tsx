@@ -2,135 +2,13 @@ import { Button } from "antd";
 import { Plug } from "lucide-react";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
+import { fetchModelCards } from "../../../services/modelCardService";
+import type { Model } from "../../../types/model";
 import Selector from "../../General/Selector.tsx";
 import ModelDetailsModal from "./ModelDetailsModal";
 
-interface YamlData {
-	id?: string;
-	"virus-type"?: string;
-	"model-name"?: string;
-	title?: string;
-	description?: string;
-	emoji?: string;
-	icon?: string;
-	color?: string;
-	details?: string;
-	image?: string;
-	authors?: string[];
-	paper?: {
-		paperTitle?: string;
-		url?: string;
-	};
-	output?: string[];
-}
-
-const parseYamlText = (yamlText: string): YamlData => {
-	const lines = yamlText.split("\n");
-	const result: Record<string, string | string[]> = {};
-	let currentKey = "";
-	let isInArray = false;
-	let arrayItems: string[] = [];
-
-	for (const line of lines) {
-		const trimmed = line.trim();
-		if (trimmed && !trimmed.startsWith("#")) {
-			const colonIndex = trimmed.indexOf(":");
-			if (colonIndex > 0) {
-				// If we were in an array, save it
-				if (isInArray && currentKey) {
-					result[currentKey] = arrayItems;
-					arrayItems = [];
-					isInArray = false;
-				}
-
-				const key = trimmed.substring(0, colonIndex).trim();
-				let value = trimmed.substring(colonIndex + 1).trim();
-
-				if (
-					(value.startsWith("'") && value.endsWith("'")) ||
-					(value.startsWith('"') && value.endsWith('"'))
-				) {
-					value = value.slice(1, -1);
-				}
-
-				if (value === "") {
-					// This might be the start of an array
-					currentKey = key;
-					isInArray = true;
-				} else {
-					result[key] = value;
-				}
-			} else if (trimmed.startsWith("- ") && isInArray) {
-				// This is an array item
-				arrayItems.push(trimmed.substring(2).trim());
-			}
-		}
-	}
-
-	// Handle any remaining array
-	if (isInArray && currentKey) {
-		result[currentKey] = arrayItems;
-	}
-
-	return result as YamlData;
-};
-
-interface Model {
-	id: string;
-	virusType: string;
-	modelName: string;
-	title: string;
-	description: string;
-	emoji: string;
-	icon: string;
-	color: string;
-	details: string;
-	output: string[];
-}
-
 const loadModels = async (): Promise<Model[]> => {
-	const modelFiles = [
-		"westNileModel1.yaml",
-		"westNileModel2.yaml",
-		"dengueModel1.yaml",
-		"malariaModel1.yaml",
-		"covidModel1.yaml",
-		"zikaModel1.yaml",
-	];
-
-	const models: Model[] = [];
-
-	for (const filename of modelFiles) {
-		try {
-			const response = await fetch(`/modelsyaml/${filename}`);
-			if (!response.ok) {
-				console.warn(`Failed to load ${filename}: ${response.status}`);
-				continue;
-			}
-
-			const yamlText = await response.text();
-			const yamlData = parseYamlText(yamlText);
-
-			const model: Model = {
-				id: yamlData.id || "",
-				virusType: yamlData["virus-type"] || "",
-				modelName: yamlData["model-name"] || "",
-				title: yamlData.title || "",
-				description: yamlData.description || "",
-				emoji: yamlData.emoji || "",
-				icon: yamlData.icon || "",
-				color: yamlData.color || "",
-				details: yamlData.details || "",
-				output: yamlData.output || ["R0"],
-			};
-
-			models.push(model);
-		} catch (error) {
-			console.error(`Error loading ${filename}:`, error);
-		}
-	}
-
-	return models;
+	return fetchModelCards();
 };
 
 // Helper function to truncate text
@@ -165,22 +43,20 @@ const ModelSelector = ({
 				setModels(loadedModels);
 			} catch (err) {
 				console.error("Error loading models:", err);
-				setError("Failed to load models");
+				setError("Failed to load models (client-side request may be blocked)");
 
 				console.log("Falling back to hardcoded model data");
 				setModels([
 					{
-						id: "west-nile-a17",
-						virusType: "west-nile",
-						modelName: "Model A17",
-						title: "West Nile Virus",
-						description: "Mosquito-borne disease affecting humans and animals",
-						emoji: "🦟",
-						icon: "Bug",
-						color: "#754910",
+						id: "model-cards-unavailable",
+						modelName: "Model Cards Unavailable",
+						title: "Model Cards Unavailable",
+						description:
+							"Unable to fetch model cards from GitHub. Check client-side access.",
+						emoji: "⚠️",
+						color: "#D14343",
 						details:
-							"Advanced climate model incorporating temperature, humidity, and precipitation data from NOAA weather stations.",
-						output: ["R0"],
+							"Model cards could not be loaded from GitHub on this client.",
 					},
 				]);
 			} finally {
@@ -196,8 +72,8 @@ const ModelSelector = ({
 	// Convert models to selector items format
 	const selectorItems = models.map((model) => ({
 		id: model.id,
-		title: `${model.title} - ${model.modelName}`,
-		description: model.description,
+		title: model.modelName,
+		description: model.description ?? "",
 		emoji: model.emoji,
 		color: model.color,
 	}));
@@ -215,7 +91,7 @@ const ModelSelector = ({
 
 	// Create display text with proper truncation
 	const getDisplayText = (modelData: Model) => {
-		const fullText = `${modelData.title} - ${modelData.modelName}`;
+		const fullText = modelData.modelName;
 		return truncateText(fullText, isMobile ? 12 : 30);
 	};
 
@@ -247,7 +123,7 @@ const ModelSelector = ({
 									textOverflow: "ellipsis",
 									whiteSpace: "nowrap",
 								}}
-								title={`${selectedModelData.title} - ${selectedModelData.modelName}`}
+								title={selectedModelData.modelName}
 							>
 								{getDisplayText(selectedModelData)}
 							</span>

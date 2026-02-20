@@ -1,4 +1,4 @@
-import type L from "leaflet";
+import type * as L from "leaflet";
 import { makeAutoObservable } from "mobx";
 
 export class MapUIInteractionsStore {
@@ -6,11 +6,11 @@ export class MapUIInteractionsStore {
 	dataProcessingError = false;
 	borderStyle: "white" | "light-gray" | "black" | "half-opacity" | "black-80" =
 		"white";
-	mapHoverTimeout: NodeJS.Timeout | null = null;
+	mapHoverTimeout: ReturnType<typeof window.setTimeout> | null = null;
 	mapHoveredLayer: L.Layer | null = null;
 	mapScreenshoter: L.SimpleMapScreenshoter | null = null;
 	noDataModalVisible = false;
-	userRequestedYear = 2016;
+	userRequestedYear = 2025;
 	dataFetchErrorMessage = "";
 
 	constructor() {
@@ -31,7 +31,9 @@ export class MapUIInteractionsStore {
 		this.borderStyle = style;
 	};
 
-	setMapHoverTimeout = (timeout: NodeJS.Timeout | null) => {
+	setMapHoverTimeout = (
+		timeout: ReturnType<typeof window.setTimeout> | null,
+	) => {
 		this.mapHoverTimeout = timeout;
 	};
 

@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as turf from "@turf/turf";
-import L from "leaflet";
+import * as L from "leaflet";
 import { isMobile } from "react-device-detect";
 import { fetchClimateData } from "../../../services/climateDataService.ts";
 import { nutsApiUrl } from "../../../services/nutsApi.ts";
@@ -370,26 +371,111 @@ export const loadNutsData = async (
 			},
 		});
 
+		let data: unknown = null;
+		try {
+			data = await response.json();
+		} catch {
+			// no-op; handled below
+		}
+
 		if (!response.ok) {
+			const backendError =
+				typeof (data as { error?: unknown })?.error === "string"
+					? ((data as { error: string }).error ?? "")
+					: "";
 			throw new Error(
-				`API_ERROR: HTTP ${response.status} - ${response.statusText}`,
+				backendError
+					? `API_ERROR: ${backendError}`
+					: `API_ERROR: HTTP ${response.status} - ${response.statusText}`,
 			);
 		}
 
-		const data = await response.json();
-
-		if (!data.result || typeof data.result !== "object") {
-			throw new Error("API_ERROR: Invalid response format");
+		if (typeof (data as { error?: unknown })?.error === "string") {
+			throw new Error(`API_ERROR: ${(data as { error: string }).error}`);
 		}
 
+		const normalized = normalizeNutsApiResponse(data);
+
 		console.log(
-			`Loaded NUTS data for ${Object.keys(data.result).length} regions`,
+			`Loaded NUTS data for ${Object.keys(normalized).length} regions`,
 		);
-		return data.result;
+		return normalized;
 	} catch (error) {
 		console.error("Failed to load NUTS data:", error);
 		throw error;
 	}
+};
+
+const normalizeNutsApiResponse = (
+	data: unknown,
+): { [nutsId: string]: number } => {
+	const result = (data as { result?: unknown })?.result ?? data;
+
+	if (!result) {
+		throw new Error("API_ERROR: Invalid response format");
+	}
+
+	if (Array.isArray(result)) {
+		if (result.length === 0) return {};
+
+		if (Array.isArray(result[0])) {
+			const mapped: { [nutsId: string]: number } = {};
+			for (const row of result as unknown[]) {
+				if (!Array.isArray(row) || row.length < 2) continue;
+				const [nutsId, value] = row as [unknown, unknown];
+				if (typeof nutsId === "string" && typeof value === "number") {
+					mapped[nutsId] = value;
+				}
+			}
+			if (Object.keys(mapped).length > 0) return mapped;
+		}
+
+		if (typeof result[0] === "object" && result[0] !== null) {
+			const mapped: { [nutsId: string]: number } = {};
+			for (const row of result as Record<string, unknown>[]) {
+				const nutsId =
+					(row.NUTS_ID as string | undefined) ??
+					(row.nuts_id as string | undefined) ??
+					(row.id as string | undefined);
+				const value =
+					(row.var_value as number | undefined) ??
+					(row.value as number | undefined) ??
+					(row.temperature as number | undefined);
+				if (typeof nutsId === "string" && typeof value === "number") {
+					mapped[nutsId] = value;
+				}
+			}
+			if (Object.keys(mapped).length > 0) return mapped;
+		}
+	}
+
+	if (typeof result === "object") {
+		const obj = result as Record<string, unknown>;
+
+		if (Array.isArray(obj.nuts_id) && Array.isArray(obj.var_value)) {
+			const mapped: { [nutsId: string]: number } = {};
+			const ids = obj.nuts_id as unknown[];
+			const values = obj.var_value as unknown[];
+			for (let i = 0; i < Math.min(ids.length, values.length); i += 1) {
+				const nutsId = ids[i];
+				const value = values[i];
+				if (typeof nutsId === "string" && typeof value === "number") {
+					mapped[nutsId] = value;
+				}
+			}
+			if (Object.keys(mapped).length > 0) return mapped;
+		}
+
+		const entries = Object.entries(obj);
+		if (
+			entries.length > 0 &&
+			entries.every(([, value]) => typeof value === "number")
+		) {
+			return obj as { [nutsId: string]: number };
+		}
+	}
+
+	throw new Error("API_ERROR: Invalid response format");
 };
 
 export const loadTemperatureData = async (
@@ -453,9 +539,9 @@ export const loadTemperatureData = async (
 			}
 
 			if (
-				!Number.isNaN(lat) &&
-				!Number.isNaN(lng) &&
-				!Number.isNaN(temperature)
+				Number.isFinite(lat) &&
+				Number.isFinite(lng) &&
+				Number.isFinite(temperature)
 			) {
 				dataPoints.push({
 					point: turf.point([lng, lat]),

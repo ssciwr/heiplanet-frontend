@@ -6,6 +6,7 @@ import { useMapDataStore } from "../../contexts/MapDataContext";
 import { useMapUIInteractionsStore } from "../../contexts/MapUIInteractionsContext";
 import { useUserSelectionsStore } from "../../contexts/UserSelectionsContext";
 import { mapStyleService } from "../../services/MapStyleService";
+import { temperatureDataStore } from "../../stores/TemperatureDataStore";
 import * as MapInteractionHandlers from "../../utils/MapInteractionHandlers";
 import AdaptiveGridLayer from "./AdaptiveGridLayer";
 import CitiesLayer from "./CitiesLayer";
@@ -141,6 +142,19 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 				{userStore.mapMode === "grid" && (
 					<Pane name="gridPane" style={{ zIndex: 340, opacity: 1.0 }}>
 						<AdaptiveGridLayer />
+						{temperatureDataStore.worldwideRegionBoundaries?.features && (
+							<GeoJSON
+								data={temperatureDataStore.worldwideRegionBoundaries}
+								style={() => ({
+									color: "#111111",
+									weight: 1,
+									fillOpacity: 0,
+									opacity: 0.8,
+									interactive: false,
+								})}
+								interactive={false}
+							/>
+						)}
 					</Pane>
 				)}
 			</>

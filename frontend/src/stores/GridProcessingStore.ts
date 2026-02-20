@@ -87,6 +87,10 @@ export class GridProcessingStore {
 		const baseSize =
 			resolutionFactor > 0 ? resolutionFactor : derivedIntervalSize;
 		const gridSize = Number(baseSize.toFixed(6));
+		if (!Number.isFinite(gridSize) || gridSize <= 0) {
+			console.warn("⚠️ Invalid grid size calculated:", gridSize);
+			return [];
+		}
 
 		console.log(
 			`🔍 Grid size: ${gridSize}, zoom: ${zoom}, resolutionFactor: ${resolutionFactor}`,
@@ -99,25 +103,33 @@ export class GridProcessingStore {
 
 		const filterStart = performance.now();
 		const buffer = gridSize * 2;
-		const filteredData = dataPoints.filter(
-			(point: DataPoint) =>
-				point.lat >= south - buffer &&
-				point.lat <= north + buffer &&
-				point.lng >= west - buffer &&
-				point.lng <= east + buffer,
-		);
+		const filteredData = dataPoints
+			.filter(
+				(point: DataPoint) =>
+					Number.isFinite(point.lat) &&
+					Number.isFinite(point.lng) &&
+					Number.isFinite(point.temperature),
+			)
+			.filter(
+				(point: DataPoint) =>
+					point.lat >= south - buffer &&
+					point.lat <= north + buffer &&
+					point.lng >= west - buffer &&
+					point.lng <= east + buffer,
+			);
 		console.log(
 			`🔍 Filtering took ${(performance.now() - filterStart).toFixed(2)}ms - filtered from ${dataPoints.length} to ${filteredData.length} points`,
 		);
 
 		const processStart = performance.now();
-		const EPS = gridSize * 1e-6;
+		const halfGridSize = gridSize / 2;
 		for (const point of filteredData) {
-			// Align to a global origin to avoid seams from floating-point drift
-			const cellLatIndex = Math.floor((point.lat + 90 + EPS) / gridSize);
-			const cellLngIndex = Math.floor((point.lng + 180 + EPS) / gridSize);
-			const cellLat = cellLatIndex * gridSize - 90;
-			const cellLng = cellLngIndex * gridSize - 180;
+			const cellLatIndex = Math.round((point.lat + 90) / gridSize);
+			const cellLngIndex = Math.round((point.lng + 180) / gridSize);
+			const baseCellLat = cellLatIndex * gridSize - 90;
+			const baseCellLng = cellLngIndex * gridSize - 180;
+			const cellLat = baseCellLat - halfGridSize;
+			const cellLng = baseCellLng - halfGridSize;
 			const cellId = `${cellLatIndex}_${cellLngIndex}`;
 
 			const bounds: L.LatLngBoundsExpression = [
@@ -165,7 +177,7 @@ export class GridProcessingStore {
 		temperatureData: TemperatureDataPoint[],
 		viewport: ViewportBounds | null,
 		resolutionLevel: number,
-	) => {
+	): GridCell[] => {
 		const methodStart = performance.now();
 		console.log(
 			"🚀 generateGridCellsFromTemperatureData START with:",
@@ -180,8 +192,7 @@ export class GridProcessingStore {
 				!!viewport,
 				temperatureData.length,
 			);
-			this.setGridCells([]);
-			return;
+			return [];
 		}
 
 		const changeCheckStart = performance.now();
@@ -227,19 +238,23 @@ export class GridProcessingStore {
 			);
 
 			console.log("📈 Generated", cells.length, "grid cells");
-			this.setGridCells(cells);
 
 			this.prevViewport = viewport;
 			this.prevResolution = resolutionLevel;
 			this.prevFirstDatapointTemperature = currentFirstDatapointTemp;
-		} else {
-			console.log("♻️ Using cached grid cells - no recalculation needed");
+			const methodTotal = performance.now() - methodStart;
+			console.log(
+				`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
+			);
+			return cells;
 		}
 
+		console.log("♻️ Using cached grid cells - no recalculation needed");
 		const methodTotal = performance.now() - methodStart;
 		console.log(
 			`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 		);
+		return this.gridCells;
 	};
 }
 
