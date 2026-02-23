@@ -83,17 +83,34 @@ export class MapStyleService {
 	): PathOptions {
 		if (!feature || !feature.properties) return {};
 
-		const properties = feature.properties as { intensity?: number };
+		const properties = feature.properties as {
+			intensity?: number;
+			NUTS_ID?: string;
+		};
+
+		if (
+			!dataExtremes ||
+			typeof properties.intensity !== "number" ||
+			!Number.isFinite(properties.intensity)
+		) {
+			return {
+				fillColor: "#cccccc",
+				weight: 1,
+				opacity: 0.8,
+				color: "#666666",
+				fillOpacity: 0.3,
+			};
+		}
+
+		const fillColor = getColorFromGradient(properties.intensity, dataExtremes);
 
 		return {
-			fillColor: dataExtremes
-				? getColorFromGradient(properties.intensity || 0, dataExtremes)
-				: "#cccccc",
-			weight: 2,
-			opacity: 1,
-			color: "white",
+			fillColor,
+			weight: 0,
+			opacity: 0,
+			color: "transparent",
 			dashArray: "",
-			fillOpacity: 0.8,
+			fillOpacity: 0.9,
 		};
 	}
 

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import GeneralCard from "../component/General/GeneralCard.tsx";
 import Footer from "../static/Footer.tsx";
 
-export default () => (
+const NotFound = () => (
 	<div
 		style={{
 			background: "rgb(235, 235, 235)",
@@ -25,11 +25,12 @@ export default () => (
 			}}
 		>
 			<img
-				src="/images/oneHealthLogoOnlySymbols.png"
-				alt="OneHealth Logo"
+				src="/images/hei-planet-logo.png"
+				alt="Hei-Planet logo"
+				className="hei-planet-logo"
 				style={{
-					width: "40px",
 					height: "40px",
+					width: "auto",
 				}}
 			/>
 			<h1
@@ -40,7 +41,7 @@ export default () => (
 					margin: 0,
 				}}
 			>
-				OneHealth
+				Hei-Planet
 			</h1>
 		</div>
 
@@ -133,3 +134,5 @@ export default () => (
 		<Footer />
 	</div>
 );
+
+export default NotFound;

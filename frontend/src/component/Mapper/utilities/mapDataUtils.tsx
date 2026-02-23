@@ -1,10 +1,12 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as turf from "@turf/turf";
-import L from "leaflet";
+import * as L from "leaflet";
 import { isMobile } from "react-device-detect";
 import { fetchClimateData } from "../../../services/climateDataService.ts";
+import { nutsApiUrl } from "../../../services/nutsApi.ts";
 import type { DataExtremes, TemperatureDataPoint } from "../types.ts";
 
-export const MIN_ZOOM = 3.4;
+export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 10;
 
 export const TEMP_COLORS = [
@@ -330,18 +332,172 @@ export const calculateExtremes = (
 	};
 };
 
+// Load NUTS data directly from API for Europe-only mode
+export const loadNutsData = async (
+	year: number,
+	month: number,
+	requestedVariableValue = "R0",
+	requestedGridResolution: "NUTS2" | "NUTS3" = "NUTS2",
+): Promise<{ [nutsId: string]: number }> => {
+	console.log(
+		"Loading NUTS data for year:",
+		year,
+		"month:",
+		month,
+		"variable:",
+		requestedVariableValue,
+		"resolution:",
+		requestedGridResolution,
+	);
+
+	// Format the month with leading zero
+	const monthStr = month.toString().padStart(2, "0");
+	const requestedTimePoint = `${year}-${monthStr}-01`;
+
+	try {
+		const nutsDataUrl = nutsApiUrl("/nuts_data", {
+			requested_time_point: requestedTimePoint,
+			requested_variable_type: requestedVariableValue,
+			requested_grid_resolution: requestedGridResolution,
+		});
+
+		console.log(
+			`Requesting NUTS values from backend: ${nutsDataUrl} (time=${requestedTimePoint}, variable=${requestedVariableValue}, resolution=${requestedGridResolution})`,
+		);
+
+		const response = await fetch(nutsDataUrl, {
+			headers: {
+				accept: "application/json",
+			},
+		});
+
+		let data: unknown = null;
+		try {
+			data = await response.json();
+		} catch {
+			// no-op; handled below
+		}
+
+		if (!response.ok) {
+			const backendError =
+				typeof (data as { error?: unknown })?.error === "string"
+					? ((data as { error: string }).error ?? "")
+					: "";
+			throw new Error(
+				backendError
+					? `API_ERROR: ${backendError}`
+					: `API_ERROR: HTTP ${response.status} - ${response.statusText}`,
+			);
+		}
+
+		if (typeof (data as { error?: unknown })?.error === "string") {
+			throw new Error(`API_ERROR: ${(data as { error: string }).error}`);
+		}
+
+		const normalized = normalizeNutsApiResponse(data);
+
+		console.log(
+			`Loaded NUTS data for ${Object.keys(normalized).length} regions`,
+		);
+		return normalized;
+	} catch (error) {
+		console.error("Failed to load NUTS data:", error);
+		throw error;
+	}
+};
+
+const normalizeNutsApiResponse = (
+	data: unknown,
+): { [nutsId: string]: number } => {
+	const result = (data as { result?: unknown })?.result ?? data;
+
+	if (!result) {
+		throw new Error("API_ERROR: Invalid response format");
+	}
+
+	if (Array.isArray(result)) {
+		if (result.length === 0) return {};
+
+		if (Array.isArray(result[0])) {
+			const mapped: { [nutsId: string]: number } = {};
+			for (const row of result as unknown[]) {
+				if (!Array.isArray(row) || row.length < 2) continue;
+				const [nutsId, value] = row as [unknown, unknown];
+				if (typeof nutsId === "string" && typeof value === "number") {
+					mapped[nutsId] = value;
+				}
+			}
+			if (Object.keys(mapped).length > 0) return mapped;
+		}
+
+		if (typeof result[0] === "object" && result[0] !== null) {
+			const mapped: { [nutsId: string]: number } = {};
+			for (const row of result as Record<string, unknown>[]) {
+				const nutsId =
+					(row.NUTS_ID as string | undefined) ??
+					(row.nuts_id as string | undefined) ??
+					(row.id as string | undefined);
+				const value =
+					(row.var_value as number | undefined) ??
+					(row.value as number | undefined) ??
+					(row.temperature as number | undefined);
+				if (typeof nutsId === "string" && typeof value === "number") {
+					mapped[nutsId] = value;
+				}
+			}
+			if (Object.keys(mapped).length > 0) return mapped;
+		}
+	}
+
+	if (typeof result === "object") {
+		const obj = result as Record<string, unknown>;
+
+		if (Array.isArray(obj.nuts_id) && Array.isArray(obj.var_value)) {
+			const mapped: { [nutsId: string]: number } = {};
+			const ids = obj.nuts_id as unknown[];
+			const values = obj.var_value as unknown[];
+			for (let i = 0; i < Math.min(ids.length, values.length); i += 1) {
+				const nutsId = ids[i];
+				const value = values[i];
+				if (typeof nutsId === "string" && typeof value === "number") {
+					mapped[nutsId] = value;
+				}
+			}
+			if (Object.keys(mapped).length > 0) return mapped;
+		}
+
+		const entries = Object.entries(obj);
+		if (
+			entries.length > 0 &&
+			entries.every(([, value]) => typeof value === "number")
+		) {
+			return obj as { [nutsId: string]: number };
+		}
+	}
+
+	throw new Error("API_ERROR: Invalid response format");
+};
+
 export const loadTemperatureData = async (
 	year: number,
 	month: number,
 	requestedVariableValue = "R0",
 	outputFormat?: string[],
+	viewportBounds?: {
+		north: number;
+		south: number;
+		east: number;
+		west: number;
+	} | null,
+	requestedGridResolution?: number,
 ): Promise<{
 	dataPoints: TemperatureDataPoint[];
 	extremes: DataExtremes;
 	bounds: L.LatLngBounds | null;
 }> => {
+	const funcStart = performance.now();
 	console.log(
-		"Loading climate data for year:",
+		"🌍 loadTemperatureData START - year:",
 		year,
 		"month:",
 		month,
@@ -357,25 +513,35 @@ export const loadTemperatureData = async (
 	}
 
 	try {
+		const fetchStart = performance.now();
 		const apiData = await fetchClimateData(
 			year,
 			month,
 			requestedVariableValue,
 			outputFormat,
+			viewportBounds,
+			requestedGridResolution,
 		);
+		console.log(
+			`🌐 fetchClimateData took ${(performance.now() - fetchStart).toFixed(2)}ms - received ${apiData.length} raw points`,
+		);
+
+		const processStart = performance.now();
 		const dataPoints: TemperatureDataPoint[] = [];
 
 		for (let i = 0; i < apiData.length; i++) {
 			const { latitude: lat, longitude: lng, temperature } = apiData[i];
 
 			if (i % 100000 === 0) {
-				console.log("Lat:", lat, "Long: ", lng, "Temp:", temperature);
+				console.log(
+					`🔄 Processing point ${i}/${apiData.length} - Lat: ${lat}, Long: ${lng}, Temp: ${temperature}`,
+				);
 			}
 
 			if (
-				!Number.isNaN(lat) &&
-				!Number.isNaN(lng) &&
-				!Number.isNaN(temperature)
+				Number.isFinite(lat) &&
+				Number.isFinite(lng) &&
+				Number.isFinite(temperature)
 			) {
 				dataPoints.push({
 					point: turf.point([lng, lat]),
@@ -385,9 +551,17 @@ export const loadTemperatureData = async (
 				});
 			}
 		}
+		console.log(
+			`⚙️ Data processing took ${(performance.now() - processStart).toFixed(2)}ms - processed ${dataPoints.length} valid points`,
+		);
 
+		const extremesStart = performance.now();
 		const extremes = calculateExtremes(dataPoints);
+		console.log(
+			`📊 calculateExtremes took ${(performance.now() - extremesStart).toFixed(2)}ms`,
+		);
 
+		const boundsStart = performance.now();
 		let bounds: L.LatLngBounds | null = null;
 		if (dataPoints.length > 0) {
 			const lats = dataPoints.map((p) => p.lat);
@@ -397,10 +571,21 @@ export const loadTemperatureData = async (
 				[Math.max(...lats) + 15, Math.max(...lngs) + 15],
 			]);
 		}
+		console.log(
+			`🗺️ Bounds calculation took ${(performance.now() - boundsStart).toFixed(2)}ms`,
+		);
+
+		const totalTime = performance.now() - funcStart;
+		console.log(
+			`✅ loadTemperatureData COMPLETE in ${totalTime.toFixed(2)}ms - ${dataPoints.length} points`,
+		);
 
 		return { dataPoints, extremes, bounds };
 	} catch (error) {
-		console.error("Failed to load temperature data:", error);
+		console.error(
+			`❌ loadTemperatureData FAILED in ${(performance.now() - funcStart).toFixed(2)}ms:`,
+			error,
+		);
 		throw error;
 	}
 };

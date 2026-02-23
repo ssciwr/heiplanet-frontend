@@ -1,5 +1,5 @@
 export default () => (
 	<div>
-		<h1>One Health</h1>
+		<h1>Hei-Planet</h1>
 	</div>
 );

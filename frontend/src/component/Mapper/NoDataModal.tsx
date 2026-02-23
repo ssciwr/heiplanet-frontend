@@ -1,11 +1,14 @@
 import { Button, Modal } from "antd";
 import { CalendarIcon } from "lucide-react";
+import type { Month } from "./types";
+import { getMonthLabel } from "./utilities/monthUtils";
 
 interface NoDataModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onLoadCurrentYear: () => void;
 	requestedYear: number;
+	requestedMonth: number;
 	errorMessage?: string;
 }
 
@@ -14,9 +17,13 @@ const NoDataModal = ({
 	onClose,
 	onLoadCurrentYear,
 	requestedYear,
+	requestedMonth,
 	errorMessage,
 }: NoDataModalProps) => {
 	const currentYear = new Date().getFullYear();
+	const safeRequestedMonth =
+		requestedMonth >= 1 && requestedMonth <= 12 ? requestedMonth : 1;
+	const requestedMonthLabel = getMonthLabel(safeRequestedMonth as Month);
 
 	return (
 		<Modal
@@ -39,12 +46,12 @@ const NoDataModal = ({
 			centered
 		>
 			<p>
-				Unfortunately, the year <strong>{requestedYear}</strong> does not have
-				any data available.
+				Unfortunately, <strong>{requestedMonthLabel}</strong>{" "}
+				<strong>{requestedYear}</strong> does not have any data available.
 			</p>
 			<p>
 				You can try loading the current year ({currentYear}) which may have more
-				recent data, or select a different year from the timeline.
+				recent data, or select a different month/year from the timeline.
 			</p>
 			{errorMessage && (
 				<p style={{ color: "#999", fontSize: "12px", marginTop: "16px" }}>

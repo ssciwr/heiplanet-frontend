@@ -3,39 +3,33 @@ import { Button, Modal, Select } from "antd";
 import { Map as MapIcon } from "lucide-react";
 
 const { Option } = Select;
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
+import { useUserSelectionsStore } from "../../contexts/UserSelectionsContext";
+import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
+import { useModelData } from "../../hooks/useModelData";
 import { viewingMode } from "../../stores/ViewingModeStore.ts";
 import GeneralCard from "../General/GeneralCard.tsx";
 import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
 import OptimismLevelSelector from "./InterfaceInputs/OptimismSelector.tsx";
 
-interface MapHeaderProps {
-	selectedModel: string;
-	handleModelSelect: (modelId: string) => void;
-	selectedOptimism: string;
-	setSelectedOptimism: (optimism: string) => void;
-	getOptimismLevels: () => string[];
-	mapMode?: "worldwide" | "europe-only";
-	onMapModeChange?: (mode: "worldwide" | "europe-only") => void;
-	borderStyle?: "white" | "light-gray" | "black" | "half-opacity" | "black-80";
-	onBorderStyleChange?: (
-		style: "white" | "light-gray" | "black" | "half-opacity" | "black-80",
-	) => void;
-}
-
-export default ({
-	selectedModel,
-	handleModelSelect,
-	selectedOptimism,
-	setSelectedOptimism,
-	getOptimismLevels,
-	mapMode = "europe-only",
-	onMapModeChange,
-	borderStyle = "white",
-	onBorderStyleChange,
-}: MapHeaderProps) => {
+const MapHeader = observer(() => {
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+	// Use MobX store directly instead of props
+	const userStore = useUserSelectionsStore();
+
+	const { borderStyle, setBorderStyle } = useMapUIInteractions();
+
+	const { getOptimismLevels } = useModelData(
+		userStore.selectedModel,
+		userStore.setSelectedModel,
+	);
+
+	const handleModelSelect = (modelId: string) => {
+		userStore.setSelectedModel(modelId);
+	};
 
 	return isMobile ? (
 		<div className="map-header">
@@ -60,14 +54,15 @@ export default ({
 						}}
 					>
 						<img
-							alt="OneHealth Logo - two objects on either side that appear to be holding a circular shape inbetween the them"
-							style={{ height: "30px", width: "30px" }}
-							src="/images/oneHealthLogoOnlySymbols.png"
+							alt="Hei-Planet logo"
+							className="hei-planet-logo"
+							style={{ height: "30px", width: "auto" }}
+							src="/images/hei-planet-logo.png"
 						/>
 
 						<div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
 							<ModelSelector
-								selectedModel={selectedModel}
+								selectedModel={userStore.selectedModel}
 								onModelSelect={handleModelSelect}
 							/>
 						</div>
@@ -102,17 +97,17 @@ export default ({
 						<div style={{ background: "white" }}>
 							<OptimismLevelSelector
 								availableOptimismLevels={getOptimismLevels()}
-								selectedOptimism={selectedOptimism}
-								setOptimism={setSelectedOptimism}
+								selectedOptimism={userStore.selectedOptimism}
+								setOptimism={userStore.setSelectedOptimism}
 							/>
 						</div>
 					</div>
-					{mapMode === "worldwide" && onBorderStyleChange && (
+					{userStore.mapMode === "worldwide" && (
 						<div style={{ marginBottom: "24px" }}>
 							<h4>Border Style</h4>
 							<Select
 								value={borderStyle}
-								onChange={onBorderStyleChange}
+								onChange={setBorderStyle}
 								style={{ width: "100%" }}
 								size="large"
 							>
@@ -174,8 +169,8 @@ export default ({
 			>
 				<div className="logo-section">
 					<h1 hidden className="map-title">
-						<span className="title-one">One</span>
-						<span className="title-health">Health</span>
+						<span className="title-one">Hei-</span>
+						<span className="title-health">Planet</span>
 						<span className="title-platform">Platform</span>
 						<small className="tertiary">
 							<i>&nbsp;{viewingMode.isExpert && "Expert Mode"}</i>
@@ -195,10 +190,12 @@ export default ({
 					<img
 						style={{
 							height: "48px",
+							width: "auto",
 							marginRight: "10px",
 						}}
-						alt="OneHealth Logo - two objects on either side that appear to be holding a circular shape inbetween the them"
-						src="/images/oneHealthWhite.png"
+						className="hei-planet-logo"
+						alt="Hei-Planet logo"
+						src="/images/hei-planet-logo.png"
 					/>
 					<div
 						className="glass-button"
@@ -223,7 +220,7 @@ export default ({
 							Display&nbsp;
 						</span>
 						<ModelSelector
-							selectedModel={selectedModel}
+							selectedModel={userStore.selectedModel}
 							onModelSelect={handleModelSelect}
 						/>
 					</div>
@@ -252,8 +249,8 @@ export default ({
 					>
 						<OptimismLevelSelector
 							availableOptimismLevels={getOptimismLevels()}
-							selectedOptimism={selectedOptimism}
-							setOptimism={setSelectedOptimism}
+							selectedOptimism={userStore.selectedOptimism}
+							setOptimism={userStore.setSelectedOptimism}
 						/>
 						<span
 							style={{
@@ -282,16 +279,22 @@ export default ({
 					>
 						<MapIcon size={20} />
 						<Select
-							value={mapMode}
-							onChange={onMapModeChange}
+							value={userStore.mapMode}
+							onChange={(v) => {
+								console.log("Map mode should be updated as such:", v);
+								userStore.setMapMode(v);
+							}}
 							style={{ minWidth: 120 }}
 							size="middle"
 						>
 							<Option value="europe-only">Europe-only</Option>
-							<Option value="worldwide">Worldwide</Option>
+							<Option value="worldwide">
+								Worldwide[deprecated, too slow now, will use backend regions]
+							</Option>
+							<Option value="grid">Grid</Option>
 						</Select>
 					</div>
-					{mapMode === "worldwide" && onBorderStyleChange && (
+					{userStore.mapMode === "worldwide" && (
 						<div
 							className="glass-button"
 							style={{
@@ -311,7 +314,7 @@ export default ({
 							<span style={{ fontSize: "16px" }}>🖼️</span>
 							<Select
 								value={borderStyle}
-								onChange={onBorderStyleChange}
+								onChange={setBorderStyle}
 								style={{ minWidth: 100 }}
 								size="middle"
 							>
@@ -403,4 +406,6 @@ export default ({
 			</GeneralCard>
 		</div>
 	);
-};
+});
+
+export default MapHeader;

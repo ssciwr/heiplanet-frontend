@@ -58,7 +58,9 @@ export const getColorFromGradient = (
 		return minColor || TEMP_COLORS[0];
 	}
 
+	// Clamp the value to the range [min, max]
 	const clampedValue = Math.max(min, Math.min(max, value));
+
 	const factor = (clampedValue - min) / (max - min);
 
 	// If custom colors are provided, use them
@@ -92,5 +94,7 @@ export const getColorFromGradient = (
 		b: startColor.b + (endColor.b - startColor.b) * localFactor,
 	};
 
-	return rgbToHex(interpolatedRgb);
+	const finalColor = rgbToHex(interpolatedRgb);
+
+	return finalColor;
 };

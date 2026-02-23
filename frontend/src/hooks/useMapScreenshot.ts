@@ -4,7 +4,7 @@ import "leaflet-simple-map-screenshoter";
 import type { Month } from "../component/Mapper/types";
 import { getMonthInfo } from "../component/Mapper/utilities/monthUtils";
 import { errorStore } from "../stores/ErrorStore";
-import type { Model } from "./useModelData";
+import type { Model } from "../types/model";
 
 export interface UseMapScreenshotReturn {
 	handleScreenshot: () => Promise<void>;

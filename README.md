@@ -1,8 +1,8 @@
-# OneHealth Frontend Mapping application
+# heiplanet Frontend Mapping application
 
 
 # Description
-The OneHealth Mapping project shows the predictions and predicted susceptibility in the future of different diseases by Infectious disease/Climate models from the group, across different regions in the map.
+The heiplanet Mapping project shows the predictions and predicted susceptibility in the future of different diseases by Infectious disease/Climate models from the group, across different regions in the map.
 
 This repository contains the frontend for the Climate Map. The user can browse for models with the Model Selector, and change the year to see future suspcetibility predictions
 
@@ -12,8 +12,7 @@ It can be configured to request and display NUTS3 regions, or worldwide equivale
 For the worldwide view, the data is projected from individual points into polygons on the frontend.
 
 ## Main components diagram:
-(Out of date since 6/10/2025 Grid Refactoring to restore grid functionality and new NUTS API)
-<img width="1370" height="847" alt="image" src="https://github.com/user-attachments/assets/bb7daba0-d421-477b-9005-d5a116a119b2" />
+(Out of date, new diagram needed)
 
 ## Example: Worldwide Simple R0 example:
 <img width="3700" height="1648" alt="image" src="https://github.com/user-attachments/assets/625d4432-faad-4e5f-b60f-4af96d6848b1" />
@@ -25,7 +24,7 @@ For the worldwide view, the data is projected from individual points into polygo
 
 
 # Installation guide
-- First, make sure the `onehealth-db` repository is running with the API accessible. The API must be able to return generated data for 2016 and 2017.
+- First, make sure the `onehealth-db` repository is running with the API accessible. It depends upon a running postgres database, typically docker name `my-postgres`. The API must be able to return generated data for 2016 and 2017.
 - Run `pnpm i` to install dependencies
 - Run `pnpm run dev` to launch the application
 

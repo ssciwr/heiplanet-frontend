@@ -38,7 +38,7 @@ const TourComponent = () => {
 		const tourDisabled = urlParams.get("notour") === "true";
 
 		// Check if user has seen the tour before
-		const hasSeenTour = localStorage.getItem("onehealth-tour-completed");
+		const hasSeenTour = localStorage.getItem("hei-planet-tour-completed");
 
 		// Only start tour on /map routes after modal choice, not automatically
 		const shouldStartTour =
@@ -88,7 +88,7 @@ const OnboardingTour = ({ children }: { children: React.ReactNode }) => {
 									type="button"
 									className="tour-button tour-button-secondary"
 									onClick={() => {
-										localStorage.setItem("onehealth-tour-completed", "true");
+										localStorage.setItem("hei-planet-tour-completed", "true");
 										setIsOpen(false);
 									}}
 								>
@@ -117,7 +117,7 @@ const OnboardingTour = ({ children }: { children: React.ReactNode }) => {
 									type="button"
 									className="tour-button tour-button-primary"
 									onClick={() => {
-										localStorage.setItem("onehealth-tour-completed", "true");
+										localStorage.setItem("hei-planet-tour-completed", "true");
 										setIsOpen(false);
 									}}
 								>

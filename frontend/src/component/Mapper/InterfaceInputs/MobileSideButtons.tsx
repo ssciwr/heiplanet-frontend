@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
+import { fetchModelCards } from "../../../services/modelCardService";
 import { AboutContent } from "../../../static/Footer.tsx";
+import type { Model } from "../../../types/model";
 import ModelDetailsModal from "./ModelDetailsModal";
 
 interface ScreenshotOptions {
@@ -57,7 +59,7 @@ declare module "leaflet" {
 	): SimpleMapScreenshoter;
 }
 
-export const MOBILE_SIDE_BUTTONS_LOCATIONS = {
+const MOBILE_SIDE_BUTTONS_LOCATIONS = {
 	BOTTOM_RIGHT: "bottom-right",
 	TOP_LEFT: "top-left",
 } as const;
@@ -91,19 +93,7 @@ const MobileSideButtons = ({
 	);
 	const [isMinimized, setIsMinimized] = useState<boolean>(false);
 	const [showModelDetails, setShowModelDetails] = useState<boolean>(false);
-	const [models, setModels] = useState<
-		Array<{
-			id: string;
-			virusType: string;
-			modelName: string;
-			title: string;
-			description: string;
-			emoji: string;
-			icon: string;
-			color: string;
-			details: string;
-		}>
-	>([]);
+	const [models, setModels] = useState<Model[]>([]);
 
 	useEffect(() => {
 		console.log("Show info:", showInfo);
@@ -122,89 +112,38 @@ const MobileSideButtons = ({
 	// Load models for the modal
 	useEffect(() => {
 		const loadModels = async () => {
-			const modelFiles = [
-				"westNileModel1.yaml",
-				"westNileModel2.yaml",
-				"dengueModel1.yaml",
-				"malariaModel1.yaml",
-				"covidModel1.yaml",
-				"zikaModel1.yaml",
-			];
-
-			const loadedModels: Array<{
-				id: string;
-				virusType: string;
-				modelName: string;
-				title: string;
-				description: string;
-				emoji: string;
-				icon: string;
-				color: string;
-				details: string;
-			}> = [];
-
-			for (const filename of modelFiles) {
-				try {
-					const response = await fetch(`/modelsyaml/${filename}`);
-					if (!response.ok) continue;
-
-					const yamlText = await response.text();
-					const lines = yamlText.split("\n");
-					const result: Record<string, string> = {};
-
-					for (const line of lines) {
-						const trimmed = line.trim();
-						if (trimmed && !trimmed.startsWith("#")) {
-							const colonIndex = trimmed.indexOf(":");
-							if (colonIndex > 0) {
-								const key = trimmed.substring(0, colonIndex).trim();
-								let value = trimmed.substring(colonIndex + 1).trim();
-								if (
-									(value.startsWith("'") && value.endsWith("'")) ||
-									(value.startsWith('"') && value.endsWith('"'))
-								) {
-									value = value.slice(1, -1);
-								}
-								result[key] = value;
-							}
-						}
-					}
-
-					const model = {
-						id: result.id || "",
-						virusType: result["virus-type"] || "",
-						modelName: result["model-name"] || "",
-						title: result.title || "",
-						description: result.description || "",
-						emoji: result.emoji || "",
-						icon: result.icon || "",
-						color: result.color || "",
-						details: result.details || "",
-					};
-
-					loadedModels.push(model);
-				} catch (error) {
-					console.error(`Error loading ${filename}:`, error);
+			try {
+				const loadedModels = await fetchModelCards();
+				if (loadedModels.length === 0) {
+					loadedModels.push({
+						id: "model-cards-unavailable",
+						modelName: "Model Cards Unavailable",
+						title: "Model Cards Unavailable",
+						description:
+							"Unable to fetch model cards from GitHub. Check client-side access.",
+						emoji: "⚠️",
+						color: "#D14343",
+						details:
+							"Model cards could not be loaded from GitHub on this client.",
+					});
 				}
+				setModels(loadedModels);
+			} catch (error) {
+				console.error("Error loading model cards:", error);
+				setModels([
+					{
+						id: "model-cards-unavailable",
+						modelName: "Model Cards Unavailable",
+						title: "Model Cards Unavailable",
+						description:
+							"Unable to fetch model cards from GitHub. Check client-side access.",
+						emoji: "⚠️",
+						color: "#D14343",
+						details:
+							"Model cards could not be loaded from GitHub on this client.",
+					},
+				]);
 			}
-
-			if (loadedModels.length === 0) {
-				// Fallback model
-				loadedModels.push({
-					id: "west-nile-a17",
-					virusType: "west-nile",
-					modelName: "Model A17",
-					title: "West Nile Virus",
-					description: "Mosquito-borne disease affecting humans and animals",
-					emoji: "🦟",
-					icon: "Bug",
-					color: "#754910",
-					details:
-						"Advanced climate model incorporating temperature, humidity, and precipitation data from NOAA weather stations.",
-				});
-			}
-
-			setModels(loadedModels);
 		};
 
 		loadModels();

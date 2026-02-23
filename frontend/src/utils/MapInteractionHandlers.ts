@@ -108,7 +108,7 @@ export const handleViewportChange = (
 
 // Feature highlighting for interactive layers
 export const createHighlightFeature = (
-	mapMode: "worldwide" | "europe-only",
+	mapMode: "worldwide" | "europe-only" | "grid",
 	borderStyle: BorderStyle,
 	dataExtremes: DataExtremes | null,
 	convertedWorldwideGeoJSON: WorldwideGeoJSON | null,
@@ -183,7 +183,7 @@ export const createHighlightFeature = (
 
 // Reset feature highlighting
 export const createResetHighlight = (
-	mapMode: "worldwide" | "europe-only",
+	mapMode: "worldwide" | "europe-only" | "grid",
 	borderStyle: BorderStyle,
 	dataExtremes: DataExtremes | null,
 	convertedWorldwideGeoJSON: WorldwideGeoJSON | null,
@@ -233,7 +233,7 @@ export const createResetHighlight = (
 
 // Feature event handler for worldwide features
 export const createOnEachWorldwideFeature = (
-	currentVariableValue: string,
+	currentVariableType: string,
 	highlightFeature: (e: L.LeafletMouseEvent) => void,
 	resetHighlight: (e: L.LeafletMouseEvent) => void,
 ) => {
@@ -261,7 +261,7 @@ export const createOnEachWorldwideFeature = (
 		<div class="worldwide-popup">
 		  <button class="popup-close-btn" aria-label="Close popup">×</button>
 		  <h4>${displayName}</h4>
-		  <p><strong>${getVariableDisplayName(currentVariableValue)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableValue, intensity) : "N/A"}</p>
+		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
 		</div>
 	  `;
 			(layer as L.Layer & { bindPopup: (content: string) => void }).bindPopup(
@@ -273,7 +273,7 @@ export const createOnEachWorldwideFeature = (
 
 // Feature event handler for Europe-only features
 export const createOnEachEuropeOnlyFeature = (
-	currentVariableValue: string,
+	currentVariableType: string,
 	highlightFeature: (e: L.LeafletMouseEvent) => void,
 	resetHighlight: (e: L.LeafletMouseEvent) => void,
 ) => {
@@ -303,7 +303,7 @@ export const createOnEachEuropeOnlyFeature = (
 		<div class="europe-only-popup">
 		  <button class="popup-close-btn" aria-label="Close popup">×</button>
 		  <h4>${displayName}</h4>
-		  <p><strong>${getVariableDisplayName(currentVariableValue)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableValue, intensity) : "N/A"}</p>
+		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
 		</div>
 	  `;
 			(layer as L.Layer & { bindPopup: (content: string) => void }).bindPopup(

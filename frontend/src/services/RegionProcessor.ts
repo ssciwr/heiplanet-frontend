@@ -292,12 +292,21 @@ export class RegionProcessor {
 					...feature,
 					properties: {
 						...feature.properties,
-						intensity: tempResult.temperature,
+						intensity: tempResult.temperature, // this label should be in some kind of mobx store or passed as prop.
+						// todo: Check this again. This relates to Ingas suggested changes today
+						// Cruically, the label here in this concept may become the yaml "model output yaml" or so
+						// Created Forntend issue #77 for this.
 						WORLDWIDE_ID:
 							feature.properties?.name ||
+							feature.properties?.NAM_0 ||
 							feature.properties?.name_en ||
 							"Unknown",
-						countryName: feature.properties?.admin || "Unknown Country",
+						countryName:
+							feature.properties?.NAM_0 ||
+							feature.properties?.admin ||
+							feature.properties?.name ||
+							feature.properties?.name_en ||
+							"Unknown Country",
 						pointCount: sampledTemperatureData.filter((point) =>
 							this.isPointInRegion(
 								point.lat,
@@ -361,7 +370,33 @@ export class RegionProcessor {
 		};
 	}
 
-	// Process Europe-only regions
+	// Process Europe-only regions using direct API data (no lat/lon conversion needed)
+	public async processEuropeOnlyRegionsFromApi(
+		apiData: { [nutsId: string]: number },
+		currentYear: number,
+	): Promise<{
+		nutsGeoJSON: NutsGeoJSON;
+		extremes: { min: number; max: number };
+	}> {
+		console.log(
+			`Processing Europe-only NUTS regions from API data for year ${currentYear}...`,
+		);
+		console.log(
+			`API data contains ${Object.keys(apiData).length} NUTS regions`,
+		);
+
+		// Use NutsConverter to create GeoJSON directly from API data
+		const { nutsGeoJSON, extremes } =
+			await nutsConverter.createNutsFromApiData(apiData);
+
+		console.log(`NUTS processing complete for year ${currentYear}`);
+		console.log(`NUTS features count: ${nutsGeoJSON.features.length}`);
+		console.log("NUTS extremes:", extremes);
+
+		return { nutsGeoJSON, extremes };
+	}
+
+	// Process Europe-only regions (legacy method - kept for backward compatibility)
 	public async processEuropeOnlyRegions(
 		temperatureData: TemperatureDataPoint[],
 		currentYear: number,

@@ -5,6 +5,7 @@ import type {
 	MultiPolygon,
 	Polygon,
 } from "geojson";
+import { nutsApiUrl } from "../../../services/nutsApi.ts";
 import type {
 	DataExtremes,
 	NutsFeature,
@@ -15,43 +16,33 @@ import type {
 
 export class NutsConverter {
 	private nutsGeoJSON: FeatureCollection | null = null;
-	private isLoadingNuts = false;
+	private nutsGeoJSONLevel: 2 | 3 | null = null;
 
-	async loadNutsGeoJSON(): Promise<void> {
-		if (this.nutsGeoJSON || this.isLoadingNuts) return;
-
-		this.isLoadingNuts = true;
-		try {
-			// Load NUTS 2 regions from Eurostat official source
-			const response = await fetch(
-				"https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2021_4326_LEVL_2.geojson",
-			);
-			const nutsData = await response.json();
-
-			// Filter to only NUTS 2 level regions (level code "2")
-			const nuts2Features = nutsData.features.filter(
-				(feature: GeoJSONFeature) => feature.properties?.LEVL_CODE === 2,
-			);
-
-			this.nutsGeoJSON = {
-				type: "FeatureCollection",
-				features: nuts2Features,
-			};
-
-			console.log(`NUTS 2 GeoJSON loaded: ${nuts2Features.length} regions`);
-			console.log(
-				"Sample regions:",
-				nuts2Features
-					.slice(0, 5)
-					.map((f: GeoJSONFeature) => f.properties?.NUTS_ID),
-			);
-		} catch (error) {
-			console.error("Failed to load NUTS data from Eurostat:", error);
-			// Fallback to empty if can't load
-			this.nutsGeoJSON = { type: "FeatureCollection", features: [] };
-		} finally {
-			this.isLoadingNuts = false;
+	async loadNutsGeoJSON(level: 2 | 3 = 3): Promise<void> {
+		if (this.nutsGeoJSON && this.nutsGeoJSONLevel === level) {
+			return;
 		}
+
+		const gridResolution = `NUTS${level}`;
+		const nutsRegionsUrl = nutsApiUrl("/nuts_regions", {
+			grid_resolution: gridResolution,
+		});
+
+		const response = await fetch(nutsRegionsUrl, {
+			headers: {
+				//	accept: "application/geo+json,application/json",
+				accept: "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error(
+				`Failed to load NUTS regions (${response.status} ${response.statusText})`,
+			);
+		}
+
+		this.nutsGeoJSON = (await response.json()) as FeatureCollection;
+		this.nutsGeoJSONLevel = level;
 	}
 
 	private createSpatialIndex(
@@ -318,6 +309,10 @@ export class NutsConverter {
 						);
 						const avgTemperature = temperatureSum / pointsInRegion.length;
 
+						console.log(
+							`NUTS ${nutsId}: ${pointsInRegion.length} points, avg temp: ${avgTemperature.toFixed(2)}°C`,
+						);
+
 						temperatures.push(avgTemperature);
 
 						// Get centroid for current position
@@ -406,6 +401,12 @@ export class NutsConverter {
 
 			// Calculate extremes
 			console.log("Calculating extremes...");
+			console.log(
+				`Temperature values: [${temperatures
+					.slice(0, 10)
+					.map((t) => t.toFixed(2))
+					.join(", ")}${temperatures.length > 10 ? "..." : ""}]`,
+			);
 			const extremes: DataExtremes =
 				temperatures.length > 0
 					? {
@@ -416,6 +417,9 @@ export class NutsConverter {
 							min: 0,
 							max: 0,
 						};
+			console.log(
+				`Final extremes: min=${extremes.min.toFixed(2)}°C, max=${extremes.max.toFixed(2)}°C`,
+			);
 
 			const nutsGeoJSON: NutsGeoJSON = {
 				type: "FeatureCollection",
@@ -494,6 +498,100 @@ export class NutsConverter {
 		}
 
 		return baseCountry;
+	}
+
+	// Create NUTS GeoJSON directly from API data (bypasses lat/lon processing)
+	/*
+	The way this goes about this is longwinded/antiquated given how this could work now. For each NUTS region in our
+	local list of regions, it make a polygon object ready to draw, and then
+	 tries to see if the API data has a region with the same ID. When it does, it assigns the intensity value.
+	 That works and the full NUTS-API path will work like that too (backend will provide a GeoJSON of countries and
+	 NUTS regions as polygons), but the code is a bit convulted and function names should change to nolonger read like
+	 it creates the Nuts regions based on processing points into their relevant regions.
+	 */
+	async createNutsFromApiData(apiData: { [nutsId: string]: number }): Promise<{
+		nutsGeoJSON: NutsGeoJSON;
+		extremes: DataExtremes;
+	}> {
+		await this.loadNutsGeoJSON(3);
+
+		const sourceGeoJSON = this.nutsGeoJSON;
+
+		if (!sourceGeoJSON) {
+			throw new Error("NUTS GeoJSON not loaded");
+		}
+
+		const nutsFeatures: NutsFeature[] = [];
+		const temperatures: number[] = [];
+
+		// Process each NUTS region in the API data
+		for (const nutsFeature of sourceGeoJSON.features) {
+			const nutsId =
+				nutsFeature.properties?.NUTS_ID || nutsFeature.properties?.nuts_id;
+
+			if (!nutsId) {
+				console.warn("NUTS feature missing NUTS_ID:", nutsFeature);
+				continue;
+			}
+
+			const apiValue = apiData[nutsId]; // look up in the hashtable of known NUTS IDs --> Intesity values from last API call.
+
+			if (apiValue !== undefined && typeof apiValue === "number") {
+				temperatures.push(apiValue);
+
+				// Get centroid for current position
+				const polygon = this.createPolygonFromFeature(nutsFeature);
+				if (!polygon) continue;
+
+				const centroid = turf.centroid(polygon);
+				const currentPosition = {
+					lat: centroid.geometry.coordinates[1],
+					lng: centroid.geometry.coordinates[0],
+				};
+
+				const nutsFeatureResult: NutsFeature = {
+					type: "Feature",
+					properties: {
+						NUTS_ID: nutsId,
+						intensity: apiValue,
+						countryName: this.getNutsDisplayName(nutsId),
+						pointCount: 1, // API data is pre-processed
+						nutsLevel: 3,
+						isApiData: true,
+						currentPosition,
+						dataPoints: [
+							{
+								lat: currentPosition.lat,
+								lng: currentPosition.lng,
+								temperature: apiValue,
+							},
+						],
+					},
+					geometry: nutsFeature.geometry as NutsGeometry,
+				};
+
+				nutsFeatures.push(nutsFeatureResult);
+			}
+		}
+
+		// Calculate extremes
+		const extremes: DataExtremes =
+			temperatures.length > 0
+				? {
+						min: Math.min(...temperatures),
+						max: Math.max(...temperatures),
+					}
+				: {
+						min: 0,
+						max: 0,
+					};
+
+		const nutsGeoJSON: NutsGeoJSON = {
+			type: "FeatureCollection",
+			features: nutsFeatures,
+		};
+
+		return { nutsGeoJSON, extremes };
 	}
 
 	// Method to overlay actual model NUTS 3 data over calculated data

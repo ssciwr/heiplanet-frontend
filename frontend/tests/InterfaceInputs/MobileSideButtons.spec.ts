@@ -161,7 +161,7 @@ test.describe("MobileSideButtons Component", () => {
 
 		await expect(page.locator("body")).toContainText("About This Map");
 		await expect(page.locator("body")).toContainText(
-			"Created with disease modelling by the OneHealth team.",
+			"Created with disease modelling by the Hei-Planet team",
 		);
 
 		// Close the modal by clicking the X or outside

@@ -15,8 +15,8 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import type { Model } from "../../../hooks/useModelData";
 import { AboutContent } from "../../../static/Footer.tsx";
+import type { Model } from "../../../types/model";
 import type { Month } from "../types";
 import { MONTHS } from "../utilities/monthUtils";
 import ModelDetailsModal from "./ModelDetailsModal";
@@ -35,7 +35,6 @@ interface AdvancedTimelineSelectorProps {
 	onScreenshot: () => void;
 	colorScheme: "purple" | "red";
 	legend?: ReactNode;
-	map?: L.Map | null;
 	screenshoter?: L.SimpleMapScreenshoter | null;
 	models: Model[];
 	selectedModelId: string;
@@ -56,7 +55,6 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 	onScreenshot,
 	colorScheme,
 	legend,
-	map: _map,
 	screenshoter,
 	models,
 	selectedModelId,
@@ -846,7 +844,7 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 			/>
 
 			<Modal
-				title="About OneHealth Platform"
+				title="About the Hei-Planet Platform"
 				open={isAboutOpen}
 				onCancel={() => setIsAboutOpen(false)}
 				footer={null}
