@@ -14,6 +14,7 @@ export interface Model {
 		url: string;
 	};
 	output?: string[];
+	model_output_variable?: string;
 	cardMarkdown?: string;
 	cardYamlUrl?: string;
 	virusType?: string;
