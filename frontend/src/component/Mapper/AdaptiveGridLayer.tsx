@@ -9,6 +9,10 @@ import { getColorFromGradient } from "./utilities/gradientUtilities";
 
 console.log("GRID-PROBLEM-DEBUG AdaptiveGridLayer module loaded");
 
+/**
+ * Technically in the GIS field this is more known as Downsampling / Level of Detail based loading/zoom support.
+ * It keeps our consumption at any given point in time to 0.2-3 MB of data rather than loading at the highest granualarity for larger windows (e.g. when very zoomed out).
+ */
 const AdaptiveGridLayer = observer(() => {
 	const canvasRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
 	const renderStart = performance.now();
@@ -42,34 +46,29 @@ const AdaptiveGridLayer = observer(() => {
 
 	// get country name this way for borders at world geojson (not NUTS), admin level 0: return (match?.properties as { NAM_0?: string } | undefined)?.NAM_0 || "Unknown";
 
-	// zIndex less than the city layer so those appear on top.
-	const result = (
-		<div style={{ zIndex: "335" }}>
-			{gridCells.map(
-				(
-					cell, // these adapt to different scales because cell.bounds changes.
-				) => (
-					<Rectangle
-						key={cell.id}
-						bounds={cell.bounds}
-						renderer={canvasRenderer}
-						interactive
-						pathOptions={getGridCellStyle(cell.temperature)}
-						eventHandlers={{
-							click: (e) => {
-								e.target.openPopup();
-								e.originalEvent?.stopPropagation();
-							},
-						}}
-					>
-						<Popup className="grid-popup">
-							<p>{cell.temperature.toFixed(2)}</p>
-							<p>Coordinates: {JSON.stringify(cell.bounds)}</p>
-						</Popup>
-					</Rectangle>
-				),
-			)}
-		</div> // todo: Add css class for grid-popup(it is transparent right now)
+	const result = gridCells.map(
+		(
+			cell, // these adapt to different scales because cell.bounds changes.
+		) => (
+			<Rectangle
+				key={cell.id}
+				bounds={cell.bounds}
+				renderer={canvasRenderer}
+				interactive
+				pathOptions={getGridCellStyle(cell.temperature)}
+				eventHandlers={{
+					click: (e) => {
+						e.target.openPopup();
+						e.originalEvent?.stopPropagation();
+					},
+				}}
+			>
+				<Popup className="grid-popup" pane="popupPane">
+					<p>{cell.temperature.toFixed(2)}</p>
+					<p>Coordinates: {JSON.stringify(cell.bounds)}</p>
+				</Popup>
+			</Rectangle>
+		),
 	); // todo: Replace just teh cell.temperature above: rename temperature to .value (as it is used for R0 too etc) and provide the label.
 	// the label should be in some kind of mobx store or passed as prop.
 	// todo: Check this again. This relates to Ingas suggested changes today
@@ -81,7 +80,7 @@ const AdaptiveGridLayer = observer(() => {
 		`📱 AdaptiveGridLayer render COMPLETE - ${gridCells.length} cells in ${renderTime.toFixed(2)}ms`,
 	);
 
-	return result;
+	return <>{result}</>;
 });
 
 export default AdaptiveGridLayer;
