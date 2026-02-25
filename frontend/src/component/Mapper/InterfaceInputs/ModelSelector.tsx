@@ -43,7 +43,7 @@ const ModelSelector = ({
 				setModels(loadedModels);
 			} catch (err) {
 				console.error("Error loading models:", err);
-				setError("Failed to load models (client-side request may be blocked)");
+				setError("Failed to load models from metadata artifact");
 
 				console.log("Falling back to hardcoded model data");
 				setModels([
@@ -51,12 +51,11 @@ const ModelSelector = ({
 						id: "model-cards-unavailable",
 						modelName: "Model Cards Unavailable",
 						title: "Model Cards Unavailable",
-						description:
-							"Unable to fetch model cards from GitHub. Check client-side access.",
+						description: "Unable to load model metadata from artifact source.",
 						emoji: "⚠️",
 						color: "#D14343",
 						details:
-							"Model cards could not be loaded from GitHub on this client.",
+							"Check artifact generation and metadata artifact URL configuration.",
 					},
 				]);
 			} finally {
