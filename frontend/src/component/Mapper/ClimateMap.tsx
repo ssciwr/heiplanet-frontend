@@ -83,9 +83,13 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		currentMonth: userStore.currentMonth,
 		selectedOptimism: userStore.selectedOptimism,
 	});
+	const mapViewportBounds = mapDataStore.mapViewportBounds;
+	const dataResolution = mapDataStore.dataResolution;
+	const rawRegionTemperatureData =
+		temperatureDataStore.rawRegionTemperatureData;
+	const rawRegionTemperatureDataLength = rawRegionTemperatureData.length;
 
 	// Set theme to purple
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
 		document.documentElement.setAttribute("data-theme", "purple");
 	}, []);
@@ -95,7 +99,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 	useEffect(() => {
 		const loadData = async () => {
 			// Avoid global requests before viewport is known in grid mode
-			if (userStore.mapMode === "grid" && !mapDataStore.mapViewportBounds) {
+			if (userStore.mapMode === "grid" && !mapViewportBounds) {
 				console.log("Skipping grid data load until viewport is available");
 				return;
 			}
@@ -104,11 +108,11 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				console.log(`Loading lat/lon data for ${userStore.mapMode} mode`);
 				console.log(
 					"🗺️ Current mapViewportBounds when loading data:",
-					mapDataStore.mapViewportBounds,
+					mapViewportBounds,
 				);
 
 				// Use current viewport bounds for data fetching
-				const viewportBoundsToUse = mapDataStore.mapViewportBounds;
+				const viewportBoundsToUse = mapViewportBounds;
 				console.log("🔄 Using viewport bounds:", viewportBoundsToUse);
 
 				await temperatureDataStore.loadTemperatureData(
@@ -124,7 +128,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 					mapDataStore.setIsLoadingRawData,
 					setGeneralError,
 					viewportBoundsToUse,
-					mapDataStore.dataResolution,
+					dataResolution,
 				);
 			}
 
@@ -146,8 +150,8 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		setNoDataModalVisible,
 		setDataFetchErrorMessage,
 		setGeneralError,
-		mapDataStore.mapViewportBounds,
-		mapDataStore.dataResolution,
+		mapViewportBounds,
+		dataResolution,
 	]);
 
 	// Handle popup close button clicks
@@ -318,9 +322,9 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 	useEffect(() => {
 		console.log("GRID-PROBLEM-DEBUG effect: processData start", {
 			mapMode: userStore.mapMode,
-			rawLen: temperatureDataStore.rawRegionTemperatureData.length,
-			hasViewport: !!mapDataStore.mapViewportBounds,
-			dataResolution: mapDataStore.dataResolution,
+			rawLen: rawRegionTemperatureDataLength,
+			hasViewport: !!mapViewportBounds,
+			dataResolution,
 			dataProcessingError,
 		});
 		// Skip processing if there's already a processing error or in Europe mode
@@ -333,7 +337,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 			return;
 		}
 
-		const rawDataLength = temperatureDataStore.rawRegionTemperatureData.length;
+		const rawDataLength = rawRegionTemperatureDataLength;
 		console.log("GRID-PROBLEM-DEBUG effect: rawDataLength", rawDataLength);
 
 		const processData = async () => {
@@ -354,7 +358,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 					mapDataStore.setIsProcessingWorldwideRegionData(true);
 					const { processedGeoJSON, extremes } =
 						await regionProcessor.processWorldwideRegions(
-							temperatureDataStore.rawRegionTemperatureData,
+							rawRegionTemperatureData,
 							temperatureDataStore.worldwideRegionBoundaries,
 						);
 					mapDataStore.setProcessedWorldwideRegions(processedGeoJSON);
@@ -372,20 +376,15 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				const gridBuildRequestId = ++latestGridBuildRequestRef.current;
 				console.log("GRID-PROBLEM-DEBUG grid branch entry", {
 					rawDataLength,
-					viewport: mapDataStore.mapViewportBounds,
-					resolution: mapDataStore.dataResolution,
+					viewport: mapViewportBounds,
+					resolution: dataResolution,
 				});
 				console.log("Grid processing check:", userStore.mapMode, rawDataLength);
-				console.log(
-					"mapDataStore.mapViewportBounds:",
-					mapDataStore.mapViewportBounds,
-				);
-				console.log("dataResolution:", mapDataStore.dataResolution);
+				console.log("mapDataStore.mapViewportBounds:", mapViewportBounds);
+				console.log("dataResolution:", dataResolution);
 
 				// Grid mode: set extremes from raw temperature data and generate grid cells
-				const temps = temperatureDataStore.rawRegionTemperatureData.map(
-					(d) => d.temperature,
-				);
+				const temps = rawRegionTemperatureData.map((d) => d.temperature);
 				const extremes = {
 					min: Math.min(...temps),
 					max: Math.max(...temps),
@@ -394,15 +393,15 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 
 				// Generate grid cells using MobX store
 				console.log("About to call generateGridCellsFromTemperatureData");
-				const viewportBounds = mapDataStore.mapViewportBounds;
-				const resolution = mapDataStore.dataResolution;
+				const viewportBounds = mapViewportBounds;
+				const resolution = dataResolution;
 				console.log("GRID-PROBLEM-DEBUG before gridProcessingStore.generate", {
 					viewportBounds,
 					resolution,
 				});
 				const nextGridCells =
 					gridProcessingStore.generateGridCellsFromTemperatureData(
-						temperatureDataStore.rawRegionTemperatureData,
+						rawRegionTemperatureData,
 						viewportBounds,
 						resolution,
 					);
@@ -443,10 +442,10 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		dataProcessingError,
 		setDataProcessingError,
 		setGeneralError,
-		temperatureDataStore.rawRegionTemperatureData,
-		temperatureDataStore.rawRegionTemperatureData.length,
-		mapDataStore.mapViewportBounds,
-		mapDataStore.dataResolution,
+		rawRegionTemperatureData,
+		rawRegionTemperatureDataLength,
+		mapViewportBounds,
+		dataResolution,
 	]);
 
 	// Cleanup timeouts on unmount
