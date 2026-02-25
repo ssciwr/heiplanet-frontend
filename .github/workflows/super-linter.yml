@@ -47,7 +47,6 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: "main"
           GITHUB_TOKEN: ${{ github.token }}
-          VALIDATE_JSCPD: false
           VALIDATE_JSON_PRETTIER: true
           VALIDATE_YAML_PRETTIER: true
 
