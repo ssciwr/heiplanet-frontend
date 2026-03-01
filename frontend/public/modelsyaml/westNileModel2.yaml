@@ -5,8 +5,9 @@ title: West Nile Virus
 description: Mosquito-borne disease affecting humans and animals
 emoji: 🦟
 icon: Bug
-color: '#754910'
-details: Comprehensive epidemiological model combining satellite imagery, ground-based
+color: "#754910"
+details:
+  Comprehensive epidemiological model combining satellite imagery, ground-based
   weather data, and vector surveillance. Integrates CDC surveillance data with real-time
   climate monitoring to forecast outbreak probability and intensity.
 output:

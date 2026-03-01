@@ -1,27 +1,27 @@
 models:
-- id: west-nile-a17
-  filename: westNileModel1.yaml
-  title: West Nile Virus
-  model-name: Model A17
-- id: west-nile-b34
-  filename: westNileModel2.yaml
-  title: West Nile Virus
-  model-name: Model B34
-- id: dengue-c12
-  filename: dengueModel1.yaml
-  title: Dengue
-  model-name: Model C12
-- id: malaria-d45
-  filename: malariaModel1.yaml
-  title: Malaria
-  model-name: Model D45
-- id: covid-e78
-  filename: covidModel1.yaml
-  title: COVID-19
-  model-name: Model E78
-- id: zika-f91
-  filename: zikaModel1.yaml
-  title: Zika Virus
-  model-name: Model F91
+  - id: west-nile-a17
+    filename: westNileModel1.yaml
+    title: West Nile Virus
+    model-name: Model A17
+  - id: west-nile-b34
+    filename: westNileModel2.yaml
+    title: West Nile Virus
+    model-name: Model B34
+  - id: dengue-c12
+    filename: dengueModel1.yaml
+    title: Dengue
+    model-name: Model C12
+  - id: malaria-d45
+    filename: malariaModel1.yaml
+    title: Malaria
+    model-name: Model D45
+  - id: covid-e78
+    filename: covidModel1.yaml
+    title: COVID-19
+    model-name: Model E78
+  - id: zika-f91
+    filename: zikaModel1.yaml
+    title: Zika Virus
+    model-name: Model F91
 output:
   - t2m

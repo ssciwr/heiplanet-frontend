@@ -5,8 +5,9 @@ title: West Nile Virus
 description: Mosquito-borne disease affecting humans and animals
 emoji: 🦟
 icon: Bug
-color: '#754910'
-details: Advanced climate model incorporating temperature, humidity, and precipitation
+color: "#754910"
+details:
+  Advanced climate model incorporating temperature, humidity, and precipitation
   data from NOAA weather stations. Uses machine learning algorithms trained on 15
   years of outbreak data to predict mosquito breeding patterns and disease transmission
   risk.
