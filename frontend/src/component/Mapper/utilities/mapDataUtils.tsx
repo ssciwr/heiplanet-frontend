@@ -3,8 +3,9 @@ import * as turf from "@turf/turf";
 import * as L from "leaflet";
 import { isMobile } from "react-device-detect";
 import { fetchClimateData } from "../../../services/climateDataService.ts";
-import { nutsApiUrl } from "../../../services/nutsApi.ts";
 import type { DataExtremes, TemperatureDataPoint } from "../types.ts";
+
+const NUTS_DATA_API_URL = "/api/nuts_data";
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 10;
@@ -355,11 +356,12 @@ export const loadNutsData = async (
 	const requestedTimePoint = `${year}-${monthStr}-01`;
 
 	try {
-		const nutsDataUrl = nutsApiUrl("/nuts_data", {
+		const nutsDataParams = new URLSearchParams({
 			requested_time_point: requestedTimePoint,
 			requested_variable_type: requestedVariableValue,
 			requested_grid_resolution: requestedGridResolution,
 		});
+		const nutsDataUrl = `${NUTS_DATA_API_URL}?${nutsDataParams.toString()}`;
 
 		console.log(
 			`Requesting NUTS values from backend: ${nutsDataUrl} (time=${requestedTimePoint}, variable=${requestedVariableValue}, resolution=${requestedGridResolution})`,

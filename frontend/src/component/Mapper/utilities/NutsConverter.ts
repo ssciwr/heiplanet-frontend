@@ -5,7 +5,7 @@ import type {
 	MultiPolygon,
 	Polygon,
 } from "geojson";
-import { nutsApiUrl } from "../../../services/nutsApi.ts";
+
 import type {
 	DataExtremes,
 	NutsFeature,
@@ -13,6 +13,8 @@ import type {
 	NutsGeometry,
 	TemperatureDataPoint,
 } from "../types";
+
+const NUTS_REGIONS_API_URL = "/api/nuts_regions";
 
 export class NutsConverter {
 	private nutsGeoJSON: FeatureCollection | null = null;
@@ -24,9 +26,11 @@ export class NutsConverter {
 		}
 
 		const gridResolution = `NUTS${level}`;
-		const nutsRegionsUrl = nutsApiUrl("/nuts_regions", {
+		const nutsRegionsParams = new URLSearchParams({
 			grid_resolution: gridResolution,
 		});
+		const nutsRegionsUrl = `${NUTS_REGIONS_API_URL}?${nutsRegionsParams.toString()}`;
+		// e.g.  /api/nuts_regions?grid_resolution=NUTS3
 
 		const response = await fetch(nutsRegionsUrl, {
 			headers: {
