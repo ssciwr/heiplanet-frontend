@@ -301,16 +301,6 @@ const MobileSideButtons = ({
 		};
 	};
 
-	const getMobileSideButtonsClasses = () => {
-		const baseClass = isMobile
-			? "mobile-side-buttons mobile-side-buttons-mobile"
-			: "mobile-side-buttons mobile-side-buttons-desktop";
-		if (isMobile) return baseClass;
-		return position === MOBILE_SIDE_BUTTONS_LOCATIONS.BOTTOM_RIGHT
-			? `${baseClass} mobile-side-buttons-bottom-right`
-			: `${baseClass} mobile-side-buttons-top-left`;
-	};
-
 	const modals = (
 		<div>
 			<Modal
@@ -378,7 +368,7 @@ const MobileSideButtons = ({
 		<>
 			<div
 				data-testid="mobile-side-buttons"
-				className={getMobileSideButtonsClasses()}
+				className="mobile-side-buttons mobile-side-buttons-mobile"
 			>
 				{!isMinimized ? (
 					<>
