@@ -531,7 +531,9 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 
 	return (
 		<div>
-			<div className="climate-map-container">
+			<div
+				className={`climate-map-container ${isMobile ? "climate-map-container-mobile" : ""}`}
+			>
 				<MapHeader />
 
 				<div className="map-content-wrapper">

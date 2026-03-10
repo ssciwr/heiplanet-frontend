@@ -4,10 +4,14 @@
 
 .climate-map-container {
 	font-family: var(--font-inter);
-	background: rgb(235, 235, 235);
+	background: white;
 	min-height: 100vh;
 	min-width: 100vw;
 	padding: 10px;
+}
+
+.climate-map-container-mobile {
+	background: rgb(235, 235, 235);
 }
 
 .map-content-wrapper {
@@ -387,7 +391,7 @@
 .nuts-popup,
 .grid-popup,
 .europe-only-popup {
-	padding: 0.55rem 0.95rem 0.85rem;
+	padding: 0.55rem 2.1rem 0.85rem 0.95rem;
 }
 
 .base-popup h4,

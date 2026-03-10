@@ -11,7 +11,6 @@ import {
 	Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { isMobile } from "react-device-detect";
 import { fetchModelCards } from "../../../services/modelCardService";
 import { AboutContent } from "../../../static/Footer.tsx";
 import type { Model } from "../../../types/model";
@@ -76,7 +75,6 @@ interface MobileSideButtonsProps {
 
 const MobileSideButtons = ({
 	map,
-	position = MOBILE_SIDE_BUTTONS_LOCATIONS.BOTTOM_RIGHT,
 	selectedModel,
 	onModelSelect,
 }: MobileSideButtonsProps) => {

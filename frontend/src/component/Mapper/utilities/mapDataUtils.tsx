@@ -226,7 +226,7 @@ export const Legend = ({
 			position: "fixed",
 			top: `${desktopOffsets.top}px`,
 			bottom: `${desktopOffsets.bottom}px`,
-			left: "32px",
+			left: "17px",
 			zIndex: 700,
 			display: "flex",
 			alignItems: "center",
