@@ -51,14 +51,25 @@ export const getVariableUnit = (variableValue: string): string => {
 // Variable to display name mapping for popup display
 export const getVariableDisplayName = (variableValue: string): string => {
 	const displayNameMap: { [key: string]: string } = {
-		R0: "R0 (Basic reproduction number)",
+		R0: "R0",
 		t2m: "Temperature (2m above ground)",
 		temperature: "Temperature",
 		temp: "Temperature",
 		// Add more mappings as needed
 	};
 
-	return displayNameMap[variableValue] || variableValue;
+	if (displayNameMap[variableValue]) {
+		return displayNameMap[variableValue];
+	}
+
+	const normalizedVariable = variableValue
+		.replace(/_/g, " ")
+		.trim()
+		.replace(/\s+/g, " ");
+
+	return normalizedVariable
+		? `${normalizedVariable.charAt(0).toUpperCase()}${normalizedVariable.slice(1)}`
+		: variableValue;
 };
 
 // Get formatted variable value with unit for display
@@ -72,5 +83,7 @@ export const getFormattedVariableValue = (
 		return "N/A";
 	}
 
-	return `${value.toFixed(1)}${unit}`;
+	const unitSuffix = unit && unit !== variableValue ? unit : "";
+
+	return `${value.toFixed(1)}${unitSuffix}`;
 };

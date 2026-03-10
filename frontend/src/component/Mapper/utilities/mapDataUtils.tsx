@@ -1,9 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import * as turf from "@turf/turf";
 import * as L from "leaflet";
+import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { fetchClimateData } from "../../../services/climateDataService.ts";
 import type { DataExtremes, TemperatureDataPoint } from "../types.ts";
+import { getVariableDisplayName } from "./monthUtils";
 
 const NUTS_DATA_API_URL = "/api/nuts_data";
 
@@ -47,6 +49,56 @@ export const Legend = ({
 	extremes,
 	unit = "R0",
 }: { extremes: DataExtremes; unit?: string }) => {
+	const [desktopOffsets, setDesktopOffsets] = useState({
+		top: 136,
+		bottom: 144,
+	});
+
+	useEffect(() => {
+		if (isMobile || typeof window === "undefined") return;
+
+		const updateLegendOffsets = () => {
+			const headerEl = document.querySelector(".map-header");
+			const timelineEl = document.querySelector(
+				"[data-testid='timeline-selector']",
+			);
+			const headerHeight =
+				headerEl instanceof HTMLElement
+					? headerEl.getBoundingClientRect().height
+					: 120;
+			const timelineHeight =
+				timelineEl instanceof HTMLElement
+					? timelineEl.getBoundingClientRect().height
+					: 128;
+
+			setDesktopOffsets({
+				top: Math.round(headerHeight + 16),
+				bottom: Math.round(timelineHeight + 16),
+			});
+		};
+
+		updateLegendOffsets();
+
+		let resizeObserver: ResizeObserver | null = null;
+		if (typeof ResizeObserver !== "undefined") {
+			resizeObserver = new ResizeObserver(() => updateLegendOffsets());
+
+			const headerEl = document.querySelector(".map-header");
+			const timelineEl = document.querySelector(
+				"[data-testid='timeline-selector']",
+			);
+
+			if (headerEl instanceof HTMLElement) resizeObserver.observe(headerEl);
+			if (timelineEl instanceof HTMLElement) resizeObserver.observe(timelineEl);
+		}
+
+		window.addEventListener("resize", updateLegendOffsets);
+		return () => {
+			window.removeEventListener("resize", updateLegendOffsets);
+			resizeObserver?.disconnect();
+		};
+	}, []);
+
 	if (!extremes) return null;
 
 	const intervals = generateIntervals(
@@ -55,6 +107,7 @@ export const Legend = ({
 		isMobile ? 6 : 10,
 	);
 	const totalRange = extremes.max - extremes.min;
+	const displayUnit = getVariableDisplayName(unit);
 
 	// Mobile timeline styles - full width, integrated with timeline
 	if (isMobile) {
@@ -121,7 +174,7 @@ export const Legend = ({
 				<>
 					<span style={labelStyle}>
 						{Math.round(extremes.min)}&nbsp;
-						{unit}
+						{displayUnit}
 					</span>
 					{intervals.map((temp) => {
 						const position = ((temp - extremes.min) / totalRange) * 100;
@@ -138,13 +191,13 @@ export const Legend = ({
 								}}
 							>
 								{temp}
-								{unit}
+								{displayUnit}
 							</span>
 						);
 					})}
 					<span style={labelStyle}>
 						{Math.round(extremes.max)}&nbsp;
-						{unit}
+						{displayUnit}
 					</span>
 				</>
 			);
@@ -160,24 +213,53 @@ export const Legend = ({
 
 	// Desktop vertical legend styles (unchanged)
 	if (!isMobile) {
+		const roundedMax = Math.round(extremes.max * 10) / 10;
+		const roundedMin = Math.round(extremes.min * 10) / 10;
+		const maxLabel = Number.isInteger(roundedMax)
+			? `${roundedMax}`
+			: roundedMax.toFixed(1);
+		const minLabel = Number.isInteger(roundedMin)
+			? `${roundedMin}`
+			: roundedMin.toFixed(1);
+
 		const wrapperStyle: React.CSSProperties = {
 			position: "fixed",
-			top: "20%",
-			bottom: "20%",
+			top: `${desktopOffsets.top}px`,
+			bottom: `${desktopOffsets.bottom}px`,
 			left: "32px",
 			zIndex: 700,
+			display: "flex",
+			alignItems: "center",
 		};
 
 		const containerStyle: React.CSSProperties = {
 			backgroundColor: "white",
 			borderRadius: "12px",
-			padding: "16px",
+			padding: "14px 12px",
 			boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
 			display: "flex",
-			flexDirection: "row",
+			flexDirection: "column",
 			alignItems: "center",
-			gap: "15px",
-			height: "100%",
+			justifyContent: "center",
+			gap: "8px",
+			minWidth: "124px",
+		};
+
+		const variableLabelStyle: React.CSSProperties = {
+			fontSize: "14px",
+			fontWeight: "700",
+			color: "rgb(80,80,80)",
+			textAlign: "center",
+			maxWidth: "100px",
+			lineHeight: 1.2,
+			wordBreak: "break-word",
+		};
+
+		const extremeLabelStyle: React.CSSProperties = {
+			fontSize: "14px",
+			fontWeight: "700",
+			color: "rgb(80,80,80)",
+			lineHeight: 1.1,
 		};
 
 		const barStyle: React.CSSProperties = {
@@ -186,16 +268,8 @@ export const Legend = ({
 			display: "flex",
 			flexDirection: "column",
 			width: "40px",
-			height: "100%",
-		};
-
-		const labelsStyle: React.CSSProperties = {
-			display: "flex",
-			flexDirection: "column",
-			justifyContent: "space-between",
-			alignItems: "flex-start",
-			position: "relative",
-			height: "100%",
+			height: "clamp(180px, 36vh, 420px)",
+			overflow: "hidden",
 		};
 
 		const renderColorBlocks = () => {
@@ -223,81 +297,13 @@ export const Legend = ({
 			});
 		};
 
-		const renderIntervalMarkers = () =>
-			intervals.map((temp) => {
-				const position = ((temp - extremes.min) / totalRange) * 100;
-				return (
-					<div
-						key={temp}
-						style={{
-							position: "absolute",
-							bottom: `${position}%`,
-							right: "100%",
-							width: "12px",
-							height: "2px",
-							backgroundColor: "#f8f9fa",
-							transform: "translateY(50%)",
-						}}
-					/>
-				);
-			});
-
-		const renderLabels = () => {
-			const labelStyle = (size: "small" | "large") => ({
-				fontSize: size === "small" ? "11px" : "13px",
-				fontWeight: size === "small" ? "500" : "bold",
-				color: "rgb(80,80,80)",
-			});
-
-			const sortedIntervals = [...intervals].reverse();
-
-			return (
-				<>
-					<span style={labelStyle("large")}>
-						{Math.round(extremes.max)}&nbsp;
-						<small className="text-gray-800">{unit}</small>
-					</span>
-
-					{sortedIntervals.map((temp) => {
-						const position = ((temp - extremes.min) / totalRange) * 100;
-						return (
-							<span
-								key={temp}
-								style={{
-									position: "absolute",
-									bottom: `${position}%`,
-									transform: "translateY(50%)",
-									...labelStyle("small"),
-								}}
-							>
-								{temp}
-								{unit}
-							</span>
-						);
-					})}
-
-					<span
-						style={{
-							...labelStyle("large"),
-							position: "absolute",
-							bottom: 0,
-						}}
-					>
-						{Math.round(extremes.min)}&nbsp;
-						<small className="text-gray-800">{unit}</small>
-					</span>
-				</>
-			);
-		};
-
 		return (
 			<div style={wrapperStyle}>
 				<div style={containerStyle}>
-					<div style={barStyle}>
-						{renderColorBlocks()}
-						{renderIntervalMarkers()}
-					</div>
-					<div style={labelsStyle}>{renderLabels()}</div>
+					<div style={variableLabelStyle}>{displayUnit}</div>
+					<div style={extremeLabelStyle}>{maxLabel}</div>
+					<div style={barStyle}>{renderColorBlocks()}</div>
+					<div style={extremeLabelStyle}>{minLabel}</div>
 				</div>
 			</div>
 		);

@@ -150,27 +150,6 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		mapDataStore.dataResolution,
 	]);
 
-	// Handle popup close button clicks
-	useEffect(() => {
-		const handlePopupClose = (event: Event) => {
-			const target = event.target as HTMLElement;
-			if (target?.classList.contains("popup-close-btn")) {
-				event.preventDefault();
-				event.stopPropagation();
-				if (mapDataStore.leafletMapInstance) {
-					mapDataStore.leafletMapInstance.closePopup();
-				}
-			}
-		};
-
-		// Add event listener to document for event delegation
-		document.addEventListener("click", handlePopupClose);
-
-		return () => {
-			document.removeEventListener("click", handlePopupClose);
-		};
-	}, []);
-
 	useEffect(() => {
 		onMount?.();
 	}, [onMount]);

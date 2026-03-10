@@ -259,7 +259,6 @@ export const createOnEachWorldwideFeature = (
 
 			const popupContent = `
 		<div class="worldwide-popup">
-		  <button class="popup-close-btn" aria-label="Close popup">×</button>
 		  <h4>${displayName}</h4>
 		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
 		</div>
@@ -301,7 +300,6 @@ export const createOnEachEuropeOnlyFeature = (
 
 			const popupContent = `
 		<div class="europe-only-popup">
-		  <button class="popup-close-btn" aria-label="Close popup">×</button>
 		  <h4>${displayName}</h4>
 		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
 		</div>
