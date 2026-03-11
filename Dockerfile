@@ -1,7 +1,7 @@
 FROM node:22-slim AS base
 
-LABEL org.opencontainers.image.source=https://github.com/ssciwr/onehealth-frontend
-LABEL org.opencontainers.image.description="Onehealth Frontend"
+LABEL org.opencontainers.image.source=https://github.com/ssciwr/heiplanet-frontend
+LABEL org.opencontainers.image.description="Heiplanet Frontend"
 LABEL org.opencontainers.image.licenses=MIT
 
 ENV PNPM_HOME="/pnpm"
