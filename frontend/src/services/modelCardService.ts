@@ -20,7 +20,7 @@ export const FALLBACK_MODEL_CARDS: Model[] = [
 	},
 ];
 
-const resolveOutputVariable = (model: Model): string => {
+export const resolveOutputVariable = (model: Model): string => {
 	const apiOutput =
 		typeof model.model_output_variable === "string"
 			? model.model_output_variable.trim()

@@ -10,6 +10,7 @@ import {
 	loadNutsData,
 	loadTemperatureData,
 } from "../component/Mapper/utilities/mapDataUtils";
+import { resolveOutputVariable } from "../services/modelCardService";
 import type { Model } from "../types/model";
 import { errorStore } from "./ErrorStore";
 import { loadingStore } from "./LoadingStore";
@@ -93,7 +94,9 @@ export class TemperatureDataStore {
 
 			const modelFindStart = performance.now();
 			const selectedModelData = models.find((m) => m.id === selectedModel);
-			const requestedVariableValue = selectedModelData?.output?.[0] || "R0";
+			const requestedVariableValue = selectedModelData
+				? resolveOutputVariable(selectedModelData)
+				: "R0";
 			const outputFormat = selectedModelData?.output;
 			console.log(
 				`🔍 Model selection took ${(performance.now() - modelFindStart).toFixed(2)}ms`,
@@ -229,7 +232,9 @@ export class TemperatureDataStore {
 			setUserRequestedYear(year);
 
 			const selectedModelData = models.find((m) => m.id === selectedModel);
-			const requestedVariableValue = selectedModelData?.output?.[0] || "R0";
+			const requestedVariableValue = selectedModelData
+				? resolveOutputVariable(selectedModelData)
+				: "R0";
 			setCurrentVariableType(requestedVariableValue);
 
 			const nutsData = await loadNutsData(
