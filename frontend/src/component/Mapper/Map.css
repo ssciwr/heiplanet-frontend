@@ -375,6 +375,10 @@
 	border: 1px solid rgba(23, 43, 77, 0.18);
 }
 
+.leaflet-popup.grid-popup .leaflet-popup-content {
+	min-width: 240px;
+}
+
 .leaflet-popup.grid-popup .leaflet-popup-content p {
 	color: var(--text-primary) !important;
 	font-weight: 500;
@@ -413,6 +417,20 @@
 	font-size: 0.95rem;
 	color: var(--text-secondary);
 	margin: 0.25rem 0;
+}
+
+.grid-popup__value {
+	font-size: 1rem;
+}
+
+.grid-popup__meta {
+	color: var(--text-secondary) !important;
+	font-weight: 400 !important;
+}
+
+.grid-popup__meta strong {
+	color: var(--text-primary);
+	font-weight: 600;
 }
 
 .tertiary {
