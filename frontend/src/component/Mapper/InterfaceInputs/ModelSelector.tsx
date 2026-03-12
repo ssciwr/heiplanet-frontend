@@ -1,15 +1,10 @@
 import { Button } from "antd";
 import { Plug } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { isMobile } from "react-device-detect";
-import { fetchModelCards } from "../../../services/modelCardService";
 import type { Model } from "../../../types/model";
 import Selector from "../../General/Selector.tsx";
 import ModelDetailsModal from "./ModelDetailsModal";
-
-const loadModels = async (): Promise<Model[]> => {
-	return fetchModelCards();
-};
 
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number): string => {
@@ -18,53 +13,19 @@ const truncateText = (text: string, maxLength: number): string => {
 };
 
 const ModelSelector = ({
+	error,
+	loading,
+	models,
 	selectedModel,
 	onModelSelect,
 }: {
+	error: string | null;
+	loading: boolean;
+	models: Model[];
 	selectedModel: string;
 	onModelSelect: (newModelId: string) => void;
 }) => {
-	const [models, setModels] = useState<Model[]>([]);
 	const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				setLoading(true);
-				setError(null);
-				const loadedModels = await loadModels();
-
-				if (loadedModels.length === 0) {
-					throw new Error("No models could be loaded");
-				}
-
-				setModels(loadedModels);
-			} catch (err) {
-				console.error("Error loading models:", err);
-				setError("Failed to load models from metadata artifact");
-
-				console.log("Falling back to hardcoded model data");
-				setModels([
-					{
-						id: "model-cards-unavailable",
-						modelName: "Model Cards Unavailable",
-						title: "Model Cards Unavailable",
-						description: "Unable to load model metadata from artifact source.",
-						emoji: "⚠️",
-						color: "#D14343",
-						details:
-							"Check artifact generation and metadata artifact URL configuration.",
-					},
-				]);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadData();
-	}, []);
 
 	const selectedModelData = models.find((m) => m.id === selectedModel);
 

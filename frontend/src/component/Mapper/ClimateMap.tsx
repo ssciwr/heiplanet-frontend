@@ -11,6 +11,7 @@ import { useMapScreenshot } from "../../hooks/useMapScreenshot";
 import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { useModelData } from "../../hooks/useModelData";
 import { regionProcessor } from "../../services/RegionProcessor";
+import { resolveOutputVariable } from "../../services/modelCardService";
 import Footer from "../../static/Footer.tsx";
 import { gridProcessingStore } from "../../stores/GridProcessingStore";
 import { mapDataStore } from "../../stores/MapDataStore";
@@ -67,7 +68,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 	} = useMapUIInteractions();
 
 	// Use model data hook
-	const { models } = useModelData(
+	const { models, modelMetadataError, modelMetadataLoading } = useModelData(
 		userStore.selectedModel,
 		userStore.setSelectedModel,
 	);
@@ -222,7 +223,9 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				const selectedModelData = models.find(
 					(m) => m.id === userStore.selectedModel,
 				);
-				const requestedVariableValue = selectedModelData?.output?.[0] || "R0";
+				const requestedVariableValue = selectedModelData
+					? resolveOutputVariable(selectedModelData)
+					: "R0";
 				userStore.setCurrentVariableType(requestedVariableValue);
 
 				const nutsApiData = await loadNutsData(
@@ -534,7 +537,11 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 			<div
 				className={`climate-map-container ${isMobile ? "climate-map-container-mobile" : ""}`}
 			>
-				<MapHeader />
+				<MapHeader
+					modelMetadataError={modelMetadataError}
+					modelMetadataLoading={modelMetadataLoading}
+					models={models}
+				/>
 
 				<div className="map-content-wrapper">
 					<div className="map-content" style={{ position: "relative" }}>
@@ -604,7 +611,13 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 
 						{/* Mobile side buttons */}
 						{isMobile && (
-							<MobileSideButtons map={mapDataStore.leafletMapInstance} />
+							<MobileSideButtons
+								map={mapDataStore.leafletMapInstance}
+								modelMetadataLoading={modelMetadataLoading}
+								models={models}
+								onModelSelect={handleModelSelect}
+								selectedModel={userStore.selectedModel}
+							/>
 						)}
 					</div>
 				</div>
