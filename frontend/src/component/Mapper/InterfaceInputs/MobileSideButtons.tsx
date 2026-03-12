@@ -11,7 +11,6 @@ import {
 	Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchModelCards } from "../../../services/modelCardService";
 import { AboutContent } from "../../../static/Footer.tsx";
 import type { Model } from "../../../types/model";
 import ModelDetailsModal from "./ModelDetailsModal";
@@ -68,6 +67,8 @@ type MobileSideButtonsLocation =
 
 interface MobileSideButtonsProps {
 	map: L.Map | null;
+	modelMetadataLoading: boolean;
+	models: Model[];
 	position?: MobileSideButtonsLocation;
 	selectedModel?: string;
 	onModelSelect?: (modelId: string) => void;
@@ -75,6 +76,8 @@ interface MobileSideButtonsProps {
 
 const MobileSideButtons = ({
 	map,
+	modelMetadataLoading,
+	models,
 	selectedModel,
 	onModelSelect,
 }: MobileSideButtonsProps) => {
@@ -91,7 +94,6 @@ const MobileSideButtons = ({
 	);
 	const [isMinimized, setIsMinimized] = useState<boolean>(false);
 	const [showModelDetails, setShowModelDetails] = useState<boolean>(false);
-	const [models, setModels] = useState<Model[]>([]);
 
 	useEffect(() => {
 		console.log("Show info:", showInfo);
@@ -106,44 +108,6 @@ const MobileSideButtons = ({
 			document.documentElement.getAttribute("data-theme"),
 		);
 	}, [currentTheme]);
-
-	// Load models for the modal
-	useEffect(() => {
-		const loadModels = async () => {
-			try {
-				const loadedModels = await fetchModelCards();
-				if (loadedModels.length === 0) {
-					loadedModels.push({
-						id: "model-cards-unavailable",
-						modelName: "Model Cards Unavailable",
-						title: "Model Cards Unavailable",
-						description: "Unable to load model metadata from artifact source.",
-						emoji: "⚠️",
-						color: "#D14343",
-						details:
-							"Check artifact generation and metadata artifact URL configuration.",
-					});
-				}
-				setModels(loadedModels);
-			} catch (error) {
-				console.error("Error loading model cards:", error);
-				setModels([
-					{
-						id: "model-cards-unavailable",
-						modelName: "Model Cards Unavailable",
-						title: "Model Cards Unavailable",
-						description: "Unable to load model metadata from artifact source.",
-						emoji: "⚠️",
-						color: "#D14343",
-						details:
-							"Check artifact generation and metadata artifact URL configuration.",
-					},
-				]);
-			}
-		};
-
-		loadModels();
-	}, []);
 
 	useEffect(() => {
 		if (map && !screenshoter) {
@@ -425,7 +389,9 @@ const MobileSideButtons = ({
 							type="button"
 							onClick={() => setShowModelDetails(true)}
 							className="btn-icon"
-							disabled={!selectedModel || models.length === 0}
+							disabled={
+								modelMetadataLoading || !selectedModel || models.length === 0
+							}
 							style={getButtonStyle()}
 						>
 							<FileText size={circularButtonSize} />
