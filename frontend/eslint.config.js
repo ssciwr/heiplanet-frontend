@@ -11,7 +11,6 @@ export default tseslint.config(
 			"tests",
 			"src/scripts",
 			"src/static/Header.tsx",
-			"src/component/General/LandOnlyMap.tsx",
 		],
 	},
 	{
