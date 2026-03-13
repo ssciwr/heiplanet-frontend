@@ -233,7 +233,7 @@ export const createResetHighlight = (
 
 // Feature event handler for worldwide features
 export const createOnEachWorldwideFeature = (
-	currentVariableType: string,
+	currentOutputVariable: string,
 	highlightFeature: (e: L.LeafletMouseEvent) => void,
 	resetHighlight: (e: L.LeafletMouseEvent) => void,
 ) => {
@@ -252,7 +252,7 @@ export const createOnEachWorldwideFeature = (
 				isFallback?: boolean;
 				currentPosition?: { lat: number; lng: number };
 				nearestDataPoint?: { lat: number; lng: number };
-				dataPoints?: Array<{ lat: number; lng: number; temperature: number }>;
+				dataPoints?: Array<{ lat: number; lng: number; modelValue: number }>;
 			};
 			const { WORLDWIDE_ID, intensity, countryName } = properties;
 			const displayName = countryName || WORLDWIDE_ID || "Unknown Country";
@@ -260,7 +260,7 @@ export const createOnEachWorldwideFeature = (
 			const popupContent = `
 		<div class="worldwide-popup">
 		  <h4>${displayName}</h4>
-		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
+		  <p><strong>${getVariableDisplayName(currentOutputVariable)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentOutputVariable, intensity) : "N/A"}</p>
 		</div>
 	  `;
 			(layer as L.Layer & { bindPopup: (content: string) => void }).bindPopup(
@@ -272,7 +272,7 @@ export const createOnEachWorldwideFeature = (
 
 // Feature event handler for Europe-only features
 export const createOnEachEuropeOnlyFeature = (
-	currentVariableType: string,
+	currentOutputVariable: string,
 	highlightFeature: (e: L.LeafletMouseEvent) => void,
 	resetHighlight: (e: L.LeafletMouseEvent) => void,
 ) => {
@@ -293,7 +293,7 @@ export const createOnEachEuropeOnlyFeature = (
 				isModelData?: boolean;
 				currentPosition?: { lat: number; lng: number };
 				nearestDataPoint?: { lat: number; lng: number };
-				dataPoints?: Array<{ lat: number; lng: number; temperature: number }>;
+				dataPoints?: Array<{ lat: number; lng: number; modelValue: number }>;
 			};
 			const { NUTS_ID, intensity, countryName } = properties;
 			const displayName = countryName || NUTS_ID || "Unknown Region";
@@ -301,7 +301,7 @@ export const createOnEachEuropeOnlyFeature = (
 			const popupContent = `
 		<div class="europe-only-popup">
 		  <h4>${displayName}</h4>
-		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
+		  <p><strong>${getVariableDisplayName(currentOutputVariable)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentOutputVariable, intensity) : "N/A"}</p>
 		</div>
 	  `;
 			(layer as L.Layer & { bindPopup: (content: string) => void }).bindPopup(

@@ -64,14 +64,14 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 
 		const onEachWorldwideFeature =
 			MapInteractionHandlers.createOnEachWorldwideFeature(
-				userStore.currentVariableType,
+				userStore.currentOutputVariable,
 				highlightFeature,
 				resetHighlight,
 			);
 
 		const onEachEuropeOnlyFeature =
 			MapInteractionHandlers.createOnEachEuropeOnlyFeature(
-				userStore.currentVariableType,
+				userStore.currentOutputVariable,
 				highlightFeature,
 				resetHighlight,
 			);

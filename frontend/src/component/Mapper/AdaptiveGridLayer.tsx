@@ -28,7 +28,7 @@ const AdaptiveGridLayer = observer(() => {
 		hasExtremes: !!processedDataExtremes,
 	});
 
-	const getGridCellStyle = (temperature: number) => {
+	const getGridCellStyle = (modelValue: number) => {
 		if (!processedDataExtremes)
 			return {
 				fillColor: "#ccc",
@@ -37,7 +37,7 @@ const AdaptiveGridLayer = observer(() => {
 				color: "#000",
 				fillOpacity: 0.8,
 			};
-		const color = getColorFromGradient(temperature, processedDataExtremes);
+		const color = getColorFromGradient(modelValue, processedDataExtremes);
 		return {
 			fillColor: color,
 			weight: 0.2,
@@ -59,7 +59,7 @@ const AdaptiveGridLayer = observer(() => {
 			];
 			const centerLat = (south + north) / 2;
 			const centerLng = (west + east) / 2;
-			const variableName = userStore.currentVariableType || "Value";
+			const variableName = userStore.currentOutputVariable || "Value";
 
 			return (
 				<Rectangle
@@ -67,7 +67,7 @@ const AdaptiveGridLayer = observer(() => {
 					bounds={cell.bounds}
 					renderer={canvasRenderer}
 					interactive
-					pathOptions={getGridCellStyle(cell.temperature)}
+					pathOptions={getGridCellStyle(cell.modelValue)}
 					eventHandlers={{
 						click: (e) => {
 							e.target.openPopup();
@@ -80,19 +80,15 @@ const AdaptiveGridLayer = observer(() => {
 							<h4>Grid Cell</h4>
 							<p className="grid-popup__value">
 								<strong>{variableName}:</strong>{" "}
-								{getFormattedVariableValue(
-									variableName,
-									cell.temperature,
-								)}
+								{getFormattedVariableValue(variableName, cell.modelValue)}
 							</p>
 							<p className="grid-popup__meta">
 								<strong>Center:</strong> {centerLat.toFixed(2)},{" "}
 								{centerLng.toFixed(2)}
 							</p>
 							<p className="grid-popup__meta">
-								<strong>Bounds:</strong> [{south.toFixed(2)},{" "}
-								{west.toFixed(2)}] to [{north.toFixed(2)},{" "}
-								{east.toFixed(2)}]
+								<strong>Bounds:</strong> [{south.toFixed(2)}, {west.toFixed(2)}]
+								to [{north.toFixed(2)}, {east.toFixed(2)}]
 							</p>
 						</div>
 					</Popup>

@@ -1,14 +1,14 @@
 import { makeAutoObservable } from "mobx";
 import type {
 	DataExtremes,
+	ModelOutputDataPoint,
 	Month,
-	TemperatureDataPoint,
 	ViewportBounds,
 	WorldwideGeoJSON,
 } from "../component/Mapper/types";
 import {
+	loadModelOutputData,
 	loadNutsData,
-	loadTemperatureData,
 } from "../component/Mapper/utilities/mapDataUtils";
 import { resolveOutputVariable } from "../services/modelCardService";
 import type { Model } from "../types/model";
@@ -18,20 +18,20 @@ import { loadingStore } from "./LoadingStore";
 const NATURAL_EARTH_URL = "/downsampled_initial.geojson";
 
 export class TemperatureDataStore {
-	rawRegionTemperatureData: TemperatureDataPoint[] = [];
+	rawRegionModelOutputData: ModelOutputDataPoint[] = [];
 	processedDataExtremes: DataExtremes | null = null;
 	mapDataBounds: ViewportBounds | null = null;
 	baseWorldGeoJSON: GeoJSON.FeatureCollection | null = null;
 	worldwideRegionBoundaries: WorldwideGeoJSON | null = null;
-	private latestTemperatureLoadRequestId = 0;
+	private latestModelDataLoadRequestId = 0;
 
 	constructor() {
 		makeAutoObservable(this);
 		this.loadWorldData();
 	}
 
-	setRawRegionTemperatureData = (data: TemperatureDataPoint[]) => {
-		this.rawRegionTemperatureData = data;
+	setRawRegionModelOutputData = (data: ModelOutputDataPoint[]) => {
+		this.rawRegionModelOutputData = data;
 	};
 
 	setProcessedDataExtremes = (extremes: DataExtremes | null) => {
@@ -50,12 +50,12 @@ export class TemperatureDataStore {
 		this.worldwideRegionBoundaries = data;
 	};
 
-	loadTemperatureData = async (
+	loadModelOutputData = async (
 		year: number,
 		month: Month,
 		models: Model[],
 		selectedModel: string,
-		setCurrentVariableType: (value: string) => void,
+		setCurrentOutputVariable: (value: string) => void,
 		setUserRequestedYear: (year: number) => void,
 		setUserRequestedMonth: (month: number) => void,
 		setNoDataModalVisible: (visible: boolean) => void,
@@ -71,9 +71,9 @@ export class TemperatureDataStore {
 		requestedGridResolution?: number,
 	) => {
 		const loadStart = performance.now();
-		const requestId = ++this.latestTemperatureLoadRequestId;
+		const requestId = ++this.latestModelDataLoadRequestId;
 		console.log(
-			`🌡️ TemperatureDataStore.loadTemperatureData START - year: ${year}, month: ${month}`,
+			`🌡️ TemperatureDataStore.loadModelOutputData START - year: ${year}, month: ${month}`,
 		);
 
 		try {
@@ -102,10 +102,10 @@ export class TemperatureDataStore {
 				`🔍 Model selection took ${(performance.now() - modelFindStart).toFixed(2)}ms`,
 			);
 
-			setCurrentVariableType(requestedVariableValue);
+			setCurrentOutputVariable(requestedVariableValue);
 
 			const dataLoadStart = performance.now();
-			const { dataPoints, extremes, bounds } = await loadTemperatureData(
+			const { dataPoints, extremes, bounds } = await loadModelOutputData(
 				year,
 				safeMonth,
 				requestedVariableValue,
@@ -114,7 +114,7 @@ export class TemperatureDataStore {
 				requestedGridResolution,
 			);
 			console.log(
-				`📊 loadTemperatureData utility took ${(performance.now() - dataLoadStart).toFixed(2)}ms`,
+				`📊 loadModelOutputData utility took ${(performance.now() - dataLoadStart).toFixed(2)}ms`,
 			);
 
 			console.log(
@@ -128,12 +128,12 @@ export class TemperatureDataStore {
 				`📏 Data extremes for year ${year}, month ${safeMonth}:`,
 				extremes,
 			);
-			if (requestId !== this.latestTemperatureLoadRequestId) {
+			if (requestId !== this.latestModelDataLoadRequestId) {
 				return; // stale, ignore
 			}
 
 			const storeUpdateStart = performance.now();
-			this.setRawRegionTemperatureData(dataPoints);
+			this.setRawRegionModelOutputData(dataPoints);
 			this.setProcessedDataExtremes(extremes);
 
 			if (bounds) {
@@ -152,23 +152,23 @@ export class TemperatureDataStore {
 
 			const totalTime = performance.now() - loadStart;
 			console.log(
-				`✅ TemperatureDataStore.loadTemperatureData COMPLETE for year ${year}, month ${safeMonth} in ${totalTime.toFixed(2)}ms`,
+				`✅ TemperatureDataStore.loadModelOutputData COMPLETE for year ${year}, month ${safeMonth} in ${totalTime.toFixed(2)}ms`,
 			);
 			loadingStore.complete();
 			setIsLoadingRawData(false);
 		} catch (err: unknown) {
 			const error = err as Error;
-			if (requestId !== this.latestTemperatureLoadRequestId) {
+			if (requestId !== this.latestModelDataLoadRequestId) {
 				return; // stale, ignore
 			}
 			console.log(
-				`❌ TemperatureDataStore.loadTemperatureData FAILED in ${(performance.now() - loadStart).toFixed(2)}ms: ${error.message}`,
+				`❌ TemperatureDataStore.loadModelOutputData FAILED in ${(performance.now() - loadStart).toFixed(2)}ms: ${error.message}`,
 			);
 			loadingStore.complete();
 			setIsLoadingRawData(false);
 
 			if (error.message.includes("API_ERROR:")) {
-				this.setRawRegionTemperatureData([]);
+				this.setRawRegionModelOutputData([]);
 				this.setProcessedDataExtremes(null);
 				this.setMapDataBounds(null);
 				const errorMsg = error.message.replace("API_ERROR: ", "");
@@ -176,10 +176,10 @@ export class TemperatureDataStore {
 				setNoDataModalVisible(true);
 			} else {
 				errorStore.showError(
-					"Temperature Data Error",
-					`Failed to load temperature data: ${error.message}`,
+					"Model Data Error",
+					`Failed to load model data: ${error.message}`,
 				);
-				setGeneralError(`Failed to load temperature data: ${error.message}`);
+				setGeneralError(`Failed to load model data: ${error.message}`);
 			}
 		}
 	};
@@ -216,7 +216,7 @@ export class TemperatureDataStore {
 		month: Month,
 		models: Model[],
 		selectedModel: string,
-		setCurrentVariableType: (value: string) => void,
+		setCurrentOutputVariable: (value: string) => void,
 		setUserRequestedYear: (year: number) => void,
 		setNoDataModalVisible: (visible: boolean) => void,
 		setDataFetchErrorMessage: (message: string) => void,
@@ -235,7 +235,7 @@ export class TemperatureDataStore {
 			const requestedVariableValue = selectedModelData
 				? resolveOutputVariable(selectedModelData)
 				: "R0";
-			setCurrentVariableType(requestedVariableValue);
+			setCurrentOutputVariable(requestedVariableValue);
 
 			const nutsData = await loadNutsData(
 				year,

@@ -1,7 +1,7 @@
-export interface ClimateDataPoint {
+export interface ApiModelOutputPoint {
 	latitude: number;
 	longitude: number;
-	temperature: number;
+	modelValue: number;
 }
 
 export interface ClimateApiResponse {
@@ -35,7 +35,7 @@ export async function fetchClimateData(
 		west: number;
 	} | null,
 	requestedGridResolution?: number,
-): Promise<ClimateDataPoint[]> {
+): Promise<ApiModelOutputPoint[]> {
 	await delay(100 + Math.random() * 300);
 
 	// Validate month parameter
@@ -189,22 +189,22 @@ export async function fetchClimateData(
 		const rawRows = data.result["latitude, longitude, var_value"] as Array<
 			[number | string, number | string, number | string]
 		>;
-		const normalizedRows: ClimateDataPoint[] = [];
+		const normalizedRows: ApiModelOutputPoint[] = [];
 
 		for (const row of rawRows) {
 			const latitude = Number(row[0]);
 			const longitude = Number(row[1]);
-			const temperature = Number(row[2]);
+			const modelValue = Number(row[2]);
 
 			if (
 				Number.isFinite(latitude) &&
 				Number.isFinite(longitude) &&
-				Number.isFinite(temperature)
+				Number.isFinite(modelValue)
 			) {
 				normalizedRows.push({
 					latitude, // "longitude": latitude,
 					longitude, // "latitude": longitude,
-					temperature,
+					modelValue,
 				});
 			}
 		}

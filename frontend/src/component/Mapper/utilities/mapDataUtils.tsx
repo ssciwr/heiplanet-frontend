@@ -4,7 +4,7 @@ import * as L from "leaflet";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { fetchClimateData } from "../../../services/climateDataService.ts";
-import type { DataExtremes, TemperatureDataPoint } from "../types.ts";
+import type { DataExtremes, ModelOutputDataPoint } from "../types.ts";
 import { getVariableDisplayName } from "./monthUtils";
 
 const NUTS_DATA_API_URL = "/api/nuts_data";
@@ -311,31 +311,31 @@ export const Legend = ({
 };
 
 export const calculateExtremes = (
-	data: TemperatureDataPoint[],
+	data: ModelOutputDataPoint[],
 	calculatePercentiles = true,
 ): DataExtremes => {
 	if (!data || data.length === 0) return { min: 0, max: 0 };
 
-	const temperatures = data
-		.map((point) => point.temperature)
-		.filter((temp) => !Number.isNaN(temp));
+	const modelValues = data
+		.map((point) => point.modelValue)
+		.filter((value) => !Number.isNaN(value));
 
-	if (temperatures.length === 0) return { min: 0, max: 0 };
+	if (modelValues.length === 0) return { min: 0, max: 0 };
 
 	if (calculatePercentiles) {
-		const sortedTemps = [...temperatures].sort((a, b) => a - b);
-		const p5Index = Math.floor((25 / 100) * (sortedTemps.length - 1));
-		const p95Index = Math.floor((75 / 100) * (sortedTemps.length - 1));
+		const sortedValues = [...modelValues].sort((a, b) => a - b);
+		const p5Index = Math.floor((25 / 100) * (sortedValues.length - 1));
+		const p95Index = Math.floor((75 / 100) * (sortedValues.length - 1));
 
 		return {
-			min: sortedTemps[p5Index],
-			max: sortedTemps[p95Index],
+			min: sortedValues[p5Index],
+			max: sortedValues[p95Index],
 		};
 	}
 
 	return {
-		min: Math.min(...temperatures),
-		max: Math.max(...temperatures),
+		min: Math.min(...modelValues),
+		max: Math.max(...modelValues),
 	};
 };
 
@@ -486,7 +486,7 @@ const normalizeNutsApiResponse = (
 	throw new Error("API_ERROR: Invalid response format");
 };
 
-export const loadTemperatureData = async (
+export const loadModelOutputData = async (
 	year: number,
 	month: number,
 	requestedVariableValue = "R0",
@@ -499,13 +499,13 @@ export const loadTemperatureData = async (
 	} | null,
 	requestedGridResolution?: number,
 ): Promise<{
-	dataPoints: TemperatureDataPoint[];
+	dataPoints: ModelOutputDataPoint[];
 	extremes: DataExtremes;
 	bounds: L.LatLngBounds | null;
 }> => {
 	const funcStart = performance.now();
 	console.log(
-		"🌍 loadTemperatureData START - year:",
+		"🌍 loadModelOutputData START - year:",
 		year,
 		"month:",
 		month,
@@ -516,7 +516,7 @@ export const loadTemperatureData = async (
 	// Additional validation here too
 	if (month === undefined || month === null) {
 		throw new Error(
-			`loadTemperatureData: Month parameter is ${month}. Expected a number between 1-12.`,
+			`loadModelOutputData: Month parameter is ${month}. Expected a number between 1-12.`,
 		);
 	}
 
@@ -535,27 +535,27 @@ export const loadTemperatureData = async (
 		);
 
 		const processStart = performance.now();
-		const dataPoints: TemperatureDataPoint[] = [];
+		const dataPoints: ModelOutputDataPoint[] = [];
 
 		for (let i = 0; i < apiData.length; i++) {
-			const { latitude: lat, longitude: lng, temperature } = apiData[i];
+			const { latitude: lat, longitude: lng, modelValue } = apiData[i];
 
 			if (i % 100000 === 0) {
 				console.log(
-					`🔄 Processing point ${i}/${apiData.length} - Lat: ${lat}, Long: ${lng}, Temp: ${temperature}`,
+					`🔄 Processing point ${i}/${apiData.length} - Lat: ${lat}, Long: ${lng}, Value: ${modelValue}`,
 				);
 			}
 
 			if (
 				Number.isFinite(lat) &&
 				Number.isFinite(lng) &&
-				Number.isFinite(temperature)
+				Number.isFinite(modelValue)
 			) {
 				dataPoints.push({
 					point: turf.point([lng, lat]),
-					temperature: temperature,
-					lat: lat,
-					lng: lng,
+					modelValue,
+					lat,
+					lng,
 				});
 			}
 		}
@@ -585,13 +585,13 @@ export const loadTemperatureData = async (
 
 		const totalTime = performance.now() - funcStart;
 		console.log(
-			`✅ loadTemperatureData COMPLETE in ${totalTime.toFixed(2)}ms - ${dataPoints.length} points`,
+			`✅ loadModelOutputData COMPLETE in ${totalTime.toFixed(2)}ms - ${dataPoints.length} points`,
 		);
 
 		return { dataPoints, extremes, bounds };
 	} catch (error) {
 		console.error(
-			`❌ loadTemperatureData FAILED in ${(performance.now() - funcStart).toFixed(2)}ms:`,
+			`❌ loadModelOutputData FAILED in ${(performance.now() - funcStart).toFixed(2)}ms:`,
 			error,
 		);
 		throw error;

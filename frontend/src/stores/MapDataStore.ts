@@ -3,14 +3,14 @@ import type L from "leaflet";
 import { makeAutoObservable } from "mobx";
 import type {
 	DataExtremes,
+	ModelOutputDataPoint,
 	NutsGeoJSON,
-	TemperatureDataPoint,
 	ViewportBounds,
 	WorldwideGeoJSON,
 } from "../component/Mapper/types";
 
 export class MapDataStore {
-	rawRegionTemperatureData: TemperatureDataPoint[] = [];
+	rawRegionModelOutputData: ModelOutputDataPoint[] = [];
 	processedDataExtremes: DataExtremes | null = null;
 	mapDataBounds: ViewportBounds | null = null;
 	baseWorldGeoJSON: FeatureCollection<Geometry, GeoJsonProperties> | null =
@@ -30,8 +30,8 @@ export class MapDataStore {
 		makeAutoObservable(this);
 	}
 	// tidyup: remove
-	setRawRegionTemperatureData = (data: TemperatureDataPoint[]) => {
-		this.rawRegionTemperatureData = data;
+	setRawRegionModelOutputData = (data: ModelOutputDataPoint[]) => {
+		this.rawRegionModelOutputData = data;
 	};
 
 	setProcessedDataExtremes = (extremes: DataExtremes | null) => {

@@ -51,7 +51,7 @@ export interface NutsProperties {
 	isMissingData?: boolean;
 	currentPosition?: { lat: number; lng: number };
 	nearestDataPoint?: { lat: number; lng: number };
-	dataPoints?: Array<{ lat: number; lng: number; temperature: number }>;
+	dataPoints?: Array<{ lat: number; lng: number; modelValue: number }>;
 }
 
 export interface NutsGeometry {
@@ -83,7 +83,7 @@ export interface OutbreakData {
 
 export interface GridCell {
 	bounds: L.LatLngBoundsExpression;
-	temperature: number;
+	modelValue: number;
 	id: string;
 }
 
@@ -100,11 +100,11 @@ export interface DataExtremes {
 	max: number;
 }
 
-// Temperature data point interface
-export interface TemperatureDataPoint {
+// Generic model output point interface
+export interface ModelOutputDataPoint {
 	lat: number;
 	lng: number;
-	temperature: number;
+	modelValue: number;
 	point: Feature<PointGeometry>;
 	date?: string;
 	id?: string;

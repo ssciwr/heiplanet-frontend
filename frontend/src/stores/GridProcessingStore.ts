@@ -3,14 +3,14 @@ import type L from "leaflet";
 import { makeAutoObservable } from "mobx";
 import type {
 	GridCell,
-	TemperatureDataPoint,
+	ModelOutputDataPoint,
 	ViewportBounds,
 } from "../component/Mapper/types";
 
 interface DataPoint {
 	lat: number;
 	lng: number;
-	temperature: number;
+	modelValue: number;
 }
 
 const calculateDerivedIntervalSize = (dataPoints: DataPoint[]): number => {
@@ -40,7 +40,7 @@ export class GridProcessingStore {
 
 	private prevViewport: ViewportBounds | null = null;
 	private prevResolution = 0;
-	private prevFirstDatapointTemperature: number | undefined = undefined;
+	private prevFirstDatapointModelValue: number | undefined = undefined;
 
 	constructor() {
 		makeAutoObservable(this);
@@ -108,7 +108,7 @@ export class GridProcessingStore {
 				(point: DataPoint) =>
 					Number.isFinite(point.lat) &&
 					Number.isFinite(point.lng) &&
-					Number.isFinite(point.temperature),
+					Number.isFinite(point.modelValue),
 			)
 			.filter(
 				(point: DataPoint) =>
@@ -140,12 +140,12 @@ export class GridProcessingStore {
 			if (cellMap.has(cellId)) {
 				const cell = cellMap.get(cellId);
 				if (cell) {
-					cell.sum += point.temperature;
+					cell.sum += point.modelValue;
 					cell.count += 1;
 				}
 			} else {
 				cellMap.set(cellId, {
-					sum: point.temperature,
+					sum: point.modelValue,
 					count: 1,
 					bounds,
 				});
@@ -159,7 +159,7 @@ export class GridProcessingStore {
 		const result = Array.from(cellMap.entries()).map(([id, data]) => ({
 			id,
 			bounds: data.bounds,
-			temperature: data.sum / data.count,
+			modelValue: data.sum / data.count,
 		}));
 		console.log(
 			`🗺️ Final mapping took ${(performance.now() - mapStart).toFixed(2)}ms`,
@@ -173,30 +173,30 @@ export class GridProcessingStore {
 		return result;
 	};
 
-	generateGridCellsFromTemperatureData = (
-		temperatureData: TemperatureDataPoint[],
+	generateGridCellsFromModelOutputData = (
+		outputData: ModelOutputDataPoint[],
 		viewport: ViewportBounds | null,
 		resolutionLevel: number,
 	): GridCell[] => {
 		const methodStart = performance.now();
 		console.log(
-			"🚀 generateGridCellsFromTemperatureData START with:",
-			temperatureData.length,
+			"🚀 generateGridCellsFromModelOutputData START with:",
+			outputData.length,
 			"points, resolution:",
 			resolutionLevel,
 		);
 
-		if (!viewport || !temperatureData.length) {
+		if (!viewport || !outputData.length) {
 			console.log(
-				"⚠️ Early exit - no viewport or temperature data",
+				"⚠️ Early exit - no viewport or model output data",
 				!!viewport,
-				temperatureData.length,
+				outputData.length,
 			);
 			return [];
 		}
 
 		const changeCheckStart = performance.now();
-		const currentFirstDatapointTemp = temperatureData[0]?.temperature;
+		const currentFirstDatapointModelValue = outputData[0]?.modelValue;
 		const hasSignificantViewportChange =
 			!this.prevViewport ||
 			Math.abs(this.prevViewport.zoom - viewport.zoom) > 0.5 ||
@@ -208,7 +208,7 @@ export class GridProcessingStore {
 		const hasResolutionChange =
 			Math.abs(this.prevResolution - resolutionLevel) > 0.1;
 		const hasDataChange =
-			this.prevFirstDatapointTemperature !== currentFirstDatapointTemp;
+			this.prevFirstDatapointModelValue !== currentFirstDatapointModelValue;
 
 		console.log(
 			`🔍 Change detection took ${(performance.now() - changeCheckStart).toFixed(2)}ms`,
@@ -222,14 +222,14 @@ export class GridProcessingStore {
 		if (hasSignificantViewportChange || hasResolutionChange || hasDataChange) {
 			console.log(
 				"🔄 RECALCULATING grid cells - data size:",
-				temperatureData.length,
+				outputData.length,
 				"viewport zoom:",
 				viewport.zoom,
 			);
 
 			const gridGenStart = performance.now();
 			const cells = this.generateAdaptiveGridCells(
-				temperatureData,
+				outputData,
 				viewport,
 				resolutionLevel,
 			);
@@ -241,10 +241,10 @@ export class GridProcessingStore {
 
 			this.prevViewport = viewport;
 			this.prevResolution = resolutionLevel;
-			this.prevFirstDatapointTemperature = currentFirstDatapointTemp;
+			this.prevFirstDatapointModelValue = currentFirstDatapointModelValue;
 			const methodTotal = performance.now() - methodStart;
 			console.log(
-				`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
+				`✅ generateGridCellsFromModelOutputData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 			);
 			return cells;
 		}
@@ -252,7 +252,7 @@ export class GridProcessingStore {
 		console.log("♻️ Using cached grid cells - no recalculation needed");
 		const methodTotal = performance.now() - methodStart;
 		console.log(
-			`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
+			`✅ generateGridCellsFromModelOutputData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 		);
 		return this.gridCells;
 	};
