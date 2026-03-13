@@ -87,6 +87,7 @@ export const useMapScreenshot = ({
 			// Get month name
 			const monthName = getMonthInfo(currentMonth).label;
 			const timeText = `${monthName} ${currentYear}`;
+			// todo: feat: when optimism levels are added, the screenshot legend should mention the optimism level.
 			const overlayText = `Model: ${modelName} | Time: ${timeText} | Optimism: ${selectedOptimism}`;
 
 			// Take screenshot first
