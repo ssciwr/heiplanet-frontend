@@ -4,8 +4,11 @@ import type { Page } from "@playwright/test";
 
 const MOCK_2025_FILE_PATH = "/tests/setup/MockResponse2258.json";
 const MOCK_2026_FILE_PATH = "/tests/setup/MockResponse4823.json";
+const MODELS_ARTIFACT_FILE_PATH = "/public/model-metadata/models.v1.json";
 const BASE_YEAR = 2025;
 const NEXT_YEAR = BASE_YEAR + 1;
+const TEST_MODEL_ID = "WNV-R0";
+const TEST_MODEL_OUTPUT_VARIABLE = "R0";
 
 // Helper function to create route handler that loads mock data
 async function createMockHandlerForYear(mockFilePath: string) {
@@ -39,21 +42,100 @@ export async function setupApiMocksWithFs(page: Page) {
 	const mock2025Handler = await createMockHandlerForYear(MOCK_2025_FILE_PATH);
 	const mock2026Handler = await createMockHandlerForYear(MOCK_2026_FILE_PATH);
 
-	// Mock the 2025-06 API endpoint (baseline)
-	await page.route(
-		`**/api/cartesian?requested_time_point=${BASE_YEAR}-06-01&requested_variable_type=R0`,
-		mock2025Handler,
-	);
+	await page.route("**/api/models", async (route) => {
+		try {
+			const filePath = path.join(
+				process.cwd(),
+				MODELS_ARTIFACT_FILE_PATH.substring(1),
+			);
+			const artifactPayload = JSON.parse(
+				fs.readFileSync(filePath, "utf-8"),
+			) as {
+				models?: Array<Record<string, unknown>>;
+			};
 
-	// Mock the 2025-07 API endpoint (month navigation test)
-	await page.route(
-		`**/api/cartesian?requested_time_point=${BASE_YEAR}-07-01&requested_variable_type=R0`,
-		mock2026Handler,
-	);
+			const artifactModel =
+				artifactPayload.models?.find((model) => model.id === TEST_MODEL_ID) ||
+				artifactPayload.models?.[0];
 
-	// Mock the 2026-06 API endpoint (year navigation test)
-	await page.route(
-		`**/api/cartesian?requested_time_point=${NEXT_YEAR}-06-01&requested_variable_type=R0`,
-		mock2026Handler,
-	);
+			const testModelPayload = artifactModel
+				? [
+						{
+							...artifactModel,
+							id: TEST_MODEL_ID,
+							modelName: TEST_MODEL_ID,
+							title: TEST_MODEL_ID,
+							output: [TEST_MODEL_OUTPUT_VARIABLE],
+							model_output_variable: TEST_MODEL_OUTPUT_VARIABLE,
+						},
+					]
+				: [
+						{
+							id: TEST_MODEL_ID,
+							modelName: TEST_MODEL_ID,
+							title: TEST_MODEL_ID,
+							description: "",
+							output: [TEST_MODEL_OUTPUT_VARIABLE],
+							model_output_variable: TEST_MODEL_OUTPUT_VARIABLE,
+						},
+					];
+
+			await route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify(testModelPayload),
+			});
+		} catch (error) {
+			await route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify([
+					{
+						id: TEST_MODEL_ID,
+						modelName: TEST_MODEL_ID,
+						title: TEST_MODEL_ID,
+						description: "",
+						output: [TEST_MODEL_OUTPUT_VARIABLE],
+						model_output_variable: TEST_MODEL_OUTPUT_VARIABLE,
+					},
+				]),
+			});
+		}
+	});
+
+	await page.route("**/api/cartesian", async (route) => {
+		if (route.request().method() !== "POST") {
+			await route.continue();
+			return;
+		}
+
+		try {
+			const requestBody = route.request().postDataJSON() as {
+				requested_time_point?: string;
+			};
+			const requestedTimePoint =
+				typeof requestBody.requested_time_point === "string"
+					? requestBody.requested_time_point
+					: "";
+
+			if (requestedTimePoint === `${BASE_YEAR}-07-01`) {
+				await mock2026Handler(route);
+				return;
+			}
+
+			if (requestedTimePoint.startsWith(`${NEXT_YEAR}-`)) {
+				await mock2026Handler(route);
+				return;
+			}
+
+			if (requestedTimePoint.startsWith(`${BASE_YEAR}-`)) {
+				await mock2025Handler(route);
+				return;
+			}
+		} catch (error) {
+			// fall back to the baseline fixture below.
+		}
+
+		await mock2025Handler(route);
+	});
 }

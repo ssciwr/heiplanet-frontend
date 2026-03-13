@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const includeFirefox =
+	!!process.env.CI || process.env.PLAYWRIGHT_INCLUDE_FIREFOX === "1";
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -37,17 +40,18 @@ export default defineConfig({
 			name: "chromium",
 			use: { ...devices["Desktop Chrome"] },
 		},
-
-		{
-			name: "firefox",
-			use: { ...devices["Desktop Firefox"] },
-		},
-
+		...(includeFirefox
+			? [
+					{
+						name: "firefox",
+						use: { ...devices["Desktop Firefox"] },
+					},
+				]
+			: []),
 		{
 			name: "webkit",
 			use: { ...devices["Desktop Safari"] },
 		},
-
 		{
 			name: "Mobile Chrome",
 			use: { ...devices["Pixel 5"] },

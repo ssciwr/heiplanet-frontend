@@ -46,6 +46,12 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 			// Ignore if no modal to close
 		}
 
+		const mapModeSelect = page.locator(".ant-select-selector").last();
+		await mapModeSelect.click({ force: true });
+		await page.keyboard.press("ArrowDown");
+		await page.keyboard.press("ArrowDown");
+		await page.keyboard.press("Enter");
+
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
 
@@ -80,19 +86,23 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 
 		// Helper function to get colors from grid path elements
 		async function getGridColors() {
-			try {
-				await page.waitForSelector('path.leaflet-interactive[fill*="#"]', {
-					timeout: 30000,
-				});
-			} catch (e) {
-				await page.waitForSelector('path[fill*="#"]', { timeout: 30000 });
-			}
+			await page.waitForFunction(
+				() =>
+					Array.from(document.querySelectorAll('path[fill*="#"]')).some(
+						(path) =>
+							path.getAttribute("fill") !== "transparent" &&
+							path.getAttribute("fill-opacity") !== "0",
+					),
+				{ timeout: 30000 },
+			);
 
-			let gridCells = page.locator('path.leaflet-interactive[fill*="#"]');
+			let gridCells = page.locator(
+				'path.leaflet-interactive[fill*="#"]:not([fill-opacity="0"])',
+			);
 			let count = await gridCells.count();
 
 			if (count === 0) {
-				gridCells = page.locator('path[fill*="#"]');
+				gridCells = page.locator('path[fill*="#"]:not([fill-opacity="0"])');
 				count = await gridCells.count();
 			}
 
@@ -195,6 +205,12 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 			// Ignore if no modal to close
 		}
 
+		const mapModeSelect = page.locator(".ant-select-selector").last();
+		await mapModeSelect.click({ force: true });
+		await page.keyboard.press("ArrowDown");
+		await page.keyboard.press("ArrowDown");
+		await page.keyboard.press("Enter");
+
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
 
@@ -226,19 +242,23 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 
 		// Helper function to get colors from grid path elements
 		async function getGridColors() {
-			try {
-				await page.waitForSelector('path.leaflet-interactive[fill*="#"]', {
-					timeout: 30000,
-				});
-			} catch (e) {
-				await page.waitForSelector('path[fill*="#"]', { timeout: 30000 });
-			}
+			await page.waitForFunction(
+				() =>
+					Array.from(document.querySelectorAll('path[fill*="#"]')).some(
+						(path) =>
+							path.getAttribute("fill") !== "transparent" &&
+							path.getAttribute("fill-opacity") !== "0",
+					),
+				{ timeout: 30000 },
+			);
 
-			let gridCells = page.locator('path.leaflet-interactive[fill*="#"]');
+			let gridCells = page.locator(
+				'path.leaflet-interactive[fill*="#"]:not([fill-opacity="0"])',
+			);
 			let count = await gridCells.count();
 
 			if (count === 0) {
-				gridCells = page.locator('path[fill*="#"]');
+				gridCells = page.locator('path[fill*="#"]:not([fill-opacity="0"])');
 				count = await gridCells.count();
 			}
 
