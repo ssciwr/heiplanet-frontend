@@ -7,7 +7,7 @@ export class UserSelectionsStore {
 	currentYear = 2025;
 	currentMonth: Month = 7;
 	currentOutputVariable = "R0";
-	mapMode: "worldwide" | "europe-only" | "grid" = "europe-only";
+	mapMode: "europe-only" | "grid" = "europe-only";
 
 	constructor() {
 		makeAutoObservable(this);
@@ -33,7 +33,7 @@ export class UserSelectionsStore {
 		this.currentOutputVariable = value;
 	};
 
-	setMapMode = (mode: "worldwide" | "europe-only" | "grid") => {
+	setMapMode = (mode: "europe-only" | "grid") => {
 		this.mapMode = mode;
 	};
 }

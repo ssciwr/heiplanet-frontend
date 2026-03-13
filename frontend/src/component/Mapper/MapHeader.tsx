@@ -7,13 +7,13 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useUserSelectionsStore } from "../../contexts/UserSelectionsContext";
-import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { viewingMode } from "../../stores/ViewingModeStore.ts";
 import type { Model } from "../../types/model";
 import GeneralCard from "../General/GeneralCard.tsx";
 import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
 import OptimismLevelSelector from "./InterfaceInputs/OptimismSelector.tsx";
 
+// todo: implement connection once models support optimism modes.
 const OPTIMISM_LEVELS = ["optimistic", "realistic", "pessimistic"];
 
 const MapHeader = observer(
@@ -28,7 +28,6 @@ const MapHeader = observer(
 	}) => {
 		const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 		const userStore = useUserSelectionsStore();
-		const { borderStyle, setBorderStyle } = useMapUIInteractions();
 
 		const handleModelSelect = (modelId: string) => {
 			userStore.setSelectedModel(modelId);
@@ -111,23 +110,6 @@ const MapHeader = observer(
 									/>
 								</div>
 							</div>
-							{userStore.mapMode === "worldwide" && (
-								<div style={{ marginBottom: "24px" }}>
-									<h4>Border Style</h4>
-									<Select
-										value={borderStyle}
-										onChange={setBorderStyle}
-										style={{ width: "100%" }}
-										size="large"
-									>
-										<Option value="white">White Borders</Option>
-										<Option value="light-gray">Light Gray Borders</Option>
-										<Option value="black">Black Borders</Option>
-										<Option value="black-80">Black 80% Borders</Option>
-										<Option value="half-opacity">Half Opacity Borders</Option>
-									</Select>
-								</div>
-							)}
 						</div>
 					</Modal>
 				</div>
@@ -301,45 +283,10 @@ const MapHeader = observer(
 								style={{ minWidth: 120 }}
 								size="middle"
 							>
-								<Option value="europe-only">Europe-only</Option>
-								<Option value="worldwide">
-									Worldwide[deprecated, too slow now, will use backend regions]
-								</Option>
+								<Option value="europe-only">Europe</Option>
 								<Option value="grid">Grid</Option>
 							</Select>
 						</div>
-						{userStore.mapMode === "worldwide" && (
-							<div
-								className="glass-button"
-								style={{
-									display: "flex",
-									alignItems: "center",
-									gap: "10px",
-									padding: "12px 16px",
-									background: "rgba(255, 255, 255, 0.2)",
-									border: "1px solid rgba(255, 255, 255, 0.3)",
-									borderRadius: "12px",
-									backdropFilter: "blur(10px)",
-									transition: "all 0.3s ease",
-									color: "white",
-									fontWeight: "500",
-								}}
-							>
-								<span style={{ fontSize: "16px" }}>🖼️</span>
-								<Select
-									value={borderStyle}
-									onChange={setBorderStyle}
-									style={{ minWidth: 100 }}
-									size="middle"
-								>
-									<Option value="white">White</Option>
-									<Option value="light-gray">Light Gray</Option>
-									<Option value="black">Black</Option>
-									<Option value="black-80">Black 80%</Option>
-									<Option value="half-opacity">Half Opacity</Option>
-								</Select>
-							</div>
-						)}
 						<small
 							className="tertiary glass-button"
 							style={{
