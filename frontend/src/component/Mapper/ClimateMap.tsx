@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { MapContainer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
@@ -479,30 +479,21 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		}
 	}, [userStore.mapMode]);
 
-	// Memoize legend components to prevent unnecessary re-renders
-	const memoizedMobileLegend = useMemo(
-		() =>
-			temperatureDataStore.processedDataExtremes ? (
-				<Legend
-					extremes={temperatureDataStore.processedDataExtremes}
-					unit={getVariableUnit(userStore.currentVariableType)}
-				/>
-			) : (
-				<div />
-			),
-		[userStore.currentVariableType],
+	const mobileLegend = temperatureDataStore.processedDataExtremes ? (
+		<Legend
+			extremes={temperatureDataStore.processedDataExtremes}
+			unit={getVariableUnit(userStore.currentVariableType)}
+		/>
+	) : (
+		<div />
 	);
 
-	const memoizedDesktopLegend = useMemo(
-		() =>
-			temperatureDataStore.processedDataExtremes ? (
-				<Legend
-					extremes={temperatureDataStore.processedDataExtremes}
-					unit={getVariableUnit(userStore.currentVariableType)}
-				/>
-			) : null,
-		[userStore.currentVariableType],
-	);
+	const desktopLegend = temperatureDataStore.processedDataExtremes ? (
+		<Legend
+			extremes={temperatureDataStore.processedDataExtremes}
+			unit={getVariableUnit(userStore.currentVariableType)}
+		/>
+	) : null;
 
 	// Viewport change handler
 	const handleViewportChange = useCallback(
@@ -623,7 +614,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 							models={models}
 							selectedModelId={userStore.selectedModel}
 							onModelSelect={handleModelSelect}
-							legend={memoizedMobileLegend}
+							legend={mobileLegend}
 						/>
 
 						{/* Mobile side buttons */}
@@ -634,7 +625,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				</div>
 
 				{/* Desktop-only legend positioned over the map */}
-				{!isMobile && memoizedDesktopLegend}
+				{!isMobile && desktopLegend}
 
 				<div className="map-bottom-bar">
 					<div className="control-section">

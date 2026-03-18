@@ -1,0 +1,31 @@
+{
+	"schema_version": "models.v1",
+	"generated_at": "2026-02-25T18:55:06.648Z",
+	"generated_from": "local-dev",
+	"models": [
+		{
+			"id": "Aedes albopictus Population Model",
+			"modelName": "Aedes albopictus Population Model",
+			"title": "Aedes albopictus Population Model",
+			"description": "",
+			"output": [
+				"egg_density",
+				"larval_density",
+				"pupal_density",
+				"adult_density",
+				"population_growth_rate"
+			],
+			"model_output_variable": "egg_density",
+			"cardYamlUrl": "https://github.com/ssciwr/heiplanet-models/blob/main/model_cards/HeiPlanet_harmonized_model_cards.yaml"
+		},
+		{
+			"id": "WNV-R0",
+			"modelName": "WNV-R0",
+			"title": "WNV-R0",
+			"description": "WNV-R0 is a dynamic epidemiological model designed to estimate the basic reproduction number (R₀) for West Nile Virus transmission across geographic regions using environmental, entomological, and host population data.",
+			"output": ["r0_estimate"],
+			"model_output_variable": "r0_estimate",
+			"cardYamlUrl": "https://github.com/ssciwr/heiplanet-models/blob/main/model_cards/WNV-R0_model_card.yaml"
+		}
+	]
+}

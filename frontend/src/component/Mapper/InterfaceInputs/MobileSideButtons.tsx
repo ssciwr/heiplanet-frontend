@@ -119,12 +119,11 @@ const MobileSideButtons = ({
 						id: "model-cards-unavailable",
 						modelName: "Model Cards Unavailable",
 						title: "Model Cards Unavailable",
-						description:
-							"Unable to fetch model cards from GitHub. Check client-side access.",
+						description: "Unable to load model metadata from artifact source.",
 						emoji: "⚠️",
 						color: "#D14343",
 						details:
-							"Model cards could not be loaded from GitHub on this client.",
+							"Check artifact generation and metadata artifact URL configuration.",
 					});
 				}
 				setModels(loadedModels);
@@ -135,12 +134,11 @@ const MobileSideButtons = ({
 						id: "model-cards-unavailable",
 						modelName: "Model Cards Unavailable",
 						title: "Model Cards Unavailable",
-						description:
-							"Unable to fetch model cards from GitHub. Check client-side access.",
+						description: "Unable to load model metadata from artifact source.",
 						emoji: "⚠️",
 						color: "#D14343",
 						details:
-							"Model cards could not be loaded from GitHub on this client.",
+							"Check artifact generation and metadata artifact URL configuration.",
 					},
 				]);
 			}
