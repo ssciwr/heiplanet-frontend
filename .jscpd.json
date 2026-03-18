@@ -1,4 +1,8 @@
 {
-	"threshold": 2,
-	"ignore": ["**/node_modules/**", "**/dist/**", "**/frontend/tests/**"]
+  "threshold": 2,
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/frontend/tests/**"
+  ]
 }
