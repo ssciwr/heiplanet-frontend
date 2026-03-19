@@ -1,15 +1,10 @@
 import L from "leaflet";
-import type {
-	DataExtremes,
-	NutsGeoJSON,
-	ViewportBounds,
-	WorldwideGeoJSON,
-} from "../component/Mapper/types";
+import type { DataExtremes, ViewportBounds } from "../component/Mapper/types";
 import {
 	getFormattedVariableValue,
 	getVariableDisplayName,
 } from "../component/Mapper/utilities/monthUtils";
-import { type BorderStyle, mapStyleService } from "../services/MapStyleService";
+import { mapStyleService } from "../services/MapStyleService";
 import { errorStore } from "../stores/ErrorStore";
 
 export interface ViewportChangeData {
@@ -108,12 +103,7 @@ export const handleViewportChange = (
 
 // Feature highlighting for interactive layers
 export const createHighlightFeature = (
-	mapMode: "worldwide" | "europe-only" | "grid",
-	borderStyle: BorderStyle,
 	dataExtremes: DataExtremes | null,
-	convertedWorldwideGeoJSON: WorldwideGeoJSON | null,
-	convertedEuropeOnlyGeoJSON: NutsGeoJSON | null,
-	worldGeoJSON: GeoJSON.FeatureCollection | null,
 	hoverTimeout: NodeJS.Timeout | null,
 	setHoverTimeout: (timeout: NodeJS.Timeout | null) => void,
 	currentHoveredLayer: L.Layer | null,
@@ -137,21 +127,9 @@ export const createHighlightFeature = (
 			const prevLayer = currentHoveredLayer as L.Path & {
 				feature: GeoJSON.Feature;
 			};
-			if (mapMode === "worldwide" && convertedWorldwideGeoJSON) {
-				prevLayer.setStyle(
-					mapStyleService.getWorldwideStyle(
-						prevLayer.feature,
-						borderStyle,
-						dataExtremes,
-					),
-				);
-			} else if (mapMode === "europe-only" && convertedEuropeOnlyGeoJSON) {
-				prevLayer.setStyle(
-					mapStyleService.getNutsStyle(prevLayer.feature, dataExtremes),
-				);
-			} else if (worldGeoJSON) {
-				prevLayer.setStyle(mapStyleService.getWorldStyle());
-			}
+			prevLayer.setStyle(
+				mapStyleService.getNutsStyle(prevLayer.feature, dataExtremes),
+			);
 			(prevLayer as L.Layer & { closePopup: () => void }).closePopup();
 		}
 
@@ -169,26 +147,18 @@ export const createHighlightFeature = (
 
 		setCurrentHoveredLayer(layer);
 
-		// Show popup on hover for worldwide and europe-only modes with slight delay
-		if (mapMode === "worldwide" || mapMode === "europe-only") {
-			const timeout = setTimeout(() => {
-				if (currentHoveredLayer === layer) {
-					(layer as L.Layer & { openPopup: () => void }).openPopup();
-				}
-			}, 100);
-			setHoverTimeout(timeout);
-		}
+		const timeout = setTimeout(() => {
+			if (currentHoveredLayer === layer) {
+				(layer as L.Layer & { openPopup: () => void }).openPopup();
+			}
+		}, 100);
+		setHoverTimeout(timeout);
 	};
 };
 
 // Reset feature highlighting
 export const createResetHighlight = (
-	mapMode: "worldwide" | "europe-only" | "grid",
-	borderStyle: BorderStyle,
 	dataExtremes: DataExtremes | null,
-	convertedWorldwideGeoJSON: WorldwideGeoJSON | null,
-	convertedEuropeOnlyGeoJSON: NutsGeoJSON | null,
-	worldGeoJSON: GeoJSON.FeatureCollection | null,
 	hoverTimeout: NodeJS.Timeout | null,
 	setHoverTimeout: (timeout: NodeJS.Timeout | null) => void,
 	currentHoveredLayer: L.Layer | null,
@@ -205,67 +175,12 @@ export const createResetHighlight = (
 
 		// Only reset if this is the currently hovered layer
 		if (currentHoveredLayer === geoJSONLayer) {
-			if (mapMode === "worldwide" && convertedWorldwideGeoJSON) {
-				geoJSONLayer.setStyle(
-					mapStyleService.getWorldwideStyle(
-						geoJSONLayer.feature,
-						borderStyle,
-						dataExtremes,
-					),
-				);
-			} else if (mapMode === "europe-only" && convertedEuropeOnlyGeoJSON) {
-				geoJSONLayer.setStyle(
-					mapStyleService.getNutsStyle(geoJSONLayer.feature, dataExtremes),
-				);
-			} else if (worldGeoJSON) {
-				geoJSONLayer.setStyle(mapStyleService.getWorldStyle());
-			}
-
-			// Close popup on mouseout for worldwide and europe-only modes
-			if (mapMode === "worldwide" || mapMode === "europe-only") {
-				(geoJSONLayer as L.Layer & { closePopup: () => void }).closePopup();
-			}
+			geoJSONLayer.setStyle(
+				mapStyleService.getNutsStyle(geoJSONLayer.feature, dataExtremes),
+			);
+			(geoJSONLayer as L.Layer & { closePopup: () => void }).closePopup();
 
 			setCurrentHoveredLayer(null);
-		}
-	};
-};
-
-// Feature event handler for worldwide features
-export const createOnEachWorldwideFeature = (
-	currentVariableType: string,
-	highlightFeature: (e: L.LeafletMouseEvent) => void,
-	resetHighlight: (e: L.LeafletMouseEvent) => void,
-) => {
-	return (feature: GeoJSON.Feature, layer: L.Layer) => {
-		layer.on({
-			mouseover: highlightFeature,
-			mouseout: resetHighlight,
-		});
-
-		if (feature.properties) {
-			const properties = feature.properties as {
-				WORLDWIDE_ID?: string;
-				intensity?: number;
-				countryName?: string;
-				pointCount?: number;
-				isFallback?: boolean;
-				currentPosition?: { lat: number; lng: number };
-				nearestDataPoint?: { lat: number; lng: number };
-				dataPoints?: Array<{ lat: number; lng: number; temperature: number }>;
-			};
-			const { WORLDWIDE_ID, intensity, countryName } = properties;
-			const displayName = countryName || WORLDWIDE_ID || "Unknown Country";
-
-			const popupContent = `
-		<div class="worldwide-popup">
-		  <h4>${displayName}</h4>
-		  <p><strong>${getVariableDisplayName(currentVariableType)}:</strong> ${intensity !== null && intensity !== undefined ? getFormattedVariableValue(currentVariableType, intensity) : "N/A"}</p>
-		</div>
-	  `;
-			(layer as L.Layer & { bindPopup: (content: string) => void }).bindPopup(
-				popupContent,
-			);
 		}
 	};
 };
