@@ -49,7 +49,6 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		const mapModeSelect = page.locator(".ant-select-selector").last();
 		await mapModeSelect.click({ force: true });
 		await page.keyboard.press("ArrowDown");
-		await page.keyboard.press("ArrowDown");
 		await page.keyboard.press("Enter");
 
 		// Wait for initial map data to load
@@ -207,7 +206,6 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 
 		const mapModeSelect = page.locator(".ant-select-selector").last();
 		await mapModeSelect.click({ force: true });
-		await page.keyboard.press("ArrowDown");
 		await page.keyboard.press("ArrowDown");
 		await page.keyboard.press("Enter");
 

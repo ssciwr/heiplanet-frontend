@@ -384,7 +384,6 @@
 }
 
 .base-popup,
-.worldwide-popup,
 .nuts-popup,
 .grid-popup,
 .europe-only-popup {
@@ -392,7 +391,6 @@
 }
 
 .base-popup h4,
-.worldwide-popup h4,
 .nuts-popup h4,
 .grid-popup h4,
 .europe-only-popup h4 {
@@ -403,7 +401,6 @@
 }
 
 .base-popup p,
-.worldwide-popup p,
 .nuts-popup p,
 .grid-popup p,
 .europe-only-popup p {

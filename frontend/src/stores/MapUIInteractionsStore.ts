@@ -4,13 +4,12 @@ import { makeAutoObservable } from "mobx";
 export class MapUIInteractionsStore {
 	generalError: string | null = null;
 	dataProcessingError = false;
-	borderStyle: "white" | "light-gray" | "black" | "half-opacity" | "black-80" =
-		"white";
 	mapHoverTimeout: ReturnType<typeof window.setTimeout> | null = null;
 	mapHoveredLayer: L.Layer | null = null;
 	mapScreenshoter: L.SimpleMapScreenshoter | null = null;
 	noDataModalVisible = false;
 	userRequestedYear = 2025;
+	userRequestedMonth = 1;
 	dataFetchErrorMessage = "";
 
 	constructor() {
@@ -23,12 +22,6 @@ export class MapUIInteractionsStore {
 
 	setDataProcessingError = (error: boolean) => {
 		this.dataProcessingError = error;
-	};
-
-	setBorderStyle = (
-		style: "white" | "light-gray" | "black" | "half-opacity" | "black-80",
-	) => {
-		this.borderStyle = style;
 	};
 
 	setMapHoverTimeout = (
@@ -51,6 +44,10 @@ export class MapUIInteractionsStore {
 
 	setUserRequestedYear = (year: number) => {
 		this.userRequestedYear = year;
+	};
+
+	setUserRequestedMonth = (month: number) => {
+		this.userRequestedMonth = month;
 	};
 
 	setDataFetchErrorMessage = (message: string) => {

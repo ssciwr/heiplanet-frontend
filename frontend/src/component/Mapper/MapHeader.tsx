@@ -6,7 +6,7 @@ const { Option } = Select;
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
-import { useUserSelectionsStore } from "../../contexts/UserSelectionsContext";
+import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
 import { viewingMode } from "../../stores/ViewingModeStore.ts";
 import type { Model } from "../../types/model";
 import GeneralCard from "../General/GeneralCard.tsx";
@@ -26,7 +26,7 @@ const MapHeader = observer(
 		models: Model[];
 	}) => {
 		const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-		const userStore = useUserSelectionsStore();
+		const userStore = useUserSelectionsForClimateQueryStore();
 
 		const handleModelSelect = (modelId: string) => {
 			userStore.setSelectedModel(modelId);

@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import type { Month } from "../component/Mapper/types";
 
-export class UserSelectionsStore {
+export class UserSelectionsForClimateQueryStore {
 	selectedModel = "";
 	selectedOptimism = "optimistic";
 	currentYear = 2025;
@@ -38,4 +38,5 @@ export class UserSelectionsStore {
 	};
 }
 
-export const userSelectionsStore = new UserSelectionsStore();
+export const userSelectionsForClimateQueryStore =
+	new UserSelectionsForClimateQueryStore();

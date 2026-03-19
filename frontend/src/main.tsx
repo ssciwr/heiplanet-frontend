@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
-import { UserSelectionsProvider } from "./contexts/UserSelectionsContext.tsx";
+import { UserSelectionsForClimateQueryProvider } from "./contexts/UserSelectionsForClimateQueryContext.tsx";
 import "./index.css";
 
 // Function to handle loading screen removal
@@ -31,11 +31,11 @@ const rootElement = document.getElementById("root");
 if (rootElement) {
 	ReactDOM.createRoot(rootElement).render(
 		<React.StrictMode>
-			<UserSelectionsProvider>
+			<UserSelectionsForClimateQueryProvider>
 				<BrowserRouter>
 					<App />
 				</BrowserRouter>
-			</UserSelectionsProvider>
+			</UserSelectionsForClimateQueryProvider>
 		</React.StrictMode>,
 	);
 

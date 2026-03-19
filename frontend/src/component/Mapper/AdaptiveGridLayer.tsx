@@ -4,7 +4,7 @@ import { Popup, Rectangle } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { observer } from "mobx-react-lite";
 import { gridProcessingStore } from "../../stores/GridProcessingStore";
-import { temperatureDataStore } from "../../stores/TemperatureDataStore";
+import { modelOutputStore } from "../../stores/ModelOutputStore";
 import { getColorFromGradient } from "./utilities/gradientUtilities";
 
 console.log("GRID-PROBLEM-DEBUG AdaptiveGridLayer module loaded");
@@ -17,7 +17,7 @@ const AdaptiveGridLayer = observer(() => {
 	const canvasRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
 	const renderStart = performance.now();
 	const gridCells = gridProcessingStore.gridCells;
-	const processedDataExtremes = temperatureDataStore.processedDataExtremes;
+	const processedDataExtremes = modelOutputStore.processedDataExtremes;
 
 	console.log("📱 AdaptiveGridLayer render START - cells:", gridCells.length);
 	console.log("GRID-PROBLEM-DEBUG AdaptiveGridLayer render", {

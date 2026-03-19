@@ -3,7 +3,6 @@ import type {
 	DataExtremes,
 	Month,
 	TemperatureDataPoint,
-	ViewportBounds,
 	WorldwideGeoJSON,
 } from "../component/Mapper/types";
 import {
@@ -17,40 +16,29 @@ import { loadingStore } from "./LoadingStore";
 
 const NATURAL_EARTH_URL = "/downsampled_initial.geojson";
 
-export class TemperatureDataStore {
-	rawRegionTemperatureData: TemperatureDataPoint[] = [];
+export class ModelOutputStore {
+	rawModelOutputPoints: TemperatureDataPoint[] = [];
 	processedDataExtremes: DataExtremes | null = null;
-	mapDataBounds: ViewportBounds | null = null;
-	baseWorldGeoJSON: GeoJSON.FeatureCollection | null = null;
-	worldwideRegionBoundaries: WorldwideGeoJSON | null = null;
+	countryBoundaryOverlay: WorldwideGeoJSON | null = null;
 	private latestTemperatureLoadRequestId = 0;
 
 	constructor() {
 		makeAutoObservable(this);
-		this.loadWorldData();
 	}
 
-	setRawRegionTemperatureData = (data: TemperatureDataPoint[]) => {
-		this.rawRegionTemperatureData = data;
+	setRawModelOutputPoints = (data: TemperatureDataPoint[]) => {
+		this.rawModelOutputPoints = data;
 	};
 
 	setProcessedDataExtremes = (extremes: DataExtremes | null) => {
 		this.processedDataExtremes = extremes;
 	};
 
-	setMapDataBounds = (bounds: ViewportBounds | null) => {
-		this.mapDataBounds = bounds;
+	setCountryBoundaryOverlay = (data: WorldwideGeoJSON | null) => {
+		this.countryBoundaryOverlay = data;
 	};
 
-	setBaseWorldGeoJSON = (data: GeoJSON.FeatureCollection | null) => {
-		this.baseWorldGeoJSON = data;
-	};
-
-	setWorldwideRegionBoundaries = (data: WorldwideGeoJSON | null) => {
-		this.worldwideRegionBoundaries = data;
-	};
-
-	loadTemperatureData = async (
+	loadModelOutputData = async (
 		year: number,
 		month: Month,
 		models: Model[],
@@ -70,10 +58,9 @@ export class TemperatureDataStore {
 		} | null,
 		requestedGridResolution?: number,
 	) => {
-		const loadStart = performance.now();
 		const requestId = ++this.latestTemperatureLoadRequestId;
 		console.log(
-			`🌡️ TemperatureDataStore.loadTemperatureData START - year: ${year}, month: ${month}`,
+			`🌡️ ModelOutputStore.loadModelOutputData START - year: ${year}, month: ${month}`,
 		);
 
 		try {
@@ -92,20 +79,15 @@ export class TemperatureDataStore {
 			setUserRequestedYear(year);
 			setUserRequestedMonth(safeMonth);
 
-			const modelFindStart = performance.now();
 			const selectedModelData = models.find((m) => m.id === selectedModel);
 			const requestedVariableValue = selectedModelData
 				? resolveOutputVariable(selectedModelData)
 				: "R0";
 			const outputFormat = selectedModelData?.output;
-			console.log(
-				`🔍 Model selection took ${(performance.now() - modelFindStart).toFixed(2)}ms`,
-			);
 
 			setCurrentVariableType(requestedVariableValue);
 
-			const dataLoadStart = performance.now();
-			const { dataPoints, extremes, bounds } = await loadTemperatureData(
+			const { dataPoints, extremes } = await loadTemperatureData(
 				year,
 				safeMonth,
 				requestedVariableValue,
@@ -113,80 +95,42 @@ export class TemperatureDataStore {
 				viewportBounds,
 				requestedGridResolution,
 			);
-			console.log(
-				`📊 loadTemperatureData utility took ${(performance.now() - dataLoadStart).toFixed(2)}ms`,
-			);
 
-			console.log(
-				`📈 Loaded ${dataPoints.length} data points for year ${year}, month ${safeMonth}`,
-			);
-			console.log(
-				`🔬 Sample point for year ${year}, month ${safeMonth}:`,
-				dataPoints[0],
-			);
-			console.log(
-				`📏 Data extremes for year ${year}, month ${safeMonth}:`,
-				extremes,
-			);
 			if (requestId !== this.latestTemperatureLoadRequestId) {
-				return; // stale, ignore
+				return;
 			}
 
-			const storeUpdateStart = performance.now();
-			this.setRawRegionTemperatureData(dataPoints);
+			this.setRawModelOutputPoints(dataPoints);
 			this.setProcessedDataExtremes(extremes);
-
-			if (bounds) {
-				const viewportBounds: ViewportBounds = {
-					north: bounds.getNorth(),
-					south: bounds.getSouth(),
-					east: bounds.getEast(),
-					west: bounds.getWest(),
-					zoom: 10,
-				};
-				this.setMapDataBounds(viewportBounds);
-			}
-			console.log(
-				`💾 Store updates took ${(performance.now() - storeUpdateStart).toFixed(2)}ms`,
-			);
-
-			const totalTime = performance.now() - loadStart;
-			console.log(
-				`✅ TemperatureDataStore.loadTemperatureData COMPLETE for year ${year}, month ${safeMonth} in ${totalTime.toFixed(2)}ms`,
-			);
 			loadingStore.complete();
 			setIsLoadingRawData(false);
 		} catch (err: unknown) {
 			const error = err as Error;
 			if (requestId !== this.latestTemperatureLoadRequestId) {
-				return; // stale, ignore
+				return;
 			}
-			console.log(
-				`❌ TemperatureDataStore.loadTemperatureData FAILED in ${(performance.now() - loadStart).toFixed(2)}ms: ${error.message}`,
-			);
+
 			loadingStore.complete();
 			setIsLoadingRawData(false);
 
 			if (error.message.includes("API_ERROR:")) {
-				this.setRawRegionTemperatureData([]);
+				this.setRawModelOutputPoints([]);
 				this.setProcessedDataExtremes(null);
-				this.setMapDataBounds(null);
 				const errorMsg = error.message.replace("API_ERROR: ", "");
 				setDataFetchErrorMessage(errorMsg);
 				setNoDataModalVisible(true);
 			} else {
 				errorStore.showError(
-					"Temperature Data Error",
-					`Failed to load temperature data: ${error.message}`,
+					"Model Output Error",
+					`Failed to load model output data: ${error.message}`,
 				);
-				setGeneralError(`Failed to load temperature data: ${error.message}`);
+				setGeneralError(`Failed to load model output data: ${error.message}`);
 			}
 		}
 	};
 
-	loadWorldwideRegions = async () => {
+	loadCountryBoundaryOverlay = async () => {
 		try {
-			console.log("Loading global administrative regions...");
 			const response = await fetch(NATURAL_EARTH_URL);
 			const data = await response.json();
 
@@ -197,17 +141,12 @@ export class TemperatureDataStore {
 				);
 			});
 
-			const globalRegions: WorldwideGeoJSON = {
+			this.setCountryBoundaryOverlay({
 				type: "FeatureCollection" as const,
 				features: allFeatures,
-			};
-
-			this.setWorldwideRegionBoundaries(globalRegions);
-			console.log(
-				`Loaded ${allFeatures.length} global administrative regions from all countries`,
-			);
+			});
 		} catch (error) {
-			console.error("Failed to load worldwide administrative regions:", error);
+			console.error("Failed to load boundary overlay:", error);
 		}
 	};
 
@@ -228,7 +167,6 @@ export class TemperatureDataStore {
 			setIsLoadingRawData(true);
 
 			const safeMonth = month || 7;
-			console.log(`Loading NUTS data for year ${year}, month ${safeMonth}`);
 			setUserRequestedYear(year);
 
 			const selectedModelData = models.find((m) => m.id === selectedModel);
@@ -244,9 +182,6 @@ export class TemperatureDataStore {
 				"NUTS3",
 			);
 
-			console.log(
-				`Loaded NUTS data for ${Object.keys(nutsData).length} regions`,
-			);
 			loadingStore.complete();
 			setIsLoadingRawData(false);
 			return nutsData;
@@ -269,18 +204,6 @@ export class TemperatureDataStore {
 			throw error;
 		}
 	};
-
-	private loadWorldData = async () => {
-		try {
-			const response = await fetch(
-				"https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
-			);
-			const worldData = await response.json();
-			this.setBaseWorldGeoJSON(worldData);
-		} catch (error) {
-			console.warn("Failed to load world GeoJSON:", error);
-		}
-	};
 }
 
-export const temperatureDataStore = new TemperatureDataStore();
+export const modelOutputStore = new ModelOutputStore();
