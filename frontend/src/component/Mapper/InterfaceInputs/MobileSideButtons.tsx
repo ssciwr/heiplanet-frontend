@@ -83,25 +83,12 @@ const MobileSideButtons = ({
 	const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
 	const [screenshoter, setScreenshoter] =
 		useState<L.SimpleMapScreenshoter | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<"default" | "branded">(
-		"default",
-	);
 	const [isMinimized, setIsMinimized] = useState<boolean>(false);
 	const [showModelDetails, setShowModelDetails] = useState<boolean>(false);
 
 	useEffect(() => {
 		console.log("Show info:", showInfo);
 	}, [showInfo]);
-
-	// Apply theme to document root
-	useEffect(() => {
-		console.log("Applying theme to document:", currentTheme);
-		document.documentElement.setAttribute("data-theme", currentTheme);
-		console.log(
-			"Document data-theme attribute:",
-			document.documentElement.getAttribute("data-theme"),
-		);
-	}, [currentTheme]);
 
 	useEffect(() => {
 		if (map && !screenshoter) {
@@ -237,12 +224,6 @@ const MobileSideButtons = ({
 		}
 	};
 
-	const handleThemeToggle = () => {
-		const newTheme = currentTheme === "default" ? "branded" : "default";
-		console.log("Switching theme from", currentTheme, "to", newTheme);
-		setCurrentTheme(newTheme);
-	};
-
 	const handleToggleMinimize = () => {
 		setIsMinimized(!isMinimized);
 	};
@@ -267,20 +248,6 @@ const MobileSideButtons = ({
 				width={400}
 			>
 				<AboutContent />
-				<br />
-				<button
-					type="button"
-					onClick={handleThemeToggle}
-					style={{
-						background: "none",
-						border: "none",
-						color: "inherit",
-						textDecoration: "underline",
-						cursor: "pointer",
-					}}
-				>
-					Change Theme
-				</button>
 			</Modal>
 
 			<Modal

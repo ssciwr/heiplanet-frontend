@@ -156,7 +156,7 @@
 	transition: all 0.2s;
 }
 
-/* Mobile modal button overrides for purple/red modes */
+/* Mobile modal button overrides */
 @media (max-width: 768px) {
 	/* Make optimism selector full width on mobile */
 	[data-testid="optimism-selector"] .model-selector {
@@ -170,48 +170,41 @@
 	}
 
 	/* Fix ALL model selector buttons - including OptimismSelector */
-	[data-theme="purple"] .model-selector-button,
-	[data-theme="purple"]
-		[data-testid="optimism-selector"]
-		.model-selector-button {
+	.model-selector-button,
+	[data-testid="optimism-selector"] .model-selector-button {
 		background: white !important;
 		color: var(--text-primary) !important;
 		border: 1px solid var(--border-light) !important;
 	}
 
 	/* Fix chevron color on mobile */
-	[data-theme="purple"] .model-selector-button .chevron,
-	[data-theme="purple"]
-		[data-testid="optimism-selector"]
-		.model-selector-button
-		.chevron {
+	.model-selector-button .chevron,
+	[data-testid="optimism-selector"] .model-selector-button .chevron {
 		color: var(--text-primary) !important;
 	}
 
-	[data-theme="purple"] .model-selector-button:hover,
-	[data-theme="purple"]
-		[data-testid="optimism-selector"]
-		.model-selector-button:hover {
+	.model-selector-button:hover,
+	[data-testid="optimism-selector"] .model-selector-button:hover {
 		background: var(--surface-overlay) !important;
 		color: var(--text-primary) !important;
 		border-color: var(--border-medium) !important;
 	}
 
 	/* Fix modal dropdown background and items */
-	[data-theme="purple"] .model-dropdown {
+	.model-dropdown {
 		background: var(--surface-raised) !important;
 	}
 
-	[data-theme="purple"] .virus-item {
+	.virus-item {
 		background: var(--surface-raised) !important;
 		color: var(--text-primary) !important;
 	}
 
-	[data-theme="purple"] .virus-item:hover {
+	.virus-item:hover {
 		background: var(--surface-overlay) !important;
 	}
 
-	[data-theme="purple"] .virus-item.selected {
+	.virus-item.selected {
 		background: #deebff !important;
 		color: var(--text-primary) !important;
 	}

@@ -13,10 +13,10 @@
 	-moz-osx-font-smoothing: grayscale;
 
 	/* Design System - Colors */
-	--primary: #db3c1c;
-	--primary-hover: #c2351a;
-	--primary-light: #deebff;
-	--brand: #a2274c;
+	--primary: #6d63c8;
+	--primary-hover: #5b52b6;
+	--primary-light: #edeaff;
+	--brand: #764ba2;
 	--white: #ffffff;
 	--dark: #303030;
 	--surface: #f8f9fa;
@@ -29,8 +29,8 @@
 	--text-tertiary: #6b778c;
 	--text-disabled: #a5adba;
 	--text-inverse: #ffffff;
-	--text-link: #0052cc;
-	--text-link-hover: #0747a6;
+	--text-link: #6d63c8;
+	--text-link-hover: #5b52b6;
 
 	/* Border Colors */
 	--border-light: #dfe1e6;
@@ -48,7 +48,7 @@
 	--shadow-light: 0 2px 4px rgba(0, 0, 0, 0.2);
 	--shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
 	--shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.1);
-	--shadow-primary: 0 4px 12px rgba(219, 60, 28, 0.3);
+	--shadow-primary: 0 4px 12px rgba(109, 99, 200, 0.3);
 
 	/* Spacing */
 	--space-xs: 0.25rem;
@@ -85,11 +85,11 @@
 
 a {
 	font-weight: 500;
-	color: #db3c1c;
+	color: var(--text-link);
 	text-decoration: inherit;
 }
 a:hover {
-	color: #db3c1c;
+	color: var(--text-link-hover);
 }
 
 body {
@@ -154,7 +154,7 @@ h1 {
 .btn-icon {
 	width: 42px;
 	height: 42px;
-	background-color: #db3c1c;
+	background-color: var(--primary);
 	border: none;
 	border-radius: var(--radius-full);
 	cursor: pointer;
@@ -553,10 +553,10 @@ button:focus-visible {
 	transform: translateY(-50%);
 }
 
-/* Timeline Selector - Red Theme */
+/* Timeline Selector */
 .ant-slider .ant-slider-rail {
-	background: #db3c1c !important;
-	box-shadow: 0 2px 8px rgba(219, 60, 28, 0.3) !important;
+	background: var(--primary) !important;
+	box-shadow: var(--shadow-primary) !important;
 	border-radius: 10px !important;
 }
 
@@ -566,8 +566,8 @@ button:focus-visible {
 
 .ant-slider .ant-slider-handle {
 	border: none !important;
-	background: #db3c1c !important;
-	box-shadow: 0 3px 12px rgba(165, 39, 78, 0.5) !important;
+	background: var(--primary) !important;
+	box-shadow: 0 3px 12px rgba(109, 99, 200, 0.45) !important;
 	width: 24px !important;
 	height: 24px !important;
 	border-radius: 50%;
@@ -581,8 +581,8 @@ button:focus-visible {
 }
 
 .ant-slider .ant-slider-handle:hover {
-	background: linear-gradient(45deg, #a5274e, #8b1e3f) !important;
-	box-shadow: 0 4px 16px rgba(165, 39, 78, 0.7) !important;
+	background: linear-gradient(45deg, var(--primary), var(--brand)) !important;
+	box-shadow: 0 4px 16px rgba(109, 99, 200, 0.55) !important;
 	transform: scale(1.1) !important;
 }
 
@@ -687,7 +687,7 @@ button:focus-visible {
 }
 
 .desktop-control-btn {
-	background-color: #db3c1c;
+	background-color: var(--primary);
 	border: none;
 	border-radius: 12px;
 	color: white;
@@ -702,9 +702,9 @@ button:focus-visible {
 }
 
 .desktop-control-btn:hover:not(:disabled) {
-	background-color: #c2351a;
+	background-color: var(--primary-hover);
 	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(219, 60, 28, 0.3);
+	box-shadow: var(--shadow-primary);
 }
 
 .desktop-control-btn:disabled {
@@ -740,7 +740,7 @@ button:focus-visible {
 		background-color: #ffffff;
 	}
 	a:hover {
-		color: #747bff;
+		color: var(--text-link-hover);
 	}
 	button {
 		background-color: #f9f9f9;

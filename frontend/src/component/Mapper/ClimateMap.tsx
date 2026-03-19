@@ -90,11 +90,6 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		selectedOptimism: userStore.selectedOptimism,
 	});
 
-	// Set theme to purple
-	useEffect(() => {
-		document.documentElement.setAttribute("data-theme", "purple");
-	}, []);
-
 	// Load data when mode changes
 	// biome-ignore lint/correctness/useExhaustiveDependencies: mobx store values should trigger data loading.
 	useEffect(() => {
