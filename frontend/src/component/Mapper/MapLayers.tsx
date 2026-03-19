@@ -4,10 +4,10 @@ import { useCallback } from "react";
 import { GeoJSON, Pane } from "react-leaflet";
 import { useMapDataStore } from "../../contexts/MapDataContext";
 import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
+import { useEuropeFeatureInteractions } from "../../hooks/useEuropeFeatureInteractions";
 import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { mapStyleService } from "../../services/MapStyleService";
 import { modelOutputStore } from "../../stores/ModelOutputStore";
-import * as MapInteractionHandlers from "../../utils/MapInteractionHandlers";
 import AdaptiveGridLayer from "./AdaptiveGridLayer";
 import CitiesLayer from "./CitiesLayer";
 
@@ -33,28 +33,14 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 		const processedEuropeNutsRegions = propsProcessedEuropeNutsRegions ?? null;
 
 		// Create interaction handlers
-		const highlightFeature = MapInteractionHandlers.createHighlightFeature(
-			processedDataExtremes,
-			mapUIStore.mapHoverTimeout,
-			mapUIStore.setMapHoverTimeout,
-			mapUIStore.mapHoveredLayer,
-			mapUIStore.setMapHoveredLayer,
-		);
-
-		const resetHighlight = MapInteractionHandlers.createResetHighlight(
-			processedDataExtremes,
-			mapUIStore.mapHoverTimeout,
-			mapUIStore.setMapHoverTimeout,
-			mapUIStore.mapHoveredLayer,
-			mapUIStore.setMapHoveredLayer,
-		);
-
-		const onEachEuropeOnlyFeature =
-			MapInteractionHandlers.createOnEachEuropeOnlyFeature(
-				userStore.currentVariableType,
-				highlightFeature,
-				resetHighlight,
-			);
+		const { onEachEuropeOnlyFeature } = useEuropeFeatureInteractions({
+			currentVariableType: userStore.currentVariableType,
+			dataExtremes: processedDataExtremes,
+			mapHoverTimeout: mapUIStore.mapHoverTimeout,
+			setMapHoverTimeout: mapUIStore.setMapHoverTimeout,
+			mapHoveredLayer: mapUIStore.mapHoveredLayer,
+			setMapHoveredLayer: mapUIStore.setMapHoveredLayer,
+		});
 
 		// Memoize style functions to prevent recreation on every render
 		const nutsStyleFunction = useCallback(

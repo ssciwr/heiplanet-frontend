@@ -4,7 +4,7 @@ import { makeAutoObservable } from "mobx";
 export class MapUIInteractionsStore {
 	generalError: string | null = null;
 	dataProcessingError = false;
-	mapHoverTimeout: ReturnType<typeof window.setTimeout> | null = null;
+	mapHoverTimeout: ReturnType<typeof setTimeout> | null = null;
 	mapHoveredLayer: L.Layer | null = null;
 	mapScreenshoter: L.SimpleMapScreenshoter | null = null;
 	noDataModalVisible = false;
@@ -24,9 +24,7 @@ export class MapUIInteractionsStore {
 		this.dataProcessingError = error;
 	};
 
-	setMapHoverTimeout = (
-		timeout: ReturnType<typeof window.setTimeout> | null,
-	) => {
+	setMapHoverTimeout = (timeout: ReturnType<typeof setTimeout> | null) => {
 		this.mapHoverTimeout = timeout;
 	};
 
