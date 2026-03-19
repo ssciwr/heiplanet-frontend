@@ -57,13 +57,7 @@ declare module "leaflet" {
 	): SimpleMapScreenshoter;
 }
 
-const MOBILE_SIDE_BUTTONS_LOCATIONS = {
-	BOTTOM_RIGHT: "bottom-right",
-	TOP_LEFT: "top-left",
-} as const;
-
-type MobileSideButtonsLocation =
-	(typeof MOBILE_SIDE_BUTTONS_LOCATIONS)[keyof typeof MOBILE_SIDE_BUTTONS_LOCATIONS];
+type MobileSideButtonsLocation = "bottom-right" | "top-left";
 
 interface MobileSideButtonsProps {
 	map: L.Map | null;
