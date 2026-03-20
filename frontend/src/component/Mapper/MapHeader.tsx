@@ -1,19 +1,14 @@
-import { SettingOutlined } from "@ant-design/icons";
-import { Button, Modal, Select } from "antd";
+import { Select } from "antd";
 import { Map as MapIcon } from "lucide-react";
 
 const { Option } = Select;
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
 import { viewingMode } from "../../stores/ViewingModeStore.ts";
 import type { Model } from "../../types/model";
 import GeneralCard from "../General/GeneralCard.tsx";
 import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
-import OptimismLevelSelector from "./InterfaceInputs/OptimismSelector.tsx";
-
-const OPTIMISM_LEVELS = ["optimistic", "realistic", "pessimistic"];
 
 const MapHeader = observer(
 	({
@@ -25,7 +20,6 @@ const MapHeader = observer(
 		modelMetadataLoading: boolean;
 		models: Model[];
 	}) => {
-		const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 		const userStore = useUserSelectionsForClimateQueryStore();
 
 		const handleModelSelect = (modelId: string) => {
@@ -63,7 +57,13 @@ const MapHeader = observer(
 								/>
 
 								<div
-									style={{ flex: 1, display: "flex", justifyContent: "center" }}
+									style={{
+										flex: 1,
+										display: "flex",
+										justifyContent: "center",
+										gap: "8px",
+										flexWrap: "wrap",
+									}}
 								>
 									<ModelSelector
 										error={modelMetadataError}
@@ -72,45 +72,24 @@ const MapHeader = observer(
 										selectedModel={userStore.selectedModel}
 										onModelSelect={handleModelSelect}
 									/>
+									<Select
+										value={userStore.mapMode}
+										onChange={(v) => {
+											console.log("Map mode should be updated as such:", v);
+											userStore.setMapMode(v);
+										}}
+										style={{ minWidth: 116 }}
+										size="middle"
+									>
+										<Option value="europe-only">Europe-only</Option>
+										<Option value="grid">Grid</Option>
+									</Select>
 								</div>
 
-								<Button
-									type="text"
-									icon={<SettingOutlined />}
-									onClick={() => setIsSettingsOpen(true)}
-									style={{
-										display: "flex",
-										alignItems: "center",
-										justifyContent: "center",
-										width: "42px",
-										height: "42px",
-									}}
-								/>
+								<div style={{ width: "42px", height: "42px" }} />
 							</div>
 						</GeneralCard>
 					</div>
-
-					<Modal
-						title="Settings"
-						open={isSettingsOpen}
-						onCancel={() => setIsSettingsOpen(false)}
-						footer={null}
-						width="90vw"
-						style={{ top: 20 }}
-					>
-						<div style={{ padding: "20px 0" }}>
-							<div style={{ marginBottom: "24px" }}>
-								<h4>Optimism Level</h4>
-								<div style={{ background: "white" }}>
-									<OptimismLevelSelector
-										availableOptimismLevels={OPTIMISM_LEVELS}
-										selectedOptimism={userStore.selectedOptimism}
-										setOptimism={userStore.setSelectedOptimism}
-									/>
-								</div>
-							</div>
-						</div>
-					</Modal>
 				</div>
 			);
 		}
@@ -218,43 +197,6 @@ const MapHeader = observer(
 								selectedModel={userStore.selectedModel}
 								onModelSelect={handleModelSelect}
 							/>
-						</div>
-						<span
-							style={{
-								color: "white",
-								fontWeight: "500",
-								textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-							}}
-						>
-							with
-						</span>
-						<div
-							className="glass-button"
-							style={{
-								background: "rgba(255, 255, 255, 0.2)",
-								border: "1px solid rgba(255, 255, 255, 0.3)",
-								borderRadius: "12px",
-								padding: "10px 16px",
-								backdropFilter: "blur(10px)",
-								transition: "all 0.3s ease",
-								display: "flex",
-								alignItems: "center",
-								gap: "4px",
-							}}
-						>
-							<OptimismLevelSelector
-								availableOptimismLevels={OPTIMISM_LEVELS}
-								selectedOptimism={userStore.selectedOptimism}
-								setOptimism={userStore.setSelectedOptimism}
-							/>
-							<span
-								style={{
-									color: "white",
-									fontWeight: "500",
-								}}
-							>
-								&nbsp;predictions
-							</span>
 						</div>
 						<div
 							className="glass-button"

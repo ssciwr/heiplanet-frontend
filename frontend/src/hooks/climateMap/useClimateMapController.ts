@@ -11,15 +11,15 @@ import { modelOutputStore } from "../../stores/ModelOutputStore";
 import type { UserSelectionsForClimateQueryStore } from "../../stores/UserSelectionsForClimateQueryStore";
 import type { Model } from "../../types/model";
 
-type UseClimateMapDataFlowArgs = {
-	models: Model[];
+type UseClimateMapControllerArgs = {
+	selectedModelData?: Model;
 	uiStore: MapUIInteractionsStore;
 	userStore: UserSelectionsForClimateQueryStore;
 };
 
 /** The options we currently read to / derive the full request from
 For example, when mapMode is Grid, this then includes the viewport (max/min x-y + resolution derived from current zoom).
-	For that grid scenario see UseGridMapDataArgs which includes this alongside Grid query data.
+	For that grid scenario see UseGridDataArgs which includes this alongside Grid query data.
 
  In the future, Optimism could also be here (as that spans all grid modes)
 
@@ -36,7 +36,7 @@ type ClimateQueryAwareArgs = {
 	climateQueryInputKey: string;
 };
 
-type UseGridMapDataArgs = UseClimateMapDataFlowArgs &
+type UseGridDataArgs = UseClimateMapControllerArgs &
 	Pick<ClimateQueryAwareArgs, "climateQueryInput"> & {
 		mapViewportBounds: typeof mapDataStore.mapViewportBounds;
 		dataResolution: typeof mapDataStore.dataResolution;
@@ -104,20 +104,24 @@ const useResetMapProcessingErrorOnQueryChange = (
 // note: grid-only data flow.
 // this is only used in Grid mode, not NUTS mode.
 // NUTS mode uses regional GeoJSON rather than grid-cell rendering.
-const useGridModeData = ({
-	models,
+const useGridDataFlow = ({
+	selectedModelData,
 	uiStore,
 	userStore,
 	climateQueryInput,
 	mapViewportBounds,
 	dataResolution,
 	rawModelOutputDataPoints,
-}: UseGridMapDataArgs) => {
+}: UseGridDataArgs) => {
 	const latestGridLoadRequestRef = useRef(0);
 	const latestGridBuildRequestRef = useRef(0);
 	const rawModelOutputDataPointsLength = rawModelOutputDataPoints.length;
 
 	useEffect(() => {
+		if (!selectedModelData) {
+			return;
+		}
+
 		const loadData = async () => {
 			if (climateQueryInput.mapMode === "grid" && !mapViewportBounds) {
 				console.log("Skipping grid data load until viewport is available");
@@ -134,8 +138,7 @@ const useGridModeData = ({
 						await modelOutputLoader.loadGridData({
 							year: climateQueryInput.currentYear,
 							month: climateQueryInput.currentMonth,
-							models,
-							selectedModel: climateQueryInput.selectedModel,
+							selectedModelData,
 							viewportBounds: mapViewportBounds,
 							requestedGridResolution: dataResolution,
 						});
@@ -192,8 +195,7 @@ const useGridModeData = ({
 		climateQueryInput.mapMode,
 		climateQueryInput.currentYear,
 		climateQueryInput.currentMonth,
-		climateQueryInput.selectedModel,
-		models,
+		selectedModelData,
 		uiStore.setUserRequestedYear,
 		uiStore.setUserRequestedMonth,
 		uiStore.setNoDataModalVisible,
@@ -217,14 +219,6 @@ const useGridModeData = ({
 		const processGridData = async () => {
 			if (rawModelOutputDataPointsLength > 0) {
 				const gridBuildRequestId = ++latestGridBuildRequestRef.current;
-				const outputValues = rawModelOutputDataPoints.map(
-					(point) => point.modelOutputValue,
-				);
-				modelOutputStore.setProcessedDataExtremes({
-					min: Math.min(...outputValues),
-					max: Math.max(...outputValues),
-				});
-
 				const nextGridCells =
 					gridProcessingStore.generateGridCellsFromTemperatureData(
 						rawModelOutputDataPoints,
@@ -254,19 +248,20 @@ const useGridModeData = ({
 	]);
 };
 
-const useEuropeNutsData = ({
-	models,
+const useEuropeNutsFlow = ({
+	selectedModelData,
 	uiStore,
 	userStore,
 	climateQueryInput,
-}: UseClimateMapDataFlowArgs &
+}: UseClimateMapControllerArgs &
 	Pick<ClimateQueryAwareArgs, "climateQueryInput">) => {
 	const latestEuropeLoadRequestRef = useRef(0);
 
 	useEffect(() => {
 		if (
 			climateQueryInput.mapMode !== "europe-only" ||
-			uiStore.dataProcessingError
+			uiStore.dataProcessingError ||
+			!selectedModelData
 		) {
 			return;
 		}
@@ -288,8 +283,7 @@ const useEuropeNutsData = ({
 					await modelOutputLoader.loadEuropeNutsData({
 						year: climateQueryInput.currentYear,
 						month: climateQueryInput.currentMonth,
-						models,
-						selectedModel: climateQueryInput.selectedModel,
+						selectedModelData,
 					});
 				if (requestId !== latestEuropeLoadRequestRef.current) {
 					return;
@@ -362,9 +356,8 @@ const useEuropeNutsData = ({
 		climateQueryInput.mapMode,
 		climateQueryInput.currentYear,
 		climateQueryInput.currentMonth,
-		climateQueryInput.selectedModel,
 		uiStore.dataProcessingError,
-		models,
+		selectedModelData,
 		userStore,
 		userStore.setCurrentVariableType,
 		uiStore.setDataProcessingError,
@@ -386,11 +379,11 @@ const useClearMapHoverTimeoutOnUnmount = (uiStore: MapUIInteractionsStore) => {
 	}, [uiStore, uiStore.mapHoverTimeout]);
 };
 
-export const useClimateMapDataFlow = ({
-	models,
+export const useClimateMapController = ({
+	selectedModelData,
 	uiStore,
 	userStore,
-}: UseClimateMapDataFlowArgs) => {
+}: UseClimateMapControllerArgs) => {
 	const mapViewportBounds = mapDataStore.mapViewportBounds;
 	const dataResolution = mapDataStore.dataResolution;
 	const rawModelOutputDataPoints = modelOutputStore.rawModelOutputDataPoints;
@@ -398,8 +391,8 @@ export const useClimateMapDataFlow = ({
 	const climateQueryInputKey = getClimateQueryInputKey(climateQueryInput);
 
 	useResetMapProcessingErrorOnQueryChange(uiStore, climateQueryInputKey);
-	useGridModeData({
-		models,
+	useGridDataFlow({
+		selectedModelData,
 		uiStore,
 		userStore,
 		climateQueryInput,
@@ -407,8 +400,8 @@ export const useClimateMapDataFlow = ({
 		dataResolution,
 		rawModelOutputDataPoints,
 	});
-	useEuropeNutsData({
-		models,
+	useEuropeNutsFlow({
+		selectedModelData,
 		uiStore,
 		userStore,
 		climateQueryInput,
