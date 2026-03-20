@@ -50,8 +50,8 @@ const NoDataModal = ({
 				<strong>{requestedYear}</strong> does not have any data available.
 			</p>
 			<p>
-				You can try loading the current year ({currentYear}) which may have more
-				recent data, or select a different month/year from the timeline.
+				You can try loading the current year ({currentYear}) if newer data has
+				been loaded, or select a different month/year from the timeline.
 			</p>
 			{errorMessage && (
 				<p style={{ color: "#999", fontSize: "12px", marginTop: "16px" }}>

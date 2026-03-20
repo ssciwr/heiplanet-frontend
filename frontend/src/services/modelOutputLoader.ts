@@ -8,7 +8,10 @@ import type {
 import { calculateExtremes } from "../component/Mapper/utilities/mapDataUtils";
 import type { Model } from "../types/model";
 import { fetchClimateData } from "./climateDataService";
-import { resolveOutputVariable } from "./modelCardService";
+import {
+	resolveOutputVariable,
+	resolveRequestVariable,
+} from "./modelCardService";
 import { fetchNutsData } from "./nutsDataService";
 
 type GridDataRequest = {
@@ -41,9 +44,11 @@ type EuropeNutsDataResult = {
 const getRequestedVariableValue = (selectedModelData?: Model) => {
 	return {
 		requestedVariableValue: selectedModelData
-			? resolveOutputVariable(selectedModelData)
+			? resolveRequestVariable(selectedModelData)
 			: "R0",
-		outputFormat: selectedModelData?.output,
+		outputFormat: selectedModelData
+			? [resolveOutputVariable(selectedModelData)]
+			: undefined,
 	};
 };
 

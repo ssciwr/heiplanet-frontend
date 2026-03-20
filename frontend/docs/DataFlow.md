@@ -54,6 +54,16 @@ You should be able to modify the build-time models meta data to provide model pa
 ### NUTS:
 ClimateMap.tsx -> useClimateMapController -> useEuropeNutsFlow -> modelOutputLoader.loadEuropeNutsData(...) -> nutsDataService.fetchNutsData(...) -> /api/nuts_data -> RegionProcessor.processEuropeOnlyRegionsFromApi(...)
 -> MapDataStore.setProcessedEuropeNutsRegions(...) + ModelOutputStore.setProcessedDataExtremes(...) -> MapLayers.tsx
+#### Sample working request URL
+http://localhost:5173/api/nuts_data?requested_time_point=2025-07-01&requested_variable_type=R0&requested_grid_resolution=NUTS3
+
+Notice "R0" has a capitalized R0, and this works this way for now because of a workaround in the backend...
+Because of  this line in heiplanet_db:
+var_name = (
+"R0" if requested_variable_type == "r0_estimate" else requested_variable_type
+)
+
+even though r0_estimate is defined in the yaml file.
 
 
 ### Grid:

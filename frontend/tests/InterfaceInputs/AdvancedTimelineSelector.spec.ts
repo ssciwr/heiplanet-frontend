@@ -46,10 +46,16 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 			// Ignore if no modal to close
 		}
 
-		const mapModeSelect = page.locator(".ant-select-selector").last();
-		await mapModeSelect.click({ force: true });
-		await page.keyboard.press("ArrowDown");
-		await page.keyboard.press("Enter");
+		await page.locator(".ant-select-selector").last().click({ force: true });
+		await page
+			.locator(
+				".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option",
+			)
+			.filter({ hasText: "Grid" })
+			.dispatchEvent("click");
+		await expect(
+			page.locator(".ant-select-selection-item").last(),
+		).toContainText("Grid");
 
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
@@ -204,10 +210,16 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 			// Ignore if no modal to close
 		}
 
-		const mapModeSelect = page.locator(".ant-select-selector").last();
-		await mapModeSelect.click({ force: true });
-		await page.keyboard.press("ArrowDown");
-		await page.keyboard.press("Enter");
+		await page.locator(".ant-select-selector").last().click({ force: true });
+		await page
+			.locator(
+				".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option",
+			)
+			.filter({ hasText: "Grid" })
+			.dispatchEvent("click");
+		await expect(
+			page.locator(".ant-select-selection-item").last(),
+		).toContainText("Grid");
 
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);

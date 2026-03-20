@@ -1,7 +1,7 @@
 import type { Model } from "../types/model";
 
 const DEFAULT_OUTPUT_VARIABLE = "R0";
-const MODEL_METADATA_API_URL = "/api/models";
+const MODEL_METADATA_URL = "/model-metadata/models.v1.json";
 
 type ModelApiPayload = Model[] | { models?: Model[] };
 
@@ -32,6 +32,10 @@ export const resolveOutputVariable = (model: Model): string => {
 			? model.output[0].trim()
 			: "";
 	return firstOutput || DEFAULT_OUTPUT_VARIABLE;
+};
+
+export const resolveRequestVariable = (model: Model): string => {
+	return resolveOutputVariable(model);
 };
 
 const normalizeModel = (model: Model): Model => {
@@ -77,5 +81,5 @@ const fetchModelsFromUrl = async (url: string): Promise<Model[]> => {
 };
 
 export const fetchModelCards = async (): Promise<Model[]> => {
-	return fetchModelsFromUrl(MODEL_METADATA_API_URL);
+	return fetchModelsFromUrl(MODEL_METADATA_URL);
 };

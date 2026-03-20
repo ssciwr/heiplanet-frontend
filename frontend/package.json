@@ -5,7 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc -b && vite build",
+		"build:model-metadata": "uv run --with datasets --with pyyaml python scripts/build_model_metadata.py",
+		"build:model-metadata:local": "node scripts/build-model-metadata-local.mjs",
+		"build": "pnpm run build:model-metadata && tsc -b && vite build",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test": "pnpm exec playwright test",
