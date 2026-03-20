@@ -14,8 +14,7 @@ import { fetchNutsData } from "./nutsDataService";
 type GridDataRequest = {
 	year: number;
 	month: Month;
-	models: Model[];
-	selectedModel: string;
+	selectedModelData?: Model;
 	viewportBounds: ViewportBounds | null;
 	requestedGridResolution: number;
 };
@@ -23,8 +22,7 @@ type GridDataRequest = {
 type EuropeNutsDataRequest = {
 	year: number;
 	month: Month;
-	models: Model[];
-	selectedModel: string;
+	selectedModelData?: Model;
 };
 
 type GridDataResult = {
@@ -40,8 +38,7 @@ type EuropeNutsDataResult = {
 	safeMonth: Month;
 };
 
-const getRequestedVariableValue = (models: Model[], selectedModel: string) => {
-	const selectedModelData = models.find((model) => model.id === selectedModel);
+const getRequestedVariableValue = (selectedModelData?: Model) => {
 	return {
 		requestedVariableValue: selectedModelData
 			? resolveOutputVariable(selectedModelData)
@@ -53,16 +50,13 @@ const getRequestedVariableValue = (models: Model[], selectedModel: string) => {
 const loadGridData = async ({
 	year,
 	month,
-	models,
-	selectedModel,
+	selectedModelData,
 	viewportBounds,
 	requestedGridResolution,
 }: GridDataRequest): Promise<GridDataResult> => {
 	const safeMonth = (month || 7) as Month;
-	const { requestedVariableValue, outputFormat } = getRequestedVariableValue(
-		models,
-		selectedModel,
-	);
+	const { requestedVariableValue, outputFormat } =
+		getRequestedVariableValue(selectedModelData);
 	const apiData = await fetchClimateData(
 		year,
 		safeMonth,
@@ -90,7 +84,7 @@ const loadGridData = async ({
 
 	return {
 		dataPoints,
-		extremes: calculateExtremes(dataPoints),
+		extremes: calculateExtremes(dataPoints, false),
 		requestedVariableValue,
 		safeMonth,
 	};
@@ -99,14 +93,11 @@ const loadGridData = async ({
 const loadEuropeNutsData = async ({
 	year,
 	month,
-	models,
-	selectedModel,
+	selectedModelData,
 }: EuropeNutsDataRequest): Promise<EuropeNutsDataResult> => {
 	const safeMonth = (month || 7) as Month;
-	const { requestedVariableValue } = getRequestedVariableValue(
-		models,
-		selectedModel,
-	);
+	const { requestedVariableValue } =
+		getRequestedVariableValue(selectedModelData);
 
 	return {
 		nutsApiData: await fetchNutsData(
