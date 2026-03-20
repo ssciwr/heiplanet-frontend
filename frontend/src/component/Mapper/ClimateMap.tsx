@@ -6,8 +6,8 @@ import "./Map.css";
 import { observer } from "mobx-react-lite";
 import { isMobile } from "react-device-detect";
 import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
+import { useClimateMapDataFlow } from "../../hooks/climateMap/useClimateMapDataFlow";
 import { useClimateMapViewport } from "../../hooks/climateMap/useClimateMapViewport";
-import { useLoadAndProcessVisibleMapDataFromClimateQueryAndViewport } from "../../hooks/climateMap/useLoadAndProcessVisibleMapDataFromClimateQueryAndViewport";
 import { useMapControls } from "../../hooks/useMapControls";
 import { useMapScreenshot } from "../../hooks/useMapScreenshot";
 import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
@@ -69,7 +69,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		useMapControls(mapDataStore.leafletMapInstance);
 	const handleViewportChange = useClimateMapViewport();
 
-	useLoadAndProcessVisibleMapDataFromClimateQueryAndViewport({
+	useClimateMapDataFlow({
 		models,
 		uiStore,
 		userStore,
