@@ -50,18 +50,6 @@ export const getVariableUnit = (variableValue: string): string => {
 
 // Variable to display name mapping for popup display
 export const getVariableDisplayName = (variableValue: string): string => {
-	const displayNameMap: { [key: string]: string } = {
-		R0: "R0",
-		t2m: "Temperature (2m above ground)",
-		temperature: "Temperature",
-		temp: "Temperature",
-		// Add more mappings as needed
-	};
-
-	if (displayNameMap[variableValue]) {
-		return displayNameMap[variableValue];
-	}
-
 	const normalizedVariable = variableValue
 		.replace(/_/g, " ")
 		.trim()
@@ -70,6 +58,8 @@ export const getVariableDisplayName = (variableValue: string): string => {
 	return normalizedVariable
 		? `${normalizedVariable.charAt(0).toUpperCase()}${normalizedVariable.slice(1)}`
 		: variableValue;
+	// Further info for variables can be placed in thev ariable or a second field e.g. "model_output_variable_sentence"
+	// which can go in brackets after the variable.
 };
 
 // Get formatted variable value with unit for display

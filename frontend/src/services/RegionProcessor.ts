@@ -1,24 +1,24 @@
 import * as turf from "@turf/turf";
 import type {
+	ModelOutputDataPoint,
 	NutsGeoJSON,
-	TemperatureDataPoint,
 } from "../component/Mapper/types";
 import { nutsConverter } from "../component/Mapper/utilities/NutsConverter";
 
 export interface RegionTemperatureResult {
-	temperature: number | null;
+	modelOutputValue: number | null;
 	isFallback: boolean;
 	currentPosition: { lat: number; lng: number };
 	nearestDataPoint: { lat: number; lng: number } | null;
-	dataPoints: TemperatureDataPoint[];
+	dataPoints: ModelOutputDataPoint[];
 }
 
 export class RegionProcessor {
 	// Sample temperature data to reduce processing load
 	public sampleTemperatureData(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 		sampleRate = 0.5,
-	): TemperatureDataPoint[] {
+	): ModelOutputDataPoint[] {
 		const sampleSize = Math.max(
 			1,
 			Math.floor(temperatureData.length * sampleRate),
@@ -42,7 +42,7 @@ export class RegionProcessor {
 	// Calculate temperature and coordinate info for a region
 	public calculateRegionTemperatureWithCoords(
 		regionFeature: GeoJSON.Feature,
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 	): RegionTemperatureResult {
 		const regionName =
 			regionFeature.properties?.name ||
@@ -80,11 +80,11 @@ export class RegionProcessor {
 			);
 			console.log(
 				`Region ${regionName}: using nearest point fallback, temp: ${
-					nearestPoint ? nearestPoint.temperature : "null"
+					nearestPoint ? nearestPoint.modelOutputValue : "null"
 				}`,
 			);
 			return {
-				temperature: nearestPoint ? nearestPoint.temperature : null,
+				modelOutputValue: nearestPoint ? nearestPoint.modelOutputValue : null,
 				isFallback: true,
 				currentPosition,
 				nearestDataPoint: nearestPoint
@@ -99,13 +99,13 @@ export class RegionProcessor {
 
 		// Calculate average temperature
 		const avgTemp =
-			pointsInRegion.reduce((sum, point) => sum + point.temperature, 0) /
+			pointsInRegion.reduce((sum, point) => sum + point.modelOutputValue, 0) /
 			pointsInRegion.length;
 		console.log(
 			`Region ${regionName}: calculated average temp: ${avgTemp} from ${pointsInRegion.length} points`,
 		);
 		return {
-			temperature: avgTemp,
+			modelOutputValue: avgTemp,
 			isFallback: false,
 			currentPosition,
 			nearestDataPoint: null,
@@ -199,8 +199,8 @@ export class RegionProcessor {
 	// Find nearest temperature point to a region using turf.js
 	public findNearestPoint(
 		regionFeature: GeoJSON.Feature,
-		temperatureData: TemperatureDataPoint[],
-	): TemperatureDataPoint | null {
+		temperatureData: ModelOutputDataPoint[],
+	): ModelOutputDataPoint | null {
 		try {
 			// Get centroid of the region using turf.js
 			const polygon = turf.feature(regionFeature.geometry);
@@ -257,7 +257,7 @@ export class RegionProcessor {
 
 	// Process Europe-only regions (legacy method - kept for backward compatibility)
 	public async processEuropeOnlyRegions(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 		currentYear: number,
 	): Promise<{
 		nutsGeoJSON: NutsGeoJSON;

@@ -25,7 +25,7 @@ const AdaptiveGridLayer = observer(() => {
 		hasExtremes: !!processedDataExtremes,
 	});
 
-	const getGridCellStyle = (temperature: number) => {
+	const getGridCellStyle = (modelOutputValue: number) => {
 		if (!processedDataExtremes)
 			return {
 				fillColor: "#ccc",
@@ -34,7 +34,7 @@ const AdaptiveGridLayer = observer(() => {
 				color: "#000",
 				fillOpacity: 0.8,
 			};
-		const color = getColorFromGradient(temperature, processedDataExtremes);
+		const color = getColorFromGradient(modelOutputValue, processedDataExtremes);
 		return {
 			fillColor: color,
 			weight: 0.2,
@@ -55,7 +55,7 @@ const AdaptiveGridLayer = observer(() => {
 				bounds={cell.bounds}
 				renderer={canvasRenderer}
 				interactive
-				pathOptions={getGridCellStyle(cell.temperature)}
+				pathOptions={getGridCellStyle(cell.modelOutputValue)}
 				eventHandlers={{
 					click: (e) => {
 						e.target.openPopup();
@@ -64,12 +64,12 @@ const AdaptiveGridLayer = observer(() => {
 				}}
 			>
 				<Popup className="grid-popup" pane="popupPane">
-					<p>{cell.temperature.toFixed(2)}</p>
+					<p>{cell.modelOutputValue.toFixed(2)}</p>
 					<p>Coordinates: {JSON.stringify(cell.bounds)}</p>
 				</Popup>
 			</Rectangle>
 		),
-	); // todo: Replace just teh cell.temperature above: rename temperature to .value (as it is used for R0 too etc) and provide the label.
+	);
 	// the label should be in some kind of mobx store or passed as prop.
 	// todo: Check this again. This relates to Ingas suggested changes today
 	// Cruically, the label here in this concept may become the yaml "model output yaml" or so

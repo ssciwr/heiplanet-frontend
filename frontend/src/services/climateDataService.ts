@@ -1,7 +1,7 @@
 export interface ClimateDataPoint {
 	latitude: number;
 	longitude: number;
-	temperature: number;
+	modelOutputValue: number;
 }
 
 export interface ClimateApiResponse {
@@ -194,17 +194,17 @@ export async function fetchClimateData(
 		for (const row of rawRows) {
 			const latitude = Number(row[0]);
 			const longitude = Number(row[1]);
-			const temperature = Number(row[2]);
+			const modelOutputValue = Number(row[2]);
 
 			if (
 				Number.isFinite(latitude) &&
 				Number.isFinite(longitude) &&
-				Number.isFinite(temperature)
+				Number.isFinite(modelOutputValue)
 			) {
 				normalizedRows.push({
 					latitude, // "longitude": latitude,
 					longitude, // "latitude": longitude,
-					temperature,
+					modelOutputValue,
 				});
 			}
 		}

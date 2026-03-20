@@ -4,7 +4,7 @@ import * as L from "leaflet";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { fetchClimateData } from "../../../services/climateDataService.ts";
-import type { DataExtremes, TemperatureDataPoint } from "../types.ts";
+import type { DataExtremes, ModelOutputDataPoint } from "../types.ts";
 import { getVariableDisplayName } from "./monthUtils";
 
 const NUTS_DATA_API_URL = "/api/nuts_data";
@@ -311,31 +311,31 @@ export const Legend = ({
 };
 
 export const calculateExtremes = (
-	data: TemperatureDataPoint[],
+	data: ModelOutputDataPoint[],
 	calculatePercentiles = true,
 ): DataExtremes => {
 	if (!data || data.length === 0) return { min: 0, max: 0 };
 
-	const temperatures = data
-		.map((point) => point.temperature)
-		.filter((temp) => !Number.isNaN(temp));
+	const modelOutputValues = data
+		.map((point) => point.modelOutputValue)
+		.filter((value) => !Number.isNaN(value));
 
-	if (temperatures.length === 0) return { min: 0, max: 0 };
+	if (modelOutputValues.length === 0) return { min: 0, max: 0 };
 
 	if (calculatePercentiles) {
-		const sortedTemps = [...temperatures].sort((a, b) => a - b);
-		const p5Index = Math.floor((25 / 100) * (sortedTemps.length - 1));
-		const p95Index = Math.floor((75 / 100) * (sortedTemps.length - 1));
+		const sortedValues = [...modelOutputValues].sort((a, b) => a - b);
+		const p5Index = Math.floor((25 / 100) * (sortedValues.length - 1));
+		const p95Index = Math.floor((75 / 100) * (sortedValues.length - 1));
 
 		return {
-			min: sortedTemps[p5Index],
-			max: sortedTemps[p95Index],
+			min: sortedValues[p5Index],
+			max: sortedValues[p95Index],
 		};
 	}
 
 	return {
-		min: Math.min(...temperatures),
-		max: Math.max(...temperatures),
+		min: Math.min(...modelOutputValues),
+		max: Math.max(...modelOutputValues),
 	};
 };
 
@@ -425,7 +425,8 @@ const normalizeNutsApiResponse = (
 
 	if (Array.isArray(result)) {
 		if (result.length === 0) return {};
-
+		// todo: there is a purpose behind this because lat/lon were sometiems string... but it's very preferably to instead
+		// change actual returned data type or use OpenAPI types to this kind of code imo.
 		if (Array.isArray(result[0])) {
 			const mapped: { [nutsId: string]: number } = {};
 			for (const row of result as unknown[]) {
@@ -437,7 +438,7 @@ const normalizeNutsApiResponse = (
 			}
 			if (Object.keys(mapped).length > 0) return mapped;
 		}
-
+		// todo: Consolidate now we return var_value in grids and value in NUTS?
 		if (typeof result[0] === "object" && result[0] !== null) {
 			const mapped: { [nutsId: string]: number } = {};
 			for (const row of result as Record<string, unknown>[]) {
@@ -448,7 +449,7 @@ const normalizeNutsApiResponse = (
 				const value =
 					(row.var_value as number | undefined) ??
 					(row.value as number | undefined) ??
-					(row.temperature as number | undefined);
+					(row.temperature as number | undefined); // todo should be removed/updated.. I believe now obsolete
 				if (typeof nutsId === "string" && typeof value === "number") {
 					mapped[nutsId] = value;
 				}
@@ -458,6 +459,7 @@ const normalizeNutsApiResponse = (
 	}
 
 	if (typeof result === "object") {
+		// todo; This is also a bit superfluous and this way because of NUTS/europe data.
 		const obj = result as Record<string, unknown>;
 
 		if (Array.isArray(obj.nuts_id) && Array.isArray(obj.var_value)) {
@@ -489,7 +491,7 @@ const normalizeNutsApiResponse = (
 export const loadTemperatureData = async (
 	year: number,
 	month: number,
-	requestedVariableValue = "R0",
+	requestedVariableValue = "R0", // e.g. model_output_variable
 	outputFormat?: string[],
 	viewportBounds?: {
 		north: number;
@@ -499,11 +501,13 @@ export const loadTemperatureData = async (
 	} | null,
 	requestedGridResolution?: number,
 ): Promise<{
-	dataPoints: TemperatureDataPoint[];
+	dataPoints: ModelOutputDataPoint[];
 	extremes: DataExtremes;
 	bounds: L.LatLngBounds | null;
 }> => {
 	const funcStart = performance.now();
+	// todo: reduce LoC needed for these (AI-generated) console logs and performance calls. Even the line breaks...
+	// it's partially forced by linters but still...
 	console.log(
 		"🌍 loadTemperatureData START - year:",
 		year,
@@ -535,25 +539,25 @@ export const loadTemperatureData = async (
 		);
 
 		const processStart = performance.now();
-		const dataPoints: TemperatureDataPoint[] = [];
+		const dataPoints: ModelOutputDataPoint[] = [];
 
 		for (let i = 0; i < apiData.length; i++) {
-			const { latitude: lat, longitude: lng, temperature } = apiData[i];
+			const { latitude: lat, longitude: lng, modelOutputValue } = apiData[i];
 
 			if (i % 100000 === 0) {
 				console.log(
-					`🔄 Processing point ${i}/${apiData.length} - Lat: ${lat}, Long: ${lng}, Temp: ${temperature}`,
+					`🔄 Processing point ${i}/${apiData.length} - Lat: ${lat}, Long: ${lng}, Value: ${modelOutputValue}`,
 				);
 			}
 
 			if (
 				Number.isFinite(lat) &&
 				Number.isFinite(lng) &&
-				Number.isFinite(temperature)
+				Number.isFinite(modelOutputValue)
 			) {
 				dataPoints.push({
 					point: turf.point([lng, lat]),
-					temperature: temperature,
+					modelOutputValue,
 					lat: lat,
 					lng: lng,
 				});

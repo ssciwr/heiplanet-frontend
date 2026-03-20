@@ -1,8 +1,8 @@
 import { makeAutoObservable } from "mobx";
 import type {
 	DataExtremes,
+	ModelOutputDataPoint,
 	Month,
-	TemperatureDataPoint,
 	WorldwideGeoJSON,
 } from "../component/Mapper/types";
 import {
@@ -17,7 +17,7 @@ import { loadingStore } from "./LoadingStore";
 const NATURAL_EARTH_URL = "/downsampled_initial.geojson";
 
 export class ModelOutputStore {
-	rawModelOutputPoints: TemperatureDataPoint[] = [];
+	rawModelOutputDataPoints: ModelOutputDataPoint[] = [];
 	processedDataExtremes: DataExtremes | null = null;
 	countryBoundaryOverlay: WorldwideGeoJSON | null = null;
 	private latestTemperatureLoadRequestId = 0;
@@ -26,8 +26,8 @@ export class ModelOutputStore {
 		makeAutoObservable(this);
 	}
 
-	setRawModelOutputPoints = (data: TemperatureDataPoint[]) => {
-		this.rawModelOutputPoints = data;
+	setRawModelOutputDataPoints = (data: ModelOutputDataPoint[]) => {
+		this.rawModelOutputDataPoints = data;
 	};
 
 	setProcessedDataExtremes = (extremes: DataExtremes | null) => {
@@ -100,7 +100,7 @@ export class ModelOutputStore {
 				return;
 			}
 
-			this.setRawModelOutputPoints(dataPoints);
+			this.setRawModelOutputDataPoints(dataPoints);
 			this.setProcessedDataExtremes(extremes);
 			loadingStore.complete();
 			setIsLoadingRawData(false);
@@ -114,7 +114,7 @@ export class ModelOutputStore {
 			setIsLoadingRawData(false);
 
 			if (error.message.includes("API_ERROR:")) {
-				this.setRawModelOutputPoints([]);
+				this.setRawModelOutputDataPoints([]);
 				this.setProcessedDataExtremes(null);
 				const errorMsg = error.message.replace("API_ERROR: ", "");
 				setDataFetchErrorMessage(errorMsg);
