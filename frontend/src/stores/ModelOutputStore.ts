@@ -1,6 +1,5 @@
 import { makeAutoObservable } from "mobx";
 import type {
-	DataExtremes,
 	ModelOutputDataPoint,
 	WorldwideGeoJSON,
 } from "../component/Mapper/types";
@@ -9,7 +8,6 @@ const NATURAL_EARTH_URL = "/downsampled_initial.geojson";
 
 export class ModelOutputStore {
 	rawModelOutputDataPoints: ModelOutputDataPoint[] = [];
-	processedDataExtremes: DataExtremes | null = null;
 	countryBoundaryOverlay: WorldwideGeoJSON | null = null;
 
 	constructor() {
@@ -18,10 +16,6 @@ export class ModelOutputStore {
 
 	setRawModelOutputDataPoints = (data: ModelOutputDataPoint[]) => {
 		this.rawModelOutputDataPoints = data;
-	};
-
-	setProcessedDataExtremes = (extremes: DataExtremes | null) => {
-		this.processedDataExtremes = extremes;
 	};
 
 	setCountryBoundaryOverlay = (data: WorldwideGeoJSON | null) => {

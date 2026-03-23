@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
-import type { ModelOutputDataPoint } from "../../component/Mapper/types";
+import type {
+	DataExtremes,
+	ModelOutputDataPoint,
+} from "../../component/Mapper/types";
 import { regionProcessor } from "../../services/RegionProcessor";
 import { modelOutputLoader } from "../../services/modelOutputLoader";
 import { errorStore } from "../../stores/ErrorStore";
@@ -13,6 +16,7 @@ import type { Model } from "../../types/model";
 
 type UseClimateDataLoaderArgs = {
 	selectedModelData?: Model;
+	setProcessedDataExtremes: (extremes: DataExtremes | null) => void;
 	uiStore: MapUIInteractionsStore;
 	userStore: UserSelectionsForClimateQueryStore;
 };
@@ -96,6 +100,7 @@ const useResetMapProcessingErrorOnQueryChange = (
 
 const useGridDataFlow = ({
 	selectedModelData,
+	setProcessedDataExtremes,
 	uiStore,
 	userStore,
 	climateQueryInput,
@@ -114,6 +119,7 @@ const useGridDataFlow = ({
 
 		const loadData = async () => {
 			if (climateQueryInput.mapMode === "grid" && !mapViewportBounds) {
+				setProcessedDataExtremes(null);
 				console.log("Skipping grid data load until viewport is available");
 				return;
 			}
@@ -140,7 +146,7 @@ const useGridDataFlow = ({
 					uiStore.setUserRequestedYear(climateQueryInput.currentYear);
 					uiStore.setUserRequestedMonth(safeMonth);
 					modelOutputStore.setRawModelOutputDataPoints(dataPoints);
-					modelOutputStore.setProcessedDataExtremes(extremes);
+					setProcessedDataExtremes(extremes);
 
 					if (!modelOutputStore.countryBoundaryOverlay) {
 						await modelOutputStore.loadCountryBoundaryOverlay();
@@ -151,9 +157,10 @@ const useGridDataFlow = ({
 						return;
 					}
 
+					setProcessedDataExtremes(null);
+
 					if (error.message.includes("API_ERROR:")) {
 						modelOutputStore.setRawModelOutputDataPoints([]);
-						modelOutputStore.setProcessedDataExtremes(null);
 						uiStore.setUserRequestedYear(climateQueryInput.currentYear);
 						uiStore.setUserRequestedMonth(climateQueryInput.currentMonth);
 						uiStore.setDataFetchErrorMessage(
@@ -193,6 +200,7 @@ const useGridDataFlow = ({
 		uiStore.setGeneralError,
 		mapViewportBounds,
 		dataResolution,
+		setProcessedDataExtremes,
 	]);
 
 	useEffect(() => {
@@ -240,6 +248,7 @@ const useGridDataFlow = ({
 
 const useEuropeNutsFlow = ({
 	selectedModelData,
+	setProcessedDataExtremes,
 	uiStore,
 	userStore,
 	climateQueryInput,
@@ -259,6 +268,7 @@ const useEuropeNutsFlow = ({
 		const clearEuropeMapDataState = () => {
 			mapDataStore.setProcessedEuropeNutsRegions(null);
 			mapDataStore.setIsProcessingEuropeNutsData(true);
+			setProcessedDataExtremes(null);
 		};
 
 		const processEuropeData = async () => {
@@ -297,7 +307,7 @@ const useEuropeNutsFlow = ({
 					return;
 				}
 				mapDataStore.setProcessedEuropeNutsRegions(nutsGeoJSON);
-				modelOutputStore.setProcessedDataExtremes(extremes);
+				setProcessedDataExtremes(extremes);
 			} catch (error) {
 				if (requestId !== latestEuropeLoadRequestRef.current) {
 					return;
@@ -309,6 +319,7 @@ const useEuropeNutsFlow = ({
 				}
 
 				console.error("Failed to load/process Europe-only NUTS data:", error);
+				setProcessedDataExtremes(null);
 				if (
 					error instanceof Error &&
 					(error.message === "NO_DATA" || error.message.includes("API_ERROR:"))
@@ -353,6 +364,7 @@ const useEuropeNutsFlow = ({
 		uiStore.setUserRequestedMonth,
 		uiStore.setDataFetchErrorMessage,
 		uiStore.setNoDataModalVisible,
+		setProcessedDataExtremes,
 	]);
 };
 
@@ -368,6 +380,7 @@ const useClearMapHoverTimeoutOnUnmount = (uiStore: MapUIInteractionsStore) => {
 
 export const useClimateDataLoader = ({
 	selectedModelData,
+	setProcessedDataExtremes,
 	uiStore,
 	userStore,
 }: UseClimateDataLoaderArgs) => {
@@ -380,6 +393,7 @@ export const useClimateDataLoader = ({
 	useResetMapProcessingErrorOnQueryChange(uiStore, climateQueryInputKey);
 	useGridDataFlow({
 		selectedModelData,
+		setProcessedDataExtremes,
 		uiStore,
 		userStore,
 		climateQueryInput,
@@ -389,6 +403,7 @@ export const useClimateDataLoader = ({
 	});
 	useEuropeNutsFlow({
 		selectedModelData,
+		setProcessedDataExtremes,
 		uiStore,
 		userStore,
 		climateQueryInput,

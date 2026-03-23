@@ -79,7 +79,7 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 				{/* Grid Mode Layer */}
 				{userStore.mapMode === "grid" && (
 					<Pane name="gridPane" style={{ zIndex: 340, opacity: 1.0 }}>
-						<AdaptiveGridLayer />
+						<AdaptiveGridLayer processedDataExtremes={processedDataExtremes} />
 						{modelOutputStore.countryBoundaryOverlay?.features && (
 							<GeoJSON
 								data={modelOutputStore.countryBoundaryOverlay}

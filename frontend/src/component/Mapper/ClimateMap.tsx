@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import ViewportMonitor from "./ViewportMonitor.tsx";
@@ -14,13 +14,13 @@ import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { useModelData } from "../../hooks/useModelData";
 import Footer from "../../static/Footer.tsx";
 import { mapDataStore } from "../../stores/MapDataStore";
-import { modelOutputStore } from "../../stores/ModelOutputStore";
 import AdvancedTimelineSelector from "./InterfaceInputs/AdvancedTimelineSelector.tsx";
 import MobileSideButtons from "./InterfaceInputs/MobileSideButtons.tsx";
 import LoadingSkeleton from "./LoadingSkeleton.tsx";
 import MapHeader from "./MapHeader.tsx";
 import MapLayers from "./MapLayers.tsx";
 import NoDataModal from "./NoDataModal.tsx";
+import type { DataExtremes } from "./types";
 import { Legend, MAX_ZOOM, MIN_ZOOM } from "./utilities/mapDataUtils";
 import { getVariableUnit } from "./utilities/monthUtils";
 
@@ -71,9 +71,12 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 	const selectedModelData = models.find(
 		(model) => model.id === userStore.selectedModel,
 	);
+	const [processedDataExtremes, setProcessedDataExtremes] =
+		useState<DataExtremes | null>(null);
 
 	useClimateDataLoader({
 		selectedModelData,
+		setProcessedDataExtremes,
 		uiStore,
 		userStore,
 	});
@@ -82,18 +85,18 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		onMount?.();
 	}, [onMount]);
 
-	const mobileLegend = modelOutputStore.processedDataExtremes ? (
+	const mobileLegend = processedDataExtremes ? (
 		<Legend
-			extremes={modelOutputStore.processedDataExtremes}
+			extremes={processedDataExtremes}
 			unit={getVariableUnit(userStore.currentVariableType)}
 		/>
 	) : (
 		<div />
 	);
 
-	const desktopLegend = modelOutputStore.processedDataExtremes ? (
+	const desktopLegend = processedDataExtremes ? (
 		<Legend
-			extremes={modelOutputStore.processedDataExtremes}
+			extremes={processedDataExtremes}
 			unit={getVariableUnit(userStore.currentVariableType)}
 		/>
 	) : null;
@@ -140,7 +143,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 								processedEuropeNutsRegions={
 									mapDataStore.processedEuropeNutsRegions
 								}
-								processedDataExtremes={modelOutputStore.processedDataExtremes}
+								processedDataExtremes={processedDataExtremes}
 							/>
 							<ViewportMonitor onViewportChange={handleViewportChange} />
 						</MapContainer>
