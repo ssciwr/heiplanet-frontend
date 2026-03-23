@@ -16,7 +16,10 @@ const getGridResolutionForZoom = (zoom: number) => {
 	return GRID_RESOLUTION_BY_ZOOM[clampedIndex];
 };
 
-// better name
+//This hook is mostly for managing input in for the viewport;
+/*
+Changes here trigger requesting of Grid data.
+ */
 export const useClimateMapViewport = () =>
 	useCallback((newViewport: { bounds: LatLngBounds; zoom: number }) => {
 		const bounds = newViewport.bounds;

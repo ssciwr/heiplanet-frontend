@@ -11,19 +11,12 @@ import { modelOutputStore } from "../../stores/ModelOutputStore";
 import type { UserSelectionsForClimateQueryStore } from "../../stores/UserSelectionsForClimateQueryStore";
 import type { Model } from "../../types/model";
 
-type UseClimateMapControllerArgs = {
+type UseClimateDataLoaderArgs = {
 	selectedModelData?: Model;
 	uiStore: MapUIInteractionsStore;
 	userStore: UserSelectionsForClimateQueryStore;
 };
 
-/** The options we currently read to / derive the full request from
-For example, when mapMode is Grid, this then includes the viewport (max/min x-y + resolution derived from current zoom).
-	For that grid scenario see UseGridDataArgs which includes this alongside Grid query data.
-
- In the future, Optimism could also be here (as that spans all grid modes)
-
-	*/
 type ClimateQueryInput = {
 	mapMode: UserSelectionsForClimateQueryStore["mapMode"];
 	currentYear: UserSelectionsForClimateQueryStore["currentYear"];
@@ -32,11 +25,11 @@ type ClimateQueryInput = {
 };
 
 type ClimateQueryAwareArgs = {
-	climateQueryInput: ClimateQueryInput; // Stored as raw data for reference for passing around as an object
+	climateQueryInput: ClimateQueryInput;
 	climateQueryInputKey: string;
 };
 
-type UseGridDataArgs = UseClimateMapControllerArgs &
+type UseGridDataArgs = UseClimateDataLoaderArgs &
 	Pick<ClimateQueryAwareArgs, "climateQueryInput"> & {
 		mapViewportBounds: typeof mapDataStore.mapViewportBounds;
 		dataResolution: typeof mapDataStore.dataResolution;
@@ -101,9 +94,6 @@ const useResetMapProcessingErrorOnQueryChange = (
 	]);
 };
 
-// note: grid-only data flow.
-// this is only used in Grid mode, not NUTS mode.
-// NUTS mode uses regional GeoJSON rather than grid-cell rendering.
 const useGridDataFlow = ({
 	selectedModelData,
 	uiStore,
@@ -253,7 +243,7 @@ const useEuropeNutsFlow = ({
 	uiStore,
 	userStore,
 	climateQueryInput,
-}: UseClimateMapControllerArgs &
+}: UseClimateDataLoaderArgs &
 	Pick<ClimateQueryAwareArgs, "climateQueryInput">) => {
 	const latestEuropeLoadRequestRef = useRef(0);
 
@@ -306,7 +296,6 @@ const useEuropeNutsFlow = ({
 				if (requestId !== latestEuropeLoadRequestRef.current) {
 					return;
 				}
-				// Now fill out the state we cleared...
 				mapDataStore.setProcessedEuropeNutsRegions(nutsGeoJSON);
 				modelOutputStore.setProcessedDataExtremes(extremes);
 			} catch (error) {
@@ -334,8 +323,6 @@ const useEuropeNutsFlow = ({
 					uiStore.setNoDataModalVisible(true);
 					uiStore.setDataProcessingError(false);
 					uiStore.setGeneralError(null);
-					/* This error handling is a little bit convulted but serves a purpose becuase we are not really
-					displaying one "homogenous" type of error */
 				} else {
 					uiStore.setDataProcessingError(true);
 					uiStore.setGeneralError("Failed to process Europe-only NUTS data");
@@ -379,11 +366,11 @@ const useClearMapHoverTimeoutOnUnmount = (uiStore: MapUIInteractionsStore) => {
 	}, [uiStore, uiStore.mapHoverTimeout]);
 };
 
-export const useClimateMapController = ({
+export const useClimateDataLoader = ({
 	selectedModelData,
 	uiStore,
 	userStore,
-}: UseClimateMapControllerArgs) => {
+}: UseClimateDataLoaderArgs) => {
 	const mapViewportBounds = mapDataStore.mapViewportBounds;
 	const dataResolution = mapDataStore.dataResolution;
 	const rawModelOutputDataPoints = modelOutputStore.rawModelOutputDataPoints;
