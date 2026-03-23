@@ -23,7 +23,7 @@ export interface ClimateApiRequest {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function fetchClimateData(
+export async function fetchGridData(
 	year: number,
 	month: number,
 	requestedVariableValue = "R0",
@@ -56,10 +56,10 @@ export async function fetchClimateData(
 	const requestedTimePoint = `${year}-${monthStr}-01`;
 
 	console.log(
-		`Fetching climate data for year: ${year}, month: ${month}, variable: ${requestedVariableValue}, date: ${requestedTimePoint}`,
+		`Fetching grid data for year: ${year}, month: ${month}, variable: ${requestedVariableValue}, date: ${requestedTimePoint}`,
 	);
 	console.log(
-		"📍 ViewportBounds parameter passed to fetchClimateData:",
+		"📍 ViewportBounds parameter passed to fetchGridData:",
 		viewportBounds,
 	);
 

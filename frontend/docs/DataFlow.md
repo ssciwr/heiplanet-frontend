@@ -9,7 +9,7 @@ The data flow is a little bit complicated, because we combine three types of inp
 For rendering, there are different outputs depending on the map mode, but we prefer most of the codebase (selecting the model, parameters like date of data for filtering) follows on route and not know about the specific mode for rendering to keep code simpler to understand.
 
 ## Example full service chain for Grid Data
-ClimateMap.tsx -> useClimateMapController* -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> climateDataService.fetchClimateData(...) -> /api/cartesian -> ModelOutputStore.setRawModelOutputDataPoints(...) +
+ClimateMap.tsx -> useClimateMapController* -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> climateDataService.fetchGridData(...) -> /api/cartesian -> ModelOutputStore.setRawModelOutputDataPoints(...) +
 ModelOutputStore.setProcessedDataExtremes(...) -> GridProcessingStore.setGridCells(...) -> AdaptiveGridLayer.tsx
 
 *useClimateMapController: receives the selected model metadata + other UI inputs (e.g. date) + current mode, then calls:
@@ -67,7 +67,7 @@ even though r0_estimate is defined in the yaml file.
 
 
 ### Grid:
- ClimateMap.tsx -> useClimateMapController -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> climateDataService.fetchClimateData(...) -> /api/cartesian -> ModelOutputStore.setRawModelOutputDataPoints(...) +
+ ClimateMap.tsx -> useClimateMapController -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> climateDataService.fetchGridData(...) -> /api/cartesian -> ModelOutputStore.setRawModelOutputDataPoints(...) +
   ModelOutputStore.setProcessedDataExtremes(...) -> GridProcessingStore.setGridCells(...) -> AdaptiveGridLayer.tsx
 
 ### Service-chain flow for screenshot data to rendering with imaginary future Gridmode specific attribute in image:

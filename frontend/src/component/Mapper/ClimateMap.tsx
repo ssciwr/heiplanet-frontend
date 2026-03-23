@@ -6,7 +6,7 @@ import "./Map.css";
 import { observer } from "mobx-react-lite";
 import { isMobile } from "react-device-detect";
 import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
-import { useClimateMapController } from "../../hooks/climateMap/useClimateMapController";
+import { useClimateDataLoader } from "../../hooks/climateMap/useClimateDataLoader";
 import { useClimateMapViewport } from "../../hooks/climateMap/useClimateMapViewport";
 import { useMapControls } from "../../hooks/useMapControls";
 import { useMapScreenshot } from "../../hooks/useMapScreenshot";
@@ -72,7 +72,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		(model) => model.id === userStore.selectedModel,
 	);
 
-	useClimateMapController({
+	useClimateDataLoader({
 		selectedModelData,
 		uiStore,
 		userStore,

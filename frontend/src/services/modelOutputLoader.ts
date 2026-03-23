@@ -7,7 +7,7 @@ import type {
 } from "../component/Mapper/types";
 import { calculateExtremes } from "../component/Mapper/utilities/mapDataUtils";
 import type { Model } from "../types/model";
-import { fetchClimateData } from "./climateDataService";
+import { fetchGridData } from "./climateDataService";
 import {
 	resolveOutputVariable,
 	resolveRequestVariable,
@@ -62,7 +62,7 @@ const loadGridData = async ({
 	const safeMonth = (month || 7) as Month;
 	const { requestedVariableValue, outputFormat } =
 		getRequestedVariableValue(selectedModelData);
-	const apiData = await fetchClimateData(
+	const apiData = await fetchGridData(
 		year,
 		safeMonth,
 		requestedVariableValue,
