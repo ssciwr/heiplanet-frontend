@@ -7,7 +7,7 @@ import type {
 } from "../component/Mapper/types";
 import { calculateExtremes } from "../component/Mapper/utilities/mapDataUtils";
 import type { Model } from "../types/model";
-import { fetchGridData } from "./climateDataService";
+import { fetchGridData } from "./gridDataService";
 import {
 	resolveOutputVariable,
 	resolveRequestVariable,

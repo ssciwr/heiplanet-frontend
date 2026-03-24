@@ -9,8 +9,7 @@ The data flow is a little bit complicated, because we combine three types of inp
 For rendering, there are different outputs depending on the map mode, but we prefer most of the codebase (selecting the model, parameters like date of data for filtering) follows on route and not know about the specific mode for rendering to keep code simpler to understand.
 
 ## Example full service chain for Grid Data
-ClimateMap.tsx -> useClimateDataLoader* -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> climateDataService.fetchGridData(...) -> /api/cartesian -> ModelOutputStore.setRawModelOutputDataPoints(...) +
-ModelOutputStore.setProcessedDataExtremes(...) -> GridProcessingStore.setGridCells(...) -> AdaptiveGridLayer.tsx
+ClimateMap.tsx -> useClimateDataLoader* -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> gridDataService.fetchGridData(...) -> /api/cartesian -> local raw model output points + local legend extremes -> GridProcessingStore.generateGridCellsFromTemperatureData(...) -> MapDisplayedDataStore.setGridCells(...) -> AdaptiveGridLayer.tsx
 
 *useClimateDataLoader: receives the selected model metadata + other UI inputs (e.g. date) + current mode, then calls:
 
@@ -53,7 +52,7 @@ You should be able to modify the build-time models meta data to provide model pa
 ## Example service-chain flow for Data:
 ### NUTS:
 ClimateMap.tsx -> useClimateDataLoader -> useEuropeNutsFlow -> modelOutputLoader.loadEuropeNutsData(...) -> nutsDataService.fetchNutsData(...) -> /api/nuts_data -> RegionProcessor.processEuropeOnlyRegionsFromApi(...)
--> MapDataStore.setProcessedEuropeNutsRegions(...) + ModelOutputStore.setProcessedDataExtremes(...) -> MapLayers.tsx
+-> MapDisplayedDataStore.setProcessedEuropeNutsRegions(...) + local legend extremes -> MapLayers.tsx
 #### Sample working request URL
 http://localhost:5173/api/nuts_data?requested_time_point=2025-07-01&requested_variable_type=R0&requested_grid_resolution=NUTS3
 
@@ -67,8 +66,7 @@ even though r0_estimate is defined in the yaml file.
 
 
 ### Grid:
- ClimateMap.tsx -> useClimateDataLoader -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> climateDataService.fetchGridData(...) -> /api/cartesian -> ModelOutputStore.setRawModelOutputDataPoints(...) +
-  ModelOutputStore.setProcessedDataExtremes(...) -> GridProcessingStore.setGridCells(...) -> AdaptiveGridLayer.tsx
+ ClimateMap.tsx -> useClimateDataLoader -> useGridDataFlow -> modelOutputLoader.loadGridData(...) -> gridDataService.fetchGridData(...) -> /api/cartesian -> local raw model output points + local legend extremes -> GridProcessingStore.generateGridCellsFromTemperatureData(...) -> MapDisplayedDataStore.setGridCells(...) -> AdaptiveGridLayer.tsx
 
 ### Service-chain flow for screenshot data to rendering with imaginary future Gridmode specific attribute in image:
 ClimateMap.tsx -> build read-only ScreenshotOverlayData from current query state (selected model / date / optimism) + future Grid-only display attribute (for example current grid resolution)

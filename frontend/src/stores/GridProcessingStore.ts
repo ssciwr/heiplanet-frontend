@@ -169,6 +169,8 @@ export class GridProcessingStore {
 		return result;
 	};
 
+	/* Note, this is just raw data points now and since the resolution change could be made to map directly?
+	 * todo: Review this simplification */
 	generateGridCellsFromTemperatureData = (
 		temperatureData: ModelOutputDataPoint[],
 		viewport: ViewportBounds | null,
