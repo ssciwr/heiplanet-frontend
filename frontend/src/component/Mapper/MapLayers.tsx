@@ -7,6 +7,7 @@ import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelect
 import { useEuropeFeatureInteractions } from "../../hooks/useEuropeFeatureInteractions";
 import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { mapStyleService } from "../../services/MapStyleService";
+import { mapViewportStore } from "../../stores/MapViewportStore";
 import { modelOutputStore } from "../../stores/ModelOutputStore";
 import AdaptiveGridLayer from "./AdaptiveGridLayer";
 import CitiesLayer from "./CitiesLayer";
@@ -52,7 +53,7 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 			<>
 				{/* Cities Layer - always rendered, but filtered by data regions, and only over the rendered regions */}
 				<CitiesLayer
-					zoom={mapDataStore.mapZoomLevel}
+					zoom={mapViewportStore.mapZoomLevel}
 					dataRegions={
 						userStore.mapMode === "europe-only"
 							? processedEuropeNutsRegions

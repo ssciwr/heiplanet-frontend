@@ -14,6 +14,7 @@ import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { useModelData } from "../../hooks/useModelData";
 import Footer from "../../static/Footer.tsx";
 import { mapDataStore } from "../../stores/MapDataStore";
+import { mapViewportStore } from "../../stores/MapViewportStore";
 import AdvancedTimelineSelector from "./InterfaceInputs/AdvancedTimelineSelector.tsx";
 import MobileSideButtons from "./InterfaceInputs/MobileSideButtons.tsx";
 import LoadingSkeleton from "./LoadingSkeleton.tsx";
@@ -56,7 +57,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 
 	// Use screenshot hook
 	const { handleScreenshot } = useMapScreenshot({
-		map: mapDataStore.leafletMapInstance,
+		map: mapViewportStore.leafletMapInstance,
 		screenshoter: mapScreenshoter,
 		setScreenshoter: setMapScreenshoter,
 		models,
@@ -66,7 +67,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		selectedOptimism: userStore.selectedOptimism,
 	});
 	const { handleZoomIn, handleZoomOut, handleResetZoom, handleLocationFind } =
-		useMapControls(mapDataStore.leafletMapInstance);
+		useMapControls(mapViewportStore.leafletMapInstance);
 	const handleViewportChange = useClimateMapViewport();
 	const selectedModelData = models.find(
 		(model) => model.id === userStore.selectedModel,
@@ -130,7 +131,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 							zoom={5}
 							minZoom={MIN_ZOOM}
 							maxZoom={MAX_ZOOM}
-							ref={mapDataStore.setLeafletMapInstance}
+							ref={mapViewportStore.setLeafletMapInstance}
 							zoomControl={false}
 							worldCopyJump={false}
 							style={{
@@ -183,7 +184,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 						{/* Mobile side buttons */}
 						{isMobile && (
 							<MobileSideButtons
-								map={mapDataStore.leafletMapInstance}
+								map={mapViewportStore.leafletMapInstance}
 								modelMetadataLoading={modelMetadataLoading}
 								models={models}
 								onModelSelect={handleModelSelect}

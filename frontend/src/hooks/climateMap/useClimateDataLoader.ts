@@ -10,6 +10,7 @@ import { gridProcessingStore } from "../../stores/GridProcessingStore";
 import { loadingStore } from "../../stores/LoadingStore";
 import { mapDataStore } from "../../stores/MapDataStore";
 import type { MapUIInteractionsStore } from "../../stores/MapUIInteractionsStore";
+import { mapViewportStore } from "../../stores/MapViewportStore";
 import { modelOutputStore } from "../../stores/ModelOutputStore";
 import type { UserSelectionsForClimateQueryStore } from "../../stores/UserSelectionsForClimateQueryStore";
 import type { Model } from "../../types/model";
@@ -35,8 +36,8 @@ type ClimateQueryAwareArgs = {
 
 type UseGridDataArgs = UseClimateDataLoaderArgs &
 	Pick<ClimateQueryAwareArgs, "climateQueryInput"> & {
-		mapViewportBounds: typeof mapDataStore.mapViewportBounds;
-		dataResolution: typeof mapDataStore.dataResolution;
+		mapViewportBounds: typeof mapViewportStore.mapViewportBounds;
+		dataResolution: typeof mapViewportStore.dataResolution;
 		rawModelOutputDataPoints: ModelOutputDataPoint[];
 	};
 
@@ -384,8 +385,8 @@ export const useClimateDataLoader = ({
 	uiStore,
 	userStore,
 }: UseClimateDataLoaderArgs) => {
-	const mapViewportBounds = mapDataStore.mapViewportBounds;
-	const dataResolution = mapDataStore.dataResolution;
+	const mapViewportBounds = mapViewportStore.mapViewportBounds;
+	const dataResolution = mapViewportStore.dataResolution;
 	const rawModelOutputDataPoints = modelOutputStore.rawModelOutputDataPoints;
 	const climateQueryInput = getClimateQueryInput(userStore);
 	const climateQueryInputKey = getClimateQueryInputKey(climateQueryInput);

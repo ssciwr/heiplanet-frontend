@@ -1,27 +1,16 @@
-import type L from "leaflet";
 import { makeAutoObservable } from "mobx";
-import type { NutsGeoJSON, ViewportBounds } from "../component/Mapper/types";
+import type { NutsGeoJSON } from "../component/Mapper/types";
 
 export class MapDataStore {
 	/*
-	Common between both Grid and NUTS mode.
-
 		processedEuropeNutsRegions is the final Europe-only NUTS layer payload.
 		Each feature already contains the region polygon geometry and its per-region
 		intensity in feature.properties.intensity, along with NUTS_ID and related
-		display metadata. ModelOutputStore does not hold those NUTS region values;
-
-		The information shared across both NUTS and Grid mode is the legend extremes values.
-
-		The Grid mode stores it's raw data (which gets directly rendered without processing) in GridProcessingStore
+		display metadata.
 	*/
 	processedEuropeNutsRegions: NutsGeoJSON | null = null; // NUTS only
 	isProcessingEuropeNutsData = false; // NUTS only
-	isLoadingRawData = false;
-	leafletMapInstance: L.Map | null = null;
-	mapViewportBounds: ViewportBounds | null = null;
-	mapZoomLevel = 0;
-	dataResolution = 5.0;
+	isLoadingRawData = false; // Grid + NUTS raw fetch phase
 
 	constructor() {
 		makeAutoObservable(this);
@@ -35,25 +24,13 @@ export class MapDataStore {
 		this.isProcessingEuropeNutsData = processing;
 	};
 
+	/*
+		Both Grid and NUTS use this while raw values are being fetched.
+		Grid uses it for the cartesian/grid request, and NUTS uses it for the
+		initial region-value request before the NUTS GeoJSON merge step runs.
+	*/
 	setIsLoadingRawData = (loading: boolean) => {
 		this.isLoadingRawData = loading;
-	};
-
-	setLeafletMapInstance = (map: L.Map | null) => {
-		this.leafletMapInstance = map;
-	};
-
-	setMapViewportBounds = (bounds: ViewportBounds | null) => {
-		this.mapViewportBounds = bounds;
-	};
-
-	setMapZoomLevel = (zoom: number) => {
-		this.mapZoomLevel = zoom;
-	};
-
-	// Grid only
-	setDataResolution = (resolution: number) => {
-		this.dataResolution = resolution;
 	};
 }
 
