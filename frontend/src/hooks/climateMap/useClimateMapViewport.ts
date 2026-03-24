@@ -4,7 +4,7 @@ import {
 	MAX_ZOOM,
 	MIN_ZOOM,
 } from "../../component/Mapper/utilities/mapDataUtils";
-import { mapViewportStore } from "../../stores/MapViewportStore";
+import { mapViewportInputsStore } from "../../stores/MapViewportInputsStore";
 
 const GRID_RESOLUTION_BY_ZOOM = [5.0, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.2, 0.1];
 
@@ -35,7 +35,7 @@ export const useClimateMapViewport = () =>
 			zoom: lodZoom,
 		};
 
-		mapViewportStore.setMapViewportBounds(nextViewportBounds);
-		mapViewportStore.setMapZoomLevel(lodZoom);
-		mapViewportStore.setDataResolution(getGridResolutionForZoom(lodZoom));
+		mapViewportInputsStore.setMapViewportBounds(nextViewportBounds);
+		mapViewportInputsStore.setMapZoomLevel(lodZoom);
+		mapViewportInputsStore.setDataResolution(getGridResolutionForZoom(lodZoom));
 	}, []);

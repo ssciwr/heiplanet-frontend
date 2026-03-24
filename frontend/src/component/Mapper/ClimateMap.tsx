@@ -13,8 +13,7 @@ import { useMapScreenshot } from "../../hooks/useMapScreenshot";
 import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { useModelData } from "../../hooks/useModelData";
 import Footer from "../../static/Footer.tsx";
-import { mapDataStore } from "../../stores/MapDataStore";
-import { mapViewportStore } from "../../stores/MapViewportStore";
+import { mapDisplayedDataStore } from "../../stores/MapDisplayedDataStore";
 import AdvancedTimelineSelector from "./InterfaceInputs/AdvancedTimelineSelector.tsx";
 import MobileSideButtons from "./InterfaceInputs/MobileSideButtons.tsx";
 import LoadingSkeleton from "./LoadingSkeleton.tsx";
@@ -57,7 +56,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 
 	// Use screenshot hook
 	const { handleScreenshot } = useMapScreenshot({
-		map: mapViewportStore.leafletMapInstance,
+		map: mapDisplayedDataStore.leafletMapInstance,
 		screenshoter: mapScreenshoter,
 		setScreenshoter: setMapScreenshoter,
 		models,
@@ -67,7 +66,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		selectedOptimism: userStore.selectedOptimism,
 	});
 	const { handleZoomIn, handleZoomOut, handleResetZoom, handleLocationFind } =
-		useMapControls(mapViewportStore.leafletMapInstance);
+		useMapControls(mapDisplayedDataStore.leafletMapInstance);
 	const handleViewportChange = useClimateMapViewport();
 	const selectedModelData = models.find(
 		(model) => model.id === userStore.selectedModel,
@@ -131,7 +130,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 							zoom={5}
 							minZoom={MIN_ZOOM}
 							maxZoom={MAX_ZOOM}
-							ref={mapViewportStore.setLeafletMapInstance}
+							ref={mapDisplayedDataStore.setLeafletMapInstance}
 							zoomControl={false}
 							worldCopyJump={false}
 							style={{
@@ -140,23 +139,18 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 								width: isMobile ? "100%" : "calc(100% - 140px)",
 							}}
 						>
-							<MapLayers
-								processedEuropeNutsRegions={
-									mapDataStore.processedEuropeNutsRegions
-								}
-								processedDataExtremes={processedDataExtremes}
-							/>
+							<MapLayers processedDataExtremes={processedDataExtremes} />
 							<ViewportMonitor onViewportChange={handleViewportChange} />
 						</MapContainer>
 
 						{/* Loading Skeleton Overlay */}
 						<LoadingSkeleton
 							isProcessing={
-								mapDataStore.isProcessingEuropeNutsData ||
-								mapDataStore.isLoadingRawData
+								mapDisplayedDataStore.isProcessingEuropeNutsData ||
+								mapDisplayedDataStore.isLoadingRawData
 							}
 							message={
-								mapDataStore.isProcessingEuropeNutsData
+								mapDisplayedDataStore.isProcessingEuropeNutsData
 									? "Processing Europe-only data..."
 									: "Loading map data..."
 							}
@@ -184,7 +178,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 						{/* Mobile side buttons */}
 						{isMobile && (
 							<MobileSideButtons
-								map={mapViewportStore.leafletMapInstance}
+								map={mapDisplayedDataStore.leafletMapInstance}
 								modelMetadataLoading={modelMetadataLoading}
 								models={models}
 								onModelSelect={handleModelSelect}

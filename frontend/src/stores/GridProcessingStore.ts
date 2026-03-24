@@ -33,11 +33,11 @@ const calculateDerivedIntervalSize = (dataPoints: DataPoint[]): number => {
 };
 
 export class GridProcessingStore {
-	gridCells: GridCell[] = [];
 	isProcessingGrid = false;
 	countriesGeoJSON: FeatureCollection<Geometry, GeoJsonProperties> | null =
 		null;
 
+	private cachedGridCells: GridCell[] = [];
 	private prevViewport: ViewportBounds | null = null;
 	private prevResolution = 0;
 	private prevFirstDatapointModelOutputValue: number | undefined = undefined;
@@ -45,10 +45,6 @@ export class GridProcessingStore {
 	constructor() {
 		makeAutoObservable(this);
 	}
-
-	setGridCells = (cells: GridCell[]) => {
-		this.gridCells = cells;
-	};
 
 	setIsProcessingGrid = (processing: boolean) => {
 		this.isProcessingGrid = processing;
@@ -245,6 +241,7 @@ export class GridProcessingStore {
 			this.prevResolution = resolutionLevel;
 			this.prevFirstDatapointModelOutputValue =
 				currentFirstDatapointModelOutputValue;
+			this.cachedGridCells = cells;
 			const methodTotal = performance.now() - methodStart;
 			console.log(
 				`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
@@ -257,7 +254,7 @@ export class GridProcessingStore {
 		console.log(
 			`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 		);
-		return this.gridCells;
+		return this.cachedGridCells;
 	};
 }
 

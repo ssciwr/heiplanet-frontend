@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
 	DataExtremes,
 	ModelOutputDataPoint,
@@ -8,10 +8,9 @@ import { modelOutputLoader } from "../../services/modelOutputLoader";
 import { errorStore } from "../../stores/ErrorStore";
 import { gridProcessingStore } from "../../stores/GridProcessingStore";
 import { loadingStore } from "../../stores/LoadingStore";
-import { mapDataStore } from "../../stores/MapDataStore";
+import { mapDisplayedDataStore } from "../../stores/MapDisplayedDataStore";
 import type { MapUIInteractionsStore } from "../../stores/MapUIInteractionsStore";
-import { mapViewportStore } from "../../stores/MapViewportStore";
-import { modelOutputStore } from "../../stores/ModelOutputStore";
+import { mapViewportInputsStore } from "../../stores/MapViewportInputsStore";
 import type { UserSelectionsForClimateQueryStore } from "../../stores/UserSelectionsForClimateQueryStore";
 import type { Model } from "../../types/model";
 
@@ -36,19 +35,20 @@ type ClimateQueryAwareArgs = {
 
 type UseGridDataArgs = UseClimateDataLoaderArgs &
 	Pick<ClimateQueryAwareArgs, "climateQueryInput"> & {
-		mapViewportBounds: typeof mapViewportStore.mapViewportBounds;
-		dataResolution: typeof mapViewportStore.dataResolution;
+		mapViewportBounds: typeof mapViewportInputsStore.mapViewportBounds;
+		dataResolution: typeof mapViewportInputsStore.dataResolution;
 		rawModelOutputDataPoints: ModelOutputDataPoint[];
+		setRawModelOutputDataPoints: (data: ModelOutputDataPoint[]) => void;
 	};
 
 const startRawDataLoad = () => {
 	loadingStore.start();
-	mapDataStore.setIsLoadingRawData(true);
+	mapDisplayedDataStore.setIsLoadingRawData(true);
 };
 
 const completeRawDataLoad = () => {
 	loadingStore.complete();
-	mapDataStore.setIsLoadingRawData(false);
+	mapDisplayedDataStore.setIsLoadingRawData(false);
 };
 
 const getClimateQueryInput = (
@@ -108,6 +108,7 @@ const useGridDataFlow = ({
 	mapViewportBounds,
 	dataResolution,
 	rawModelOutputDataPoints,
+	setRawModelOutputDataPoints,
 }: UseGridDataArgs) => {
 	const latestGridLoadRequestRef = useRef(0);
 	const latestGridBuildRequestRef = useRef(0);
@@ -146,11 +147,11 @@ const useGridDataFlow = ({
 					userStore.setCurrentVariableType(requestedVariableValue);
 					uiStore.setUserRequestedYear(climateQueryInput.currentYear);
 					uiStore.setUserRequestedMonth(safeMonth);
-					modelOutputStore.setRawModelOutputDataPoints(dataPoints);
+					setRawModelOutputDataPoints(dataPoints);
 					setProcessedDataExtremes(extremes);
 
-					if (!modelOutputStore.countryBoundaryOverlay) {
-						await modelOutputStore.loadCountryBoundaryOverlay();
+					if (!mapDisplayedDataStore.countryBoundaryOverlay) {
+						await mapDisplayedDataStore.loadCountryBoundaryOverlay();
 					}
 				} catch (err: unknown) {
 					const error = err as Error;
@@ -161,7 +162,7 @@ const useGridDataFlow = ({
 					setProcessedDataExtremes(null);
 
 					if (error.message.includes("API_ERROR:")) {
-						modelOutputStore.setRawModelOutputDataPoints([]);
+						setRawModelOutputDataPoints([]);
 						uiStore.setUserRequestedYear(climateQueryInput.currentYear);
 						uiStore.setUserRequestedMonth(climateQueryInput.currentMonth);
 						uiStore.setDataFetchErrorMessage(
@@ -201,13 +202,15 @@ const useGridDataFlow = ({
 		uiStore.setGeneralError,
 		mapViewportBounds,
 		dataResolution,
+		setRawModelOutputDataPoints,
 		setProcessedDataExtremes,
 	]);
 
 	useEffect(() => {
 		if (climateQueryInput.mapMode !== "grid") {
 			latestGridBuildRequestRef.current += 1;
-			gridProcessingStore.setGridCells([]);
+			setRawModelOutputDataPoints([]);
+			mapDisplayedDataStore.setGridCells([]);
 			return;
 		}
 
@@ -227,12 +230,12 @@ const useGridDataFlow = ({
 				if (gridBuildRequestId !== latestGridBuildRequestRef.current) {
 					return;
 				}
-				gridProcessingStore.setGridCells(nextGridCells);
+				mapDisplayedDataStore.setGridCells(nextGridCells);
 				return;
 			}
 
 			latestGridBuildRequestRef.current += 1;
-			gridProcessingStore.setGridCells([]);
+			mapDisplayedDataStore.setGridCells([]);
 		};
 
 		processGridData();
@@ -244,6 +247,7 @@ const useGridDataFlow = ({
 		rawModelOutputDataPointsLength,
 		mapViewportBounds,
 		dataResolution,
+		setRawModelOutputDataPoints,
 	]);
 };
 
@@ -267,8 +271,8 @@ const useEuropeNutsFlow = ({
 		}
 
 		const clearEuropeMapDataState = () => {
-			mapDataStore.setProcessedEuropeNutsRegions(null);
-			mapDataStore.setIsProcessingEuropeNutsData(true);
+			mapDisplayedDataStore.setProcessedEuropeNutsRegions(null);
+			mapDisplayedDataStore.setIsProcessingEuropeNutsData(true);
 			setProcessedDataExtremes(null);
 		};
 
@@ -307,7 +311,7 @@ const useEuropeNutsFlow = ({
 				if (requestId !== latestEuropeLoadRequestRef.current) {
 					return;
 				}
-				mapDataStore.setProcessedEuropeNutsRegions(nutsGeoJSON);
+				mapDisplayedDataStore.setProcessedEuropeNutsRegions(nutsGeoJSON);
 				setProcessedDataExtremes(extremes);
 			} catch (error) {
 				if (requestId !== latestEuropeLoadRequestRef.current) {
@@ -341,7 +345,7 @@ const useEuropeNutsFlow = ({
 				}
 			} finally {
 				if (requestId === latestEuropeLoadRequestRef.current) {
-					mapDataStore.setIsProcessingEuropeNutsData(false);
+					mapDisplayedDataStore.setIsProcessingEuropeNutsData(false);
 					if (!rawDataLoadCompleted) {
 						completeRawDataLoad();
 					}
@@ -385,9 +389,11 @@ export const useClimateDataLoader = ({
 	uiStore,
 	userStore,
 }: UseClimateDataLoaderArgs) => {
-	const mapViewportBounds = mapViewportStore.mapViewportBounds;
-	const dataResolution = mapViewportStore.dataResolution;
-	const rawModelOutputDataPoints = modelOutputStore.rawModelOutputDataPoints;
+	const mapViewportBounds = mapViewportInputsStore.mapViewportBounds;
+	const dataResolution = mapViewportInputsStore.dataResolution;
+	const [rawModelOutputDataPoints, setRawModelOutputDataPoints] = useState<
+		ModelOutputDataPoint[]
+	>([]);
 	const climateQueryInput = getClimateQueryInput(userStore);
 	const climateQueryInputKey = getClimateQueryInputKey(climateQueryInput);
 
@@ -401,6 +407,7 @@ export const useClimateDataLoader = ({
 		mapViewportBounds,
 		dataResolution,
 		rawModelOutputDataPoints,
+		setRawModelOutputDataPoints,
 	});
 	useEuropeNutsFlow({
 		selectedModelData,
