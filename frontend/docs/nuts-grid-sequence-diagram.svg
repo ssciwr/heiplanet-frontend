@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2460 1700" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1700" role="img" aria-labelledby="title desc">
   <title id="title">NUTS and Grid Sequence Diagram</title>
   <desc id="desc">Simple sequence diagram showing the current NUTS and Grid data flows in ClimateMap.</desc>
   <defs>
@@ -48,12 +48,12 @@
     </g>
   </defs>
 
-  <rect class="bg" x="0" y="0" width="2460" height="1700"/>
+  <rect class="bg" x="0" y="0" width="2560" height="1700"/>
   <text class="title" x="70" y="78">NUTS and Grid Sequence Diagram</text>
   <text class="subtitle" x="70" y="108">Simple current-state view. Top: NUTS Europe-only flow. Bottom: Grid flow.</text>
 
-  <rect class="panel" x="60" y="150" width="2340" height="690"/>
-  <rect class="panel" x="60" y="880" width="2340" height="730"/>
+  <rect class="panel" x="60" y="150" width="2440" height="690"/>
+  <rect class="panel" x="60" y="880" width="2440" height="730"/>
   <text class="panelTitle" x="92" y="194">NUTS</text>
   <text class="panelTitle" x="92" y="924">Grid</text>
 
@@ -101,12 +101,12 @@
   <!-- NUTS messages -->
   <g>
     <path class="arrow" marker-end="url(#arrowBlue)" d="M210 340 L490 340"/>
-    <rect class="labelBg" x="252" y="316" width="250" height="24"/>
-    <text class="step" x="288" y="330">1. query change, mapMode = europe-only</text>
+    <rect class="labelBg" x="252" y="316" width="380" height="24"/>
+    <text class="step" x="288" y="330">1. Model, date, or mode(NUTS) changed</text>
 
     <path class="arrowStore" marker-end="url(#arrowPurple)" d="M490 400 L1890 400"/>
-    <rect class="labelBg" x="830" y="376" width="270" height="24"/>
-    <text class="step" x="862" y="390">2. clear NUTS state + start loading</text>
+    <rect class="labelBg" x="830" y="376" width="218" height="24"/>
+    <text class="step" x="862" y="390">2. Manage loading state</text>
 
     <path class="arrowAlt" marker-end="url(#arrowGreen)" d="M490 460 L770 460"/>
     <rect class="labelBg" x="522" y="436" width="170" height="24"/>
@@ -180,17 +180,17 @@
     <text class="small" x="1904" y="1002">hook state</text>
     <line class="line" x1="1934" y1="1022" x2="1934" y2="1540"/>
 
-    <rect x="2038" y="938" width="368" height="96" rx="28" fill="#000000" opacity="0.2"/>
+    <rect x="2038" y="938" width="458" height="96" rx="28" fill="#000000" opacity="0.2"/>
 
     <rect class="participantStore" x="2050" y="950" width="208" height="72"/>
     <text class="name" x="2072" y="980">MapDisplayedDataStore</text>
     <text class="small" x="2080" y="1002">grid cells + boundary overlay</text>
     <line class="line" x1="2154" y1="1022" x2="2154" y2="1540"/>
 
-    <rect class="participantUi" x="2230" y="950" width="176" height="72"/>
-    <text class="name" x="2282" y="980">Output</text>
-    <text class="small" x="2248" y="1002">UI / render / legend extremes</text>
-    <line class="line" x1="2298" y1="1022" x2="2298" y2="1540"/>
+    <rect class="participantUi" x="2300" y="950" width="176" height="72"/>
+    <text class="name" x="2352" y="980">Output</text>
+    <text class="small" x="2318" y="1002">UI / render / legend extremes</text>
+    <line class="line" x1="2368" y1="1022" x2="2368" y2="1540"/>
   </g>
 
   <!-- Grid messages -->
@@ -208,8 +208,8 @@
     <text class="step" x="634" y="1162">1/2. set viewport, zoom, resolution (reactive/inferred)</text>
 
     <path class="arrow" marker-end="url(#arrowBlue)" d="M194 1184 L451 1184"/>
-    <rect class="labelBg" x="220" y="1150" width="182" height="30"/>
-    <text class="step" x="242" y="1170">1. mapMode</text>
+    <rect class="labelBg" x="220" y="1150" width="370" height="30"/>
+    <text class="step" x="242" y="1170">1. Model, date, or mode(Grid) changed</text>
 
     <path class="arrowAlt" marker-end="url(#arrowGreen)" d="M451 1240 L1220 1240"/>
     <rect class="labelBg" x="656" y="1208" width="288" height="28"/>
@@ -223,14 +223,10 @@
     <rect class="labelBg" x="1500" y="1300" width="272" height="28"/>
     <text class="step" x="1524" y="1318">5. POST area + grid resolution</text>
 
-    <path class="arrowStore" marker-end="url(#arrowPurple)" d="M1220 1392 L1934 1392"/>
-    <rect class="labelBg" x="1462" y="1360" width="334" height="48"/>
-    <text class="step" x="1486" y="1380">6. store raw points in local hook state</text>
-    <text class="small" x="1486" y="1400">setRawModelOutputDataPoints()</text>
-
     <path class="arrowStore" marker-end="url(#arrowPurple)" d="M451 1452 L2154 1452"/>
-    <rect class="labelBg" x="1098" y="1428" width="510" height="28"/>
-    <text class="step" x="1122" y="1446">7. generateGridCellsFromTemperatureData() + setGridCells()</text>
+    <rect class="labelBg" x="1022" y="1418" width="806" height="52"/>
+    <text class="step" x="1046" y="1438">7. generateGridCellsFromRawModelOutputData(): setRawModelOutputDataPoints(), setGridCells()</text>
+    <text class="small" x="1046" y="1458">+ manage loading state</text>
 
     <rect class="note" x="1862" y="1482" width="468" height="52"/>
     <text class="noteText" x="1886" y="1514">Grid UI then renders via MapLayers -&gt; AdaptiveGridLayer.</text>

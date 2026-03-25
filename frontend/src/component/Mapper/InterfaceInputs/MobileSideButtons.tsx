@@ -160,7 +160,7 @@ const MobileSideButtons = ({
 				const { latitude, longitude } = position.coords;
 				if (map) {
 					console.log("Setting map position to: ", latitude, longitude);
-					map.flyTo([latitude, longitude], 8, {
+					map.flyTo([latitude, longitude], 9, {
 						duration: 2,
 						easeLinearity: 0.1,
 					});

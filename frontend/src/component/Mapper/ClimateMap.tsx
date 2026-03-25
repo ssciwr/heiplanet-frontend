@@ -14,7 +14,7 @@ import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { useModelData } from "../../hooks/useModelData";
 import Footer from "../../static/Footer.tsx";
 import { mapDisplayedDataStore } from "../../stores/MapDisplayedDataStore";
-import AdvancedTimelineSelector from "./InterfaceInputs/AdvancedTimelineSelector.tsx";
+import DateSelector from "./InterfaceInputs/DateSelector.tsx";
 import MobileSideButtons from "./InterfaceInputs/MobileSideButtons.tsx";
 import LoadingSkeleton from "./LoadingSkeleton.tsx";
 import MapHeader from "./MapHeader.tsx";
@@ -156,8 +156,8 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 							}
 						/>
 
-						{/* Advanced Timeline Selector - Now supports mobile */}
-						<AdvancedTimelineSelector
+						{/* Date Selector - supports mobile */}
+						<DateSelector
 							year={userStore.currentYear}
 							month={userStore.currentMonth}
 							onYearChange={userStore.setCurrentYear}

@@ -166,7 +166,6 @@ export const useMapScreenshot = ({
 					a.click();
 					document.body.removeChild(a);
 					URL.revokeObjectURL(url);
-					console.log("Screenshot with overlay saved successfully");
 				}
 			}, "image/png");
 

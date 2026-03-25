@@ -23,7 +23,7 @@ import ModelDetailsModal from "./ModelDetailsModal";
 
 const { Option } = Select;
 
-interface AdvancedTimelineSelectorProps {
+interface DateSelectorProps {
 	year: number;
 	month: Month;
 	onYearChange: (value: number) => void;
@@ -43,7 +43,7 @@ interface AdvancedTimelineSelectorProps {
 
 const hideMonthSelector = false; // Month selector is now enabled and connected to the API
 
-const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
+const DateSelector: React.FC<DateSelectorProps> = ({
 	year,
 	month,
 	onYearChange,
@@ -856,4 +856,4 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 	);
 };
 
-export default AdvancedTimelineSelector;
+export default DateSelector;

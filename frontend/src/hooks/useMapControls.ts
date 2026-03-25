@@ -22,7 +22,7 @@ export const useMapControls = (map: L.Map | null) => {
 				(position) => {
 					map?.setView(
 						[position.coords.latitude, position.coords.longitude],
-						6,
+						7,
 					);
 				},
 				(error) => {
