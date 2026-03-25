@@ -20,6 +20,7 @@ Separate for each map mode are:
 - Mode-specific output stores that builds several Leaflet Component Mapping Layers, which get rendered when they have data.
 
 Common for all map modes are:
+
 - A controlling useClimateDataLoader main hook, which manages loading state
 - A setter to set the data extremes for display in the legend
 - Skeleton functions so the same process/API is followed in both modes, e.g. modelOutputLoader actually contains the two mode specific loader functions.
