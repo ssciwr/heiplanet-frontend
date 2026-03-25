@@ -72,3 +72,7 @@ even though r0_estimate is defined in the yaml file.
 ClimateMap.tsx -> build read-only ScreenshotOverlayData from current query state (selected model / date / optimism) + future Grid-only display attribute (for example current grid resolution)
 -> useMapScreenshot(...) -> leaflet-simple-map-screenshoter.takeScreen("blob") -> canvas.drawImage(...) -> canvas.fillText(...) with shared query metadata +
 future Grid-only overlay text -> browser download of final PNG
+
+## Sequence Diagram
+
+![NUTS grid sequence diagram](./nuts-grid-sequence-diagram.svg)
