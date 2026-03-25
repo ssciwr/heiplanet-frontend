@@ -169,33 +169,33 @@ export class GridProcessingStore {
 		return result;
 	};
 
-	/* Note, this is just raw data points now and since the resolution change could be made to map directly?
+	/* Note, this is just raw model output data points now and since the resolution change could be made to map directly?
 	 * todo: Review this simplification */
-	generateGridCellsFromTemperatureData = (
-		temperatureData: ModelOutputDataPoint[],
+	generateGridCellsFromRawModelOutputData = (
+		rawModelOutputData: ModelOutputDataPoint[],
 		viewport: ViewportBounds | null,
 		resolutionLevel: number,
 	): GridCell[] => {
 		const methodStart = performance.now();
 		console.log(
-			"🚀 generateGridCellsFromTemperatureData START with:",
-			temperatureData.length,
+			"🚀 generateGridCellsFromRawModelOutputData START with:",
+			rawModelOutputData.length,
 			"points, resolution:",
 			resolutionLevel,
 		);
 
-		if (!viewport || !temperatureData.length) {
+		if (!viewport || !rawModelOutputData.length) {
 			console.log(
-				"⚠️ Early exit - no viewport or temperature data",
+				"⚠️ Early exit - no viewport or raw model output data",
 				!!viewport,
-				temperatureData.length,
+				rawModelOutputData.length,
 			);
 			return [];
 		}
 
 		const changeCheckStart = performance.now();
 		const currentFirstDatapointModelOutputValue =
-			temperatureData[0]?.modelOutputValue;
+			rawModelOutputData[0]?.modelOutputValue;
 		const hasSignificantViewportChange =
 			!this.prevViewport ||
 			Math.abs(this.prevViewport.zoom - viewport.zoom) > 0.5 ||
@@ -222,14 +222,14 @@ export class GridProcessingStore {
 		if (hasSignificantViewportChange || hasResolutionChange || hasDataChange) {
 			console.log(
 				"🔄 RECALCULATING grid cells - data size:",
-				temperatureData.length,
+				rawModelOutputData.length,
 				"viewport zoom:",
 				viewport.zoom,
 			);
 
 			const gridGenStart = performance.now();
 			const cells = this.generateAdaptiveGridCells(
-				temperatureData,
+				rawModelOutputData,
 				viewport,
 				resolutionLevel,
 			);
@@ -246,7 +246,7 @@ export class GridProcessingStore {
 			this.cachedGridCells = cells;
 			const methodTotal = performance.now() - methodStart;
 			console.log(
-				`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
+				`✅ generateGridCellsFromRawModelOutputData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 			);
 			return cells;
 		}
@@ -254,7 +254,7 @@ export class GridProcessingStore {
 		console.log("♻️ Using cached grid cells - no recalculation needed");
 		const methodTotal = performance.now() - methodStart;
 		console.log(
-			`✅ generateGridCellsFromTemperatureData COMPLETE in ${methodTotal.toFixed(2)}ms`,
+			`✅ generateGridCellsFromRawModelOutputData COMPLETE in ${methodTotal.toFixed(2)}ms`,
 		);
 		return this.cachedGridCells;
 	};
