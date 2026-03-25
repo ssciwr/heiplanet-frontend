@@ -194,11 +194,6 @@ const useGridDataFlow = ({
 		climateQueryInput.currentYear,
 		climateQueryInput.currentMonth,
 		selectedModelData,
-		uiStore.setUserRequestedYear, // sense check if we need these?
-		uiStore.setUserRequestedMonth, // sense check if we need these?
-		uiStore.setNoDataModalVisible, // sense check if we need these?
-		uiStore.setDataFetchErrorMessage, // sense check if we need these?
-		uiStore.setGeneralError, // sense check if we need these?
 		mapViewportBounds,
 		dataResolution,
 		setProcessedDataExtremes,
@@ -353,13 +348,6 @@ const useEuropeNutsFlow = ({
 		uiStore.dataProcessingError,
 		selectedModelData,
 		userStore,
-		userStore.setCurrentVariableType, // should come from model meta, and nolonger be here.
-		uiStore.setDataProcessingError, // sense check: do we need these either here in deps?
-		uiStore.setGeneralError, // sense check: do we need these either here in deps?
-		uiStore.setUserRequestedYear, // sense check: do we need these either here in deps?
-		uiStore.setUserRequestedMonth, // sense check: do we need these either here in deps?
-		uiStore.setDataFetchErrorMessage, // sense check: do we need these either here in deps?
-		uiStore.setNoDataModalVisible, // sense check: do we need these either here in deps?
 		setProcessedDataExtremes,
 	]);
 };

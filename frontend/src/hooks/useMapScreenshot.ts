@@ -87,7 +87,7 @@ export const useMapScreenshot = ({
 			// Get month name
 			const monthName = getMonthInfo(currentMonth).label;
 			const timeText = `${monthName} ${currentYear}`;
-			const overlayText = `Model: ${modelName} | Time: ${timeText} | Optimism: ${selectedOptimism}`;
+			const overlayText = `Model: ${modelName} | Time: ${timeText}`; // | Optimism: ${selectedOptimism} not implemented.
 
 			// Take screenshot first
 			const blob = (await screenshoter.takeScreen("blob", {
