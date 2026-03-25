@@ -63,7 +63,6 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		selectedModel: userStore.selectedModel,
 		currentYear: userStore.currentYear,
 		currentMonth: userStore.currentMonth,
-		selectedOptimism: userStore.selectedOptimism,
 	});
 	const { handleZoomIn, handleZoomOut, handleResetZoom, handleLocationFind } =
 		useMapControls(mapDisplayedDataStore.leafletMapInstance);

@@ -18,7 +18,6 @@ interface UseMapScreenshotProps {
 	selectedModel: string;
 	currentYear: number;
 	currentMonth: Month;
-	selectedOptimism: string;
 }
 
 export const useMapScreenshot = ({
@@ -29,7 +28,6 @@ export const useMapScreenshot = ({
 	selectedModel,
 	currentYear,
 	currentMonth,
-	selectedOptimism,
 }: UseMapScreenshotProps): UseMapScreenshotReturn => {
 	// Initialize screenshoter when map is ready
 	useEffect(() => {
