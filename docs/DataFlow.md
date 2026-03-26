@@ -93,7 +93,11 @@ var_name = (
 )
 ```
 
+This API requests work too for now:
+http://localhost:5173/api/nuts_data?requested_time_point=2025-07-01&requested_variable_type=r0_estimate&requested_grid_resolution=NUTS3
+
 even though r0_estimate is defined in the yaml file.
+
 
 ### Grid
 ```text
