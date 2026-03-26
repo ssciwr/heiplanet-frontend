@@ -1,6 +1,5 @@
 {
-	"schema_version": "models.v1",
-	"generated_at": "2026-03-20T16:22:42.450443Z",
+	"generated_at": "2026-03-25T17:25:45.412424Z",
 	"generated_from": "hf-dataset:iulusoy/heiplanet-models-dataset@main",
 	"models": [
 		{
