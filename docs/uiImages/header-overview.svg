@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1378 144" role="img" aria-labelledby="title desc">
+  <title id="title">Header overview</title>
+  <desc id="desc">Purple header strip with the Heidelberg Planetary Health Hub brand, display selector, and map mode selector.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7f86df"/>
+      <stop offset="100%" stop-color="#7466bf"/>
+    </linearGradient>
+    <style>
+      .bg { fill: url(#bg); }
+      .panel { fill: rgba(255, 255, 255, 0.08); stroke: rgba(255, 255, 255, 0.3); stroke-width: 2; }
+      .field { fill: rgba(255, 255, 255, 0.06); stroke: rgba(255, 255, 255, 0.22); stroke-width: 2; }
+      .brandSmall { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #ffffff; letter-spacing: 0.6px; }
+      .brandBig { font: 800 28px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .label { font: 500 26px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .value { font: 400 28px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .chevron, .icon, .leaf { stroke: #ffffff; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .logoRing { fill: url(#logoGrad); }
+    </style>
+    <radialGradient id="logoGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#78c4a4"/>
+      <stop offset="100%" stop-color="#3b6d92"/>
+    </radialGradient>
+  </defs>
+
+  <rect class="bg" width="1378" height="144"/>
+
+  <circle class="logoRing" cx="144" cy="72" r="46"/>
+  <circle cx="146" cy="54" r="9" fill="#ffffff"/>
+  <path class="leaf" d="M121 99c7-22 24-30 24-30 3 18-3 33-13 42"/>
+  <path class="leaf" d="M139 96c17-1 28-14 34-24 5 13 5 27 0 38-10-3-23-7-34-14"/>
+  <path class="leaf" d="M112 98c-8-7-12-18-12-29 10 2 19 8 25 16"/>
+
+  <text class="brandSmall" x="198" y="37">HEIDELBERG</text>
+  <text class="brandBig" x="198" y="68">PLANETARY</text>
+  <text class="brandBig" x="198" y="99">HEALTH HUB</text>
+
+  <rect class="panel" x="431" y="17" width="446" height="94" rx="22"/>
+  <text class="label" x="497" y="72">Display</text>
+  <rect class="field" x="626" y="33" width="250" height="61" rx="16"/>
+  <text class="value" x="664" y="72">WNV-RO</text>
+  <path class="chevron" d="M780 56l9 10 9-10"/>
+
+  <rect class="panel" x="895" y="17" width="357" height="94" rx="22"/>
+  <path class="icon" d="M994 59l11-4 10 4 11-4v28l-11 4-10-4-11 4z"/>
+  <path class="icon" d="M1005 55v32M1015 59v28"/>
+  <rect class="field" x="986" y="33" width="228" height="61" rx="16"/>
+  <text class="value" x="1047" y="72">Europe-only</text>
+  <path class="chevron" d="M1176 56l9 10 9-10"/>
+</svg>
