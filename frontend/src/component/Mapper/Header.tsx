@@ -10,7 +10,7 @@ import type { Model } from "../../types/model";
 import GeneralCard from "../General/GeneralCard.tsx";
 import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
 
-const MapHeader = observer(
+const Header = observer(
 	({
 		modelMetadataError,
 		modelMetadataLoading,
@@ -310,4 +310,4 @@ const MapHeader = observer(
 	},
 );
 
-export default MapHeader;
+export default Header;

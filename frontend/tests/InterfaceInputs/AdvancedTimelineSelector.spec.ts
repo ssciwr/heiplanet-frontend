@@ -34,7 +34,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
 		// Wait for the advanced timeline selector to load
-		await page.waitForSelector(".advanced-timeline-desktop", {
+		await page.waitForSelector(".bottom-bar", {
 			timeout: 30000,
 		});
 		await page.waitForSelector(".leaflet-container", { timeout: 30000 });
@@ -198,7 +198,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
 		// Wait for the advanced timeline selector to load
-		await page.waitForSelector(".advanced-timeline-desktop", {
+		await page.waitForSelector(".bottom-bar", {
 			timeout: 30000,
 		});
 		await page.waitForSelector(".leaflet-container", { timeout: 30000 });
@@ -355,7 +355,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
 		// Wait for the advanced timeline selector to load
-		await page.waitForSelector(".advanced-timeline-desktop", {
+		await page.waitForSelector(".bottom-bar", {
 			timeout: 30000,
 		});
 

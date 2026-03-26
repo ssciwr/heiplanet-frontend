@@ -14,10 +14,10 @@ import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { useModelData } from "../../hooks/useModelData";
 import Footer from "../../static/Footer.tsx";
 import { mapDisplayedDataStore } from "../../stores/MapDisplayedDataStore";
-import DateSelector from "./InterfaceInputs/DateSelector.tsx";
+import Header from "./Header.tsx";
+import BottomBar from "./InterfaceInputs/BottomBar.tsx";
 import MobileSideButtons from "./InterfaceInputs/MobileSideButtons.tsx";
 import LoadingSkeleton from "./LoadingSkeleton.tsx";
-import MapHeader from "./MapHeader.tsx";
 import MapLayers from "./MapLayers.tsx";
 import NoDataModal from "./NoDataModal.tsx";
 import type { DataExtremes } from "./types";
@@ -115,7 +115,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 			<div
 				className={`climate-map-container ${isMobile ? "climate-map-container-mobile" : ""}`}
 			>
-				<MapHeader
+				<Header
 					modelMetadataError={modelMetadataError}
 					modelMetadataLoading={modelMetadataLoading}
 					models={models}
@@ -156,7 +156,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 						/>
 
 						{/* Date Selector - supports mobile */}
-						<DateSelector
+						<BottomBar
 							year={userStore.currentYear}
 							month={userStore.currentMonth}
 							onYearChange={userStore.setCurrentYear}
@@ -166,7 +166,6 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 							onResetZoom={handleResetZoom}
 							onLocationFind={handleLocationFind}
 							onScreenshot={handleScreenshot}
-							colorScheme="purple"
 							screenshoter={mapScreenshoter}
 							models={models}
 							selectedModelId={userStore.selectedModel}
