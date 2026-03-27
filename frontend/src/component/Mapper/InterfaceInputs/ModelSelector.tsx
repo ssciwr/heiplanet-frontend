@@ -64,12 +64,13 @@ const ModelSelector = ({
 					style={{
 						display: "inline-flex",
 						alignItems: "center",
-						gap: "8px",
-						padding: "8px 16px",
+						gap: "6px",
+						padding: "6px 12px",
 						borderRadius: "8px",
 						color: "var(--text-primary)",
 						height: "auto",
-						maxWidth: "140px",
+						maxWidth: "120px",
+						fontSize: "15px",
 					}}
 					loading={loading}
 					onClick={() => setIsDetailsModalOpen(true)}

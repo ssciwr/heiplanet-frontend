@@ -27,6 +27,8 @@ const Header = observer(
 		};
 
 		if (isMobile) {
+			const mobileHeaderSideSlot = 24;
+
 			return (
 				<div className="map-header">
 					<div
@@ -47,22 +49,33 @@ const Header = observer(
 									display: "flex",
 									alignItems: "center",
 									justifyContent: "space-between",
+									gap: "10px",
 								}}
 							>
-								<img
-									alt="Hei-Planet logo"
-									className="hei-planet-logo"
-									style={{ height: "30px", width: "auto" }}
-									src="/images/hei-planet-logo.png"
-								/>
+								<div
+									style={{
+										width: `${mobileHeaderSideSlot}px`,
+										display: "flex",
+										justifyContent: "center",
+										flexShrink: 0,
+									}}
+								>
+									<img
+										alt="Hei-Planet logo"
+										className="hei-planet-logo"
+										style={{ height: "15px", width: "auto" }}
+										src="/images/hei-planet-logo.png"
+									/>
+								</div>
 
 								<div
 									style={{
 										flex: 1,
 										display: "flex",
-										justifyContent: "center",
+										flexDirection: "column",
+										alignItems: "center",
 										gap: "8px",
-										flexWrap: "wrap",
+										minWidth: 0,
 									}}
 								>
 									<ModelSelector
@@ -78,7 +91,7 @@ const Header = observer(
 											console.log("Map mode should be updated as such:", v);
 											userStore.setMapMode(v);
 										}}
-										style={{ minWidth: 116 }}
+										style={{ width: 108, maxWidth: 108, fontSize: "14px" }}
 										size="middle"
 									>
 										<Option value="europe-only">Europe-only</Option>
@@ -86,7 +99,13 @@ const Header = observer(
 									</Select>
 								</div>
 
-								<div style={{ width: "42px", height: "42px" }} />
+								<div
+									style={{
+										width: `${mobileHeaderSideSlot}px`,
+										height: "15px",
+										flexShrink: 0,
+									}}
+								/>
 							</div>
 						</GeneralCard>
 					</div>

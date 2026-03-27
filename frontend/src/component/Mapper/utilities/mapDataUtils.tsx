@@ -18,28 +18,6 @@ export const TEMP_COLORS = [
 	"#e2fba2", // Very light green/yellow
 ];
 
-// Generate whole number intervals every 10 degrees
-const generateIntervals = (
-	min: number,
-	max: number,
-	maxIntervals: number,
-): number[] => {
-	const practicalMin = min + 3;
-	const practicalMax = max - 3; // 3 degree padding so that it doesn't overlap on the scale.
-	const intervals: number[] = [];
-	const startTemp = Math.ceil(practicalMin / 10) * 10;
-
-	for (
-		let temp = startTemp;
-		temp < practicalMax && intervals.length < maxIntervals;
-		temp += 5
-	) {
-		intervals.push(temp);
-	}
-
-	return intervals;
-};
-
 export const Legend = ({
 	extremes,
 	unit = "R0",
@@ -96,24 +74,50 @@ export const Legend = ({
 
 	if (!extremes) return null;
 
-	const intervals = generateIntervals(
-		extremes.min,
-		extremes.max,
-		isMobile ? 6 : 10,
-	);
 	const totalRange = extremes.max - extremes.min;
 	const displayUnit = getVariableDisplayName(unit);
 
 	// Mobile timeline styles - full width, integrated with timeline
 	if (isMobile) {
+		const roundedMin = Math.round(extremes.min * 100) / 100;
+		const roundedMax = Math.round(extremes.max * 100) / 100;
+		const minLabel = Number.isInteger(roundedMin)
+			? `${roundedMin}`
+			: roundedMin.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+		const maxLabel = Number.isInteger(roundedMax)
+			? `${roundedMax}`
+			: roundedMax.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+		const oneThirdValue = extremes.min + totalRange / 3;
+		const twoThirdValue = extremes.min + (totalRange * 2) / 3;
+		const oneThirdApprox =
+			oneThirdValue < 0
+				? Math.ceil(oneThirdValue * 100) / 100
+				: Math.floor(oneThirdValue * 100) / 100;
+		const twoThirdApprox =
+			twoThirdValue < 0
+				? Math.ceil(twoThirdValue * 100) / 100
+				: Math.floor(twoThirdValue * 100) / 100;
+		const oneThirdLabel = Number.isInteger(oneThirdApprox)
+			? `${oneThirdApprox}`
+			: oneThirdApprox.toFixed(2);
+		const twoThirdLabel = Number.isInteger(twoThirdApprox)
+			? `${twoThirdApprox}`
+			: twoThirdApprox.toFixed(2);
+
 		const containerStyle: React.CSSProperties = {
 			width: "100%",
-			padding: "12px 16px",
+			padding: "12px 10px 10px",
 			backgroundColor: "transparent",
 			display: "flex",
 			flexDirection: "column",
 			gap: "8px",
 			margin: 0,
+		};
+
+		const barWrapperStyle: React.CSSProperties = {
+			position: "relative",
+			width: "100%",
+			paddingBottom: "8px",
 		};
 
 		const barStyle: React.CSSProperties = {
@@ -129,10 +133,30 @@ export const Legend = ({
 		const labelsStyle: React.CSSProperties = {
 			display: "flex",
 			justifyContent: "space-between",
-			alignItems: "center",
+			alignItems: "flex-start",
 			width: "100%",
 			position: "relative",
-			marginTop: "6px",
+			marginTop: "0",
+		};
+
+		const tickerStyle: React.CSSProperties = {
+			position: "absolute",
+			top: "24px",
+			width: "1px",
+			height: "8px",
+			backgroundColor: "rgba(60,60,60,0.6)",
+		};
+
+		const inlineMarkerStyle: React.CSSProperties = {
+			position: "absolute",
+			top: "50%",
+			transform: "translate(-50%, -50%)",
+			fontSize: "0.5em",
+			fontWeight: "600",
+			color: "rgba(255,255,255,0.95)",
+			lineHeight: 1,
+			textShadow: "0 1px 2px rgba(0,0,0,0.2)",
+			pointerEvents: "none",
 		};
 
 		const renderMobileColorBlocks = () =>
@@ -159,40 +183,38 @@ export const Legend = ({
 			});
 
 		const renderMobileLabels = () => {
-			const labelStyle = {
-				fontSize: "10px",
+			const variableLabelStyle = {
+				fontSize: "12px",
 				fontWeight: "600",
 				color: "rgb(60,60,60)",
+			};
+			const valueStyle = {
+				fontSize: "24px",
+				fontWeight: "700",
+				color: "rgb(60,60,60)",
+				lineHeight: 1,
+			};
+			const extremeStyle = {
+				display: "flex",
+				alignItems: "baseline",
+				gap: "4px",
 			};
 
 			return (
 				<>
-					<span style={labelStyle}>
-						{Math.round(extremes.min)}&nbsp;
-						{displayUnit}
+					<span style={{ ...extremeStyle, marginLeft: "-2px" }}>
+						<span style={valueStyle}>{minLabel}</span>
+						<span style={variableLabelStyle}>{displayUnit}</span>
 					</span>
-					{intervals.map((temp) => {
-						const position = ((temp - extremes.min) / totalRange) * 100;
-						return (
-							<span
-								key={temp}
-								style={{
-									position: "absolute",
-									left: `${position}%`,
-									transform: "translateX(-50%)",
-									...labelStyle,
-									fontSize: "9px",
-									fontWeight: "500",
-								}}
-							>
-								{temp}
-								{displayUnit}
-							</span>
-						);
-					})}
-					<span style={labelStyle}>
-						{Math.round(extremes.max)}&nbsp;
-						{displayUnit}
+					<span
+						style={{
+							...extremeStyle,
+							justifyContent: "flex-end",
+							marginRight: "-2px",
+						}}
+					>
+						<span style={variableLabelStyle}>{displayUnit}</span>
+						<span style={valueStyle}>{maxLabel}</span>
 					</span>
 				</>
 			);
@@ -200,7 +222,17 @@ export const Legend = ({
 
 		return (
 			<div style={containerStyle}>
-				<div style={barStyle}>{renderMobileColorBlocks()}</div>
+				<div style={barWrapperStyle}>
+					<div style={barStyle}>{renderMobileColorBlocks()}</div>
+					<span style={{ ...tickerStyle, left: 0 }} />
+					<span style={{ ...tickerStyle, right: 0 }} />
+					<span style={{ ...inlineMarkerStyle, left: "33.333%" }}>
+						{oneThirdLabel}
+					</span>
+					<span style={{ ...inlineMarkerStyle, left: "66.667%" }}>
+						{twoThirdLabel}
+					</span>
+				</div>
 				<div style={labelsStyle}>{renderMobileLabels()}</div>
 			</div>
 		);
