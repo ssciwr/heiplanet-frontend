@@ -51,8 +51,10 @@ const ModelSelector = ({
 
 	// Create display text with proper truncation
 	const getDisplayText = (modelData: Model) => {
-		const fullText = modelData.modelName;
-		return truncateText(fullText, isMobile ? 12 : 30);
+		const fullText = modelData.modelName.trim();
+		return isMobile
+			? fullText.slice(0, 3).toUpperCase()
+			: truncateText(fullText, 30);
 	};
 
 	if (isMobile) {
@@ -64,31 +66,22 @@ const ModelSelector = ({
 					style={{
 						display: "inline-flex",
 						alignItems: "center",
-						gap: "6px",
-						padding: "6px 12px",
-						borderRadius: "8px",
+						justifyContent: "center",
+						padding: "0 12px",
+						borderRadius: "10px",
 						color: "var(--text-primary)",
-						height: "auto",
-						maxWidth: "120px",
-						fontSize: "15px",
+						height: "34px",
+						minWidth: "74px",
+						fontSize: "14px",
+						fontWeight: 500,
 					}}
 					loading={loading}
 					onClick={() => setIsDetailsModalOpen(true)}
 				>
 					{selectedModelData ? (
-						<>
-							<span>{selectedModelData.emoji}</span>
-							<span
-								style={{
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-								title={selectedModelData.modelName}
-							>
-								{getDisplayText(selectedModelData)}
-							</span>
-						</>
+						<span title={selectedModelData.modelName}>
+							{getDisplayText(selectedModelData)}
+						</span>
 					) : (
 						<>
 							<Plug size={18} style={{ color: "#0052CC" }} />

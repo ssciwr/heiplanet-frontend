@@ -4,6 +4,7 @@ import { Map as MapIcon } from "lucide-react";
 const { Option } = Select;
 import { observer } from "mobx-react-lite";
 import { isMobile } from "react-device-detect";
+import mobileLogo from "../../assets/heiplanet-circle-only-logo.jpg";
 import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
 import { viewingMode } from "../../stores/ViewingModeStore.ts";
 import type { Model } from "../../types/model";
@@ -27,23 +28,30 @@ const Header = observer(
 		};
 
 		if (isMobile) {
-			const mobileHeaderSideSlot = 24;
-
 			return (
 				<div className="map-header">
 					<div
 						style={{
 							position: "fixed",
-							top: "1em",
+							top: "0.75em",
 							left: "50%",
 							transform: "translateX(-50%)",
-							width: "95vw",
+							width: "calc(100vw - 24px)",
 							opacity: 1,
 							zIndex: 500,
-							padding: "1px",
+							padding: 0,
 						}}
 					>
-						<GeneralCard style={{ border: "0px solid" }}>
+						<GeneralCard
+							style={{
+								margin: 0,
+								border: "1px solid rgba(220, 220, 220, 0.7)",
+								borderRadius: 20,
+							}}
+							bodyStyle={{
+								padding: "10px 12px",
+							}}
+						>
 							<div
 								style={{
 									display: "flex",
@@ -54,17 +62,22 @@ const Header = observer(
 							>
 								<div
 									style={{
-										width: `${mobileHeaderSideSlot}px`,
+										width: "30px",
+										height: "30px",
 										display: "flex",
 										justifyContent: "center",
+										alignItems: "center",
 										flexShrink: 0,
 									}}
 								>
 									<img
 										alt="Hei-Planet logo"
 										className="hei-planet-logo"
-										style={{ height: "15px", width: "auto" }}
-										src="/images/hei-planet-logo.png"
+										style={{
+											height: "30px",
+											width: "30px",
+										}}
+										src={mobileLogo}
 									/>
 								</div>
 
@@ -72,8 +85,8 @@ const Header = observer(
 									style={{
 										flex: 1,
 										display: "flex",
-										flexDirection: "column",
 										alignItems: "center",
+										justifyContent: "flex-start",
 										gap: "8px",
 										minWidth: 0,
 									}}
@@ -91,21 +104,15 @@ const Header = observer(
 											console.log("Map mode should be updated as such:", v);
 											userStore.setMapMode(v);
 										}}
-										style={{ width: 108, maxWidth: 108, fontSize: "14px" }}
+										style={{ width: 82, minWidth: 82, fontSize: "14px" }}
+										popupMatchSelectWidth={false}
 										size="middle"
+										aria-label="Map mode"
 									>
-										<Option value="europe-only">Europe-only</Option>
+										<Option value="europe-only">Eur</Option>
 										<Option value="grid">Grid</Option>
 									</Select>
 								</div>
-
-								<div
-									style={{
-										width: `${mobileHeaderSideSlot}px`,
-										height: "15px",
-										flexShrink: 0,
-									}}
-								/>
 							</div>
 						</GeneralCard>
 					</div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MapContainer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import ViewportMonitor from "./ViewportMonitor.tsx";
@@ -24,14 +24,46 @@ import type { DataExtremes } from "./types";
 import { Legend, MAX_ZOOM, MIN_ZOOM } from "./utilities/mapDataUtils";
 import { getVariableUnit } from "./utilities/monthUtils";
 
-console.log("GRID-PROBLEM-DEBUG ClimateMap module loaded");
-
 type ClimateMapProps = {
 	onMount?: () => boolean;
 };
 
+/*
+AI-Generated
+*/
+const ClimateMapNoDataModal = observer(() => {
+	const uiStore = useMapUIInteractions();
+	const userStore = useUserSelectionsForClimateQueryStore();
+	const {
+		noDataModalVisible,
+		userRequestedYear,
+		userRequestedMonth,
+		dataFetchErrorMessage,
+		setNoDataModalVisible,
+	} = uiStore;
+
+	const handleClose = useCallback(() => {
+		setNoDataModalVisible(false);
+	}, [setNoDataModalVisible]);
+
+	const handleLoadCurrentYear = useCallback(() => {
+		userStore.setCurrentYear(new Date().getFullYear());
+		setNoDataModalVisible(false);
+	}, [setNoDataModalVisible, userStore]);
+
+	return (
+		<NoDataModal
+			isOpen={noDataModalVisible}
+			onClose={handleClose}
+			onLoadCurrentYear={handleLoadCurrentYear}
+			requestedYear={userRequestedYear}
+			requestedMonth={userRequestedMonth}
+			errorMessage={dataFetchErrorMessage}
+		/>
+	);
+});
+
 const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
-	console.log("GRID-PROBLEM-DEBUG ClimateMap render");
 	const userStore = useUserSelectionsForClimateQueryStore();
 	const uiStore = useMapUIInteractions();
 	const {
@@ -39,11 +71,6 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 		setGeneralError,
 		dataProcessingError,
 		setDataProcessingError,
-		noDataModalVisible,
-		setNoDataModalVisible,
-		userRequestedYear,
-		userRequestedMonth,
-		dataFetchErrorMessage,
 		mapScreenshoter,
 		setMapScreenshoter,
 	} = uiStore;
@@ -99,12 +126,6 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 			unit={getVariableUnit(userStore.currentVariableType)}
 		/>
 	) : null;
-
-	const handleLoadCurrentYear = () => {
-		const currentYear = new Date().getFullYear();
-		userStore.setCurrentYear(currentYear);
-		setNoDataModalVisible(false);
-	};
 
 	const handleModelSelect = (modelId: string) => {
 		userStore.setSelectedModel(modelId);
@@ -222,14 +243,7 @@ const ClimateMap = observer(({ onMount = () => true }: ClimateMapProps) => {
 				</div>
 			</div>
 
-			<NoDataModal
-				isOpen={noDataModalVisible}
-				onClose={() => setNoDataModalVisible(false)}
-				onLoadCurrentYear={handleLoadCurrentYear}
-				requestedYear={userRequestedYear}
-				requestedMonth={userRequestedMonth}
-				errorMessage={dataFetchErrorMessage}
-			/>
+			<ClimateMapNoDataModal />
 
 			<Footer />
 		</div>

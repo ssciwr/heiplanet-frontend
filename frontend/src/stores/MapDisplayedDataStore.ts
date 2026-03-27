@@ -74,6 +74,12 @@ export class MapDisplayedDataStore {
 	};
 
 	setGridCells = (cells: GridCell[]) => {
+		if (this.gridCells === cells) {
+			return;
+		}
+		if (this.gridCells.length === 0 && cells.length === 0) {
+			return;
+		}
 		this.gridCells = cells;
 	};
 	// End mode-specific

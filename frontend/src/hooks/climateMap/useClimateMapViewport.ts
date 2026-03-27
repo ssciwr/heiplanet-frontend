@@ -34,8 +34,23 @@ export const useClimateMapViewport = () =>
 			west: bounds.getWest(),
 			zoom: lodZoom,
 		};
+		const currentViewportBounds = mapViewportInputsStore.mapViewportBounds;
+		const nextDataResolution = getGridResolutionForZoom(lodZoom);
 
-		mapViewportInputsStore.setMapViewportBounds(nextViewportBounds);
-		mapViewportInputsStore.setMapZoomLevel(lodZoom);
-		mapViewportInputsStore.setDataResolution(getGridResolutionForZoom(lodZoom));
+		if (
+			!currentViewportBounds ||
+			currentViewportBounds.north !== nextViewportBounds.north ||
+			currentViewportBounds.south !== nextViewportBounds.south ||
+			currentViewportBounds.east !== nextViewportBounds.east ||
+			currentViewportBounds.west !== nextViewportBounds.west ||
+			currentViewportBounds.zoom !== nextViewportBounds.zoom
+		) {
+			mapViewportInputsStore.setMapViewportBounds(nextViewportBounds);
+		}
+		if (mapViewportInputsStore.mapZoomLevel !== lodZoom) {
+			mapViewportInputsStore.setMapZoomLevel(lodZoom);
+		}
+		if (mapViewportInputsStore.dataResolution !== nextDataResolution) {
+			mapViewportInputsStore.setDataResolution(nextDataResolution);
+		}
 	}, []);

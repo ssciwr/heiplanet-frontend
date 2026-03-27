@@ -34,7 +34,7 @@ type ClimateQueryAwareArgs = {
 };
 
 type UseGridDataArgs = UseClimateDataLoaderArgs &
-	Pick<ClimateQueryAwareArgs, "climateQueryInput"> & {
+	Pick<ClimateQueryAwareArgs, "climateQueryInput" | "climateQueryInputKey"> & {
 		mapViewportBounds: typeof mapViewportInputsStore.mapViewportBounds;
 		dataResolution: typeof mapViewportInputsStore.dataResolution;
 	};
@@ -103,6 +103,7 @@ const useGridDataFlow = ({
 	uiStore,
 	userStore,
 	climateQueryInput,
+	climateQueryInputKey,
 	mapViewportBounds,
 	dataResolution,
 }: UseGridDataArgs) => {
@@ -110,9 +111,17 @@ const useGridDataFlow = ({
 		ModelOutputDataPoint[]
 	>([]);
 	const latestGridLoadRequestRef = useRef(0);
+	const lastNoDataQueryKeyRef = useRef<string | null>(null);
 	const rawModelOutputDataPointsLength = rawModelOutputDataPoints.length;
 
 	useEffect(() => {
+		if (
+			lastNoDataQueryKeyRef.current &&
+			lastNoDataQueryKeyRef.current !== climateQueryInputKey
+		) {
+			lastNoDataQueryKeyRef.current = null;
+		}
+
 		if (!selectedModelData) {
 			return;
 		}
@@ -125,6 +134,10 @@ const useGridDataFlow = ({
 			}
 
 			if (climateQueryInput.mapMode !== "grid") {
+				return;
+			}
+
+			if (lastNoDataQueryKeyRef.current === climateQueryInputKey) {
 				return;
 			}
 			const requestId = ++latestGridLoadRequestRef.current;
@@ -162,12 +175,15 @@ const useGridDataFlow = ({
 				setProcessedDataExtremes(null);
 
 				if (error.message.includes("API_ERROR:")) {
-					setRawModelOutputDataPoints([]);
+					setRawModelOutputDataPoints((previousDataPoints) =>
+						previousDataPoints.length === 0 ? previousDataPoints : [],
+					);
 					uiStore.setUserRequestedYear(climateQueryInput.currentYear);
 					uiStore.setUserRequestedMonth(climateQueryInput.currentMonth);
 					uiStore.setDataFetchErrorMessage(
 						error.message.replace("API_ERROR: ", ""),
 					);
+					lastNoDataQueryKeyRef.current = climateQueryInputKey;
 					uiStore.setNoDataModalVisible(true);
 					uiStore.setGeneralError(null);
 				} else {
@@ -197,11 +213,14 @@ const useGridDataFlow = ({
 		mapViewportBounds,
 		dataResolution,
 		setProcessedDataExtremes,
+		climateQueryInputKey,
 	]);
 
 	useEffect(() => {
 		if (climateQueryInput.mapMode !== "grid") {
-			setRawModelOutputDataPoints([]);
+			setRawModelOutputDataPoints((previousDataPoints) =>
+				previousDataPoints.length === 0 ? previousDataPoints : [],
+			);
 			mapDisplayedDataStore.setGridCells([]);
 			return;
 		}
@@ -243,11 +262,23 @@ const useEuropeNutsFlow = ({
 	uiStore,
 	userStore,
 	climateQueryInput,
+	climateQueryInputKey,
 }: UseClimateDataLoaderArgs &
-	Pick<ClimateQueryAwareArgs, "climateQueryInput">) => {
+	Pick<
+		ClimateQueryAwareArgs,
+		"climateQueryInput" | "climateQueryInputKey"
+	>) => {
 	const latestEuropeLoadRequestRef = useRef(0);
+	const lastNoDataQueryKeyRef = useRef<string | null>(null);
 
 	useEffect(() => {
+		if (
+			lastNoDataQueryKeyRef.current &&
+			lastNoDataQueryKeyRef.current !== climateQueryInputKey
+		) {
+			lastNoDataQueryKeyRef.current = null;
+		}
+
 		if (
 			climateQueryInput.mapMode !== "europe-only" ||
 			uiStore.dataProcessingError ||
@@ -322,6 +353,7 @@ const useEuropeNutsFlow = ({
 							? "No data found for this request."
 							: error.message.replace("API_ERROR: ", ""),
 					);
+					lastNoDataQueryKeyRef.current = climateQueryInputKey;
 					uiStore.setNoDataModalVisible(true);
 					uiStore.setDataProcessingError(false);
 					uiStore.setGeneralError(null);
@@ -349,6 +381,7 @@ const useEuropeNutsFlow = ({
 		selectedModelData,
 		userStore,
 		setProcessedDataExtremes,
+		climateQueryInputKey,
 	]);
 };
 
@@ -380,6 +413,7 @@ export const useClimateDataLoader = ({
 		uiStore,
 		userStore,
 		climateQueryInput,
+		climateQueryInputKey,
 		mapViewportBounds,
 		dataResolution,
 	});
@@ -389,6 +423,7 @@ export const useClimateDataLoader = ({
 		uiStore,
 		userStore,
 		climateQueryInput,
+		climateQueryInputKey,
 	});
 	useClearMapHoverTimeoutOnUnmount(uiStore);
 };
