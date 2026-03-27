@@ -86,32 +86,35 @@ const Header = observer(
 										flex: 1,
 										display: "flex",
 										alignItems: "center",
-										justifyContent: "flex-start",
-										gap: "8px",
+										gap: "12px",
 										minWidth: 0,
 									}}
 								>
-									<ModelSelector
-										error={modelMetadataError}
-										loading={modelMetadataLoading}
-										models={models}
-										selectedModel={userStore.selectedModel}
-										onModelSelect={handleModelSelect}
-									/>
-									<Select
-										value={userStore.mapMode}
-										onChange={(v) => {
-											console.log("Map mode should be updated as such:", v);
-											userStore.setMapMode(v);
-										}}
-										style={{ width: 82, minWidth: 82, fontSize: "14px" }}
-										popupMatchSelectWidth={false}
-										size="middle"
-										aria-label="Map mode"
-									>
-										<Option value="europe-only">Eur</Option>
-										<Option value="grid">Grid</Option>
-									</Select>
+									<div style={{ flex: 1, minWidth: 0 }}>
+										<ModelSelector
+											error={modelMetadataError}
+											loading={modelMetadataLoading}
+											models={models}
+											selectedModel={userStore.selectedModel}
+											onModelSelect={handleModelSelect}
+										/>
+									</div>
+									<div style={{ flex: 1, minWidth: 0 }}>
+										<Select
+											value={userStore.mapMode}
+											onChange={(v) => {
+												console.log("Map mode should be updated as such:", v);
+												userStore.setMapMode(v);
+											}}
+											style={{ width: "100%", fontSize: "14px" }}
+											popupMatchSelectWidth={false}
+											size="middle"
+											aria-label="Map mode"
+										>
+											<Option value="europe-only">Eur</Option>
+											<Option value="grid">Grid</Option>
+										</Select>
+									</div>
 								</div>
 							</div>
 						</GeneralCard>

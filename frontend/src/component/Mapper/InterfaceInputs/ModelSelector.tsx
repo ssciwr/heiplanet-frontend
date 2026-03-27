@@ -60,7 +60,10 @@ const ModelSelector = ({
 	if (isMobile) {
 		// On mobile, just show button that opens modal
 		return (
-			<span className="model-selector">
+			<span
+				className="model-selector"
+				style={{ display: "block", width: "100%" }}
+			>
 				<Button
 					className="header-font-size bg-surface-raised border-light"
 					style={{
@@ -71,7 +74,7 @@ const ModelSelector = ({
 						borderRadius: "10px",
 						color: "var(--text-primary)",
 						height: "34px",
-						minWidth: "74px",
+						width: "100%",
 						fontSize: "14px",
 						fontWeight: 500,
 					}}
