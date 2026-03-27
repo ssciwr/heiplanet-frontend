@@ -82,8 +82,16 @@ const ModelSelector = ({
 					onClick={() => setIsDetailsModalOpen(true)}
 				>
 					{selectedModelData ? (
-						<span title={selectedModelData.modelName}>
-							{getDisplayText(selectedModelData)}
+						<span
+							title={selectedModelData.modelName}
+							style={{
+								display: "inline-flex",
+								alignItems: "center",
+								gap: "6px",
+							}}
+						>
+							<span aria-hidden="true">🦠</span>
+							<span>{getDisplayText(selectedModelData)}</span>
 						</span>
 					) : (
 						<>

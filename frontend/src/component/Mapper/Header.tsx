@@ -111,8 +111,30 @@ const Header = observer(
 											size="middle"
 											aria-label="Map mode"
 										>
-											<Option value="europe-only">Eur</Option>
-											<Option value="grid">Grid</Option>
+											<Option value="europe-only">
+												<span
+													style={{
+														display: "inline-flex",
+														alignItems: "center",
+														gap: "6px",
+													}}
+												>
+													<span aria-hidden="true">🌍</span>
+													<span>Eur</span>
+												</span>
+											</Option>
+											<Option value="grid">
+												<span
+													style={{
+														display: "inline-flex",
+														alignItems: "center",
+														gap: "6px",
+													}}
+												>
+													<span aria-hidden="true">🗺️</span>
+													<span>Grid</span>
+												</span>
+											</Option>
 										</Select>
 									</div>
 								</div>
