@@ -5,9 +5,6 @@ test.describe("ModelDetailsModal", () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
-		// Wait for page to load
-		await page.waitForTimeout(3000);
-
 		// Close any modal that might be open
 		try {
 			await page.locator(".ant-modal-close").click({ timeout: 5000 });
@@ -30,33 +27,25 @@ test.describe("ModelDetailsModal", () => {
 			.first();
 
 		await expect(dropdownTrigger).toBeVisible();
-		await dropdownTrigger.click({ force: true });
+		await dropdownTrigger.dispatchEvent("click");
 
-		await page.waitForTimeout(1000);
+		const dropdown = page.locator(".model-dropdown");
+		await expect(dropdown).toBeVisible();
 
-		const modelCardsUnavailable = page.locator(
-			'text="Model Cards Unavailable"',
-		);
+		const modelCardsUnavailable = dropdown.getByText("Model Cards Unavailable");
 		if (await modelCardsUnavailable.isVisible()) {
 			await expect(modelCardsUnavailable).toBeVisible();
 			return;
 		}
 
-		const viewAllModelsOption = page.locator('[data-testid="view-all-models"]');
-		const viewAllModelsTextOption = page.locator(
-			'text="View Details & Compare Models"',
-		);
-
-		// only desktop has the quick switch preview, mobile goes right to the modal due to spacing concerns.
-		if (await viewAllModelsOption.isVisible()) {
-			await viewAllModelsOption.click({ force: true });
-		} else if (await viewAllModelsTextOption.isVisible()) {
-			await viewAllModelsTextOption.click({ force: true });
-		}
+		const viewAllModelsOption = dropdown.getByTestId("view-all-models");
+		await expect(viewAllModelsOption).toBeVisible();
+		await expect(viewAllModelsOption).toBeEnabled();
+		await viewAllModelsOption.dispatchEvent("click");
 
 		const modal = page.locator('[data-testid="model-details-modal"]');
 
-		await expect(modal).toBeVisible();
+		await expect(modal).toBeVisible({ timeout: 15000 });
 
 		// Step 4: Verify modal title
 		const modalTitle = page.locator('text="Disease Model Details"');
