@@ -46,16 +46,19 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 			// Ignore if no modal to close
 		}
 
-		await page.locator(".ant-select-selector").last().click({ force: true });
-		await page
-			.locator(
-				".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option",
-			)
-			.filter({ hasText: "Grid" })
-			.dispatchEvent("click");
-		await expect(
-			page.locator(".ant-select-selection-item").last(),
-		).toContainText("Grid");
+		const mapModeSelect = page.locator(".map-header .ant-select-selector");
+		const mapModeValue = page.locator(".map-header .ant-select-selection-item");
+		await expect(mapModeSelect).toBeVisible();
+		if ((await mapModeValue.textContent())?.trim() !== "Grid") {
+			await mapModeSelect.dispatchEvent("mousedown");
+			const gridOption = page
+				.locator(".ant-select-dropdown .ant-select-item-option")
+				.filter({ hasText: "Grid" })
+				.last();
+			await expect(gridOption).toBeVisible();
+			await gridOption.click();
+		}
+		await expect(mapModeValue).toContainText("Grid");
 
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
@@ -210,16 +213,19 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 			// Ignore if no modal to close
 		}
 
-		await page.locator(".ant-select-selector").last().click({ force: true });
-		await page
-			.locator(
-				".ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option",
-			)
-			.filter({ hasText: "Grid" })
-			.dispatchEvent("click");
-		await expect(
-			page.locator(".ant-select-selection-item").last(),
-		).toContainText("Grid");
+		const mapModeSelect = page.locator(".map-header .ant-select-selector");
+		const mapModeValue = page.locator(".map-header .ant-select-selection-item");
+		await expect(mapModeSelect).toBeVisible();
+		if ((await mapModeValue.textContent())?.trim() !== "Grid") {
+			await mapModeSelect.dispatchEvent("mousedown");
+			const gridOption = page
+				.locator(".ant-select-dropdown .ant-select-item-option")
+				.filter({ hasText: "Grid" })
+				.last();
+			await expect(gridOption).toBeVisible();
+			await gridOption.click();
+		}
+		await expect(mapModeValue).toContainText("Grid");
 
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
