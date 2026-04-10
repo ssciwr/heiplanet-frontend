@@ -11,8 +11,6 @@ import {
 	Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { isMobile } from "react-device-detect";
-import { fetchModelCards } from "../../../services/modelCardService";
 import { AboutContent } from "../../../static/Footer.tsx";
 import type { Model } from "../../../types/model";
 import ModelDetailsModal from "./ModelDetailsModal";
@@ -59,16 +57,12 @@ declare module "leaflet" {
 	): SimpleMapScreenshoter;
 }
 
-const MOBILE_SIDE_BUTTONS_LOCATIONS = {
-	BOTTOM_RIGHT: "bottom-right",
-	TOP_LEFT: "top-left",
-} as const;
-
-type MobileSideButtonsLocation =
-	(typeof MOBILE_SIDE_BUTTONS_LOCATIONS)[keyof typeof MOBILE_SIDE_BUTTONS_LOCATIONS];
+type MobileSideButtonsLocation = "bottom-right" | "top-left";
 
 interface MobileSideButtonsProps {
 	map: L.Map | null;
+	modelMetadataLoading: boolean;
+	models: Model[];
 	position?: MobileSideButtonsLocation;
 	selectedModel?: string;
 	onModelSelect?: (modelId: string) => void;
@@ -76,7 +70,8 @@ interface MobileSideButtonsProps {
 
 const MobileSideButtons = ({
 	map,
-	position = MOBILE_SIDE_BUTTONS_LOCATIONS.BOTTOM_RIGHT,
+	modelMetadataLoading,
+	models,
 	selectedModel,
 	onModelSelect,
 }: MobileSideButtonsProps) => {
@@ -88,64 +83,12 @@ const MobileSideButtons = ({
 	const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
 	const [screenshoter, setScreenshoter] =
 		useState<L.SimpleMapScreenshoter | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<"default" | "branded">(
-		"default",
-	);
 	const [isMinimized, setIsMinimized] = useState<boolean>(false);
 	const [showModelDetails, setShowModelDetails] = useState<boolean>(false);
-	const [models, setModels] = useState<Model[]>([]);
 
 	useEffect(() => {
 		console.log("Show info:", showInfo);
 	}, [showInfo]);
-
-	// Apply theme to document root
-	useEffect(() => {
-		console.log("Applying theme to document:", currentTheme);
-		document.documentElement.setAttribute("data-theme", currentTheme);
-		console.log(
-			"Document data-theme attribute:",
-			document.documentElement.getAttribute("data-theme"),
-		);
-	}, [currentTheme]);
-
-	// Load models for the modal
-	useEffect(() => {
-		const loadModels = async () => {
-			try {
-				const loadedModels = await fetchModelCards();
-				if (loadedModels.length === 0) {
-					loadedModels.push({
-						id: "model-cards-unavailable",
-						modelName: "Model Cards Unavailable",
-						title: "Model Cards Unavailable",
-						description: "Unable to load model metadata from artifact source.",
-						emoji: "⚠️",
-						color: "#D14343",
-						details:
-							"Check artifact generation and metadata artifact URL configuration.",
-					});
-				}
-				setModels(loadedModels);
-			} catch (error) {
-				console.error("Error loading model cards:", error);
-				setModels([
-					{
-						id: "model-cards-unavailable",
-						modelName: "Model Cards Unavailable",
-						title: "Model Cards Unavailable",
-						description: "Unable to load model metadata from artifact source.",
-						emoji: "⚠️",
-						color: "#D14343",
-						details:
-							"Check artifact generation and metadata artifact URL configuration.",
-					},
-				]);
-			}
-		};
-
-		loadModels();
-	}, []);
 
 	useEffect(() => {
 		if (map && !screenshoter) {
@@ -217,7 +160,7 @@ const MobileSideButtons = ({
 				const { latitude, longitude } = position.coords;
 				if (map) {
 					console.log("Setting map position to: ", latitude, longitude);
-					map.flyTo([latitude, longitude], 8, {
+					map.flyTo([latitude, longitude], 9, {
 						duration: 2,
 						easeLinearity: 0.1,
 					});
@@ -281,12 +224,6 @@ const MobileSideButtons = ({
 		}
 	};
 
-	const handleThemeToggle = () => {
-		const newTheme = currentTheme === "default" ? "branded" : "default";
-		console.log("Switching theme from", currentTheme, "to", newTheme);
-		setCurrentTheme(newTheme);
-	};
-
 	const handleToggleMinimize = () => {
 		setIsMinimized(!isMinimized);
 	};
@@ -301,16 +238,6 @@ const MobileSideButtons = ({
 		};
 	};
 
-	const getMobileSideButtonsClasses = () => {
-		const baseClass = isMobile
-			? "mobile-side-buttons mobile-side-buttons-mobile"
-			: "mobile-side-buttons mobile-side-buttons-desktop";
-		if (isMobile) return baseClass;
-		return position === MOBILE_SIDE_BUTTONS_LOCATIONS.BOTTOM_RIGHT
-			? `${baseClass} mobile-side-buttons-bottom-right`
-			: `${baseClass} mobile-side-buttons-top-left`;
-	};
-
 	const modals = (
 		<div>
 			<Modal
@@ -321,20 +248,6 @@ const MobileSideButtons = ({
 				width={400}
 			>
 				<AboutContent />
-				<br />
-				<button
-					type="button"
-					onClick={handleThemeToggle}
-					style={{
-						background: "none",
-						border: "none",
-						color: "inherit",
-						textDecoration: "underline",
-						cursor: "pointer",
-					}}
-				>
-					Change Theme
-				</button>
 			</Modal>
 
 			<Modal
@@ -378,7 +291,7 @@ const MobileSideButtons = ({
 		<>
 			<div
 				data-testid="mobile-side-buttons"
-				className={getMobileSideButtonsClasses()}
+				className="mobile-side-buttons mobile-side-buttons-mobile"
 			>
 				{!isMinimized ? (
 					<>
@@ -437,7 +350,9 @@ const MobileSideButtons = ({
 							type="button"
 							onClick={() => setShowModelDetails(true)}
 							className="btn-icon"
-							disabled={!selectedModel || models.length === 0}
+							disabled={
+								modelMetadataLoading || !selectedModel || models.length === 0
+							}
 							style={getButtonStyle()}
 						>
 							<FileText size={circularButtonSize} />

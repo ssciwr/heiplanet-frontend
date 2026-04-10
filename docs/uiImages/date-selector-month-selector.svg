@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 399 105" role="img" aria-labelledby="title desc">
+  <title id="title">DateSelector month selector</title>
+  <desc id="desc">Purple UI snippet showing previous and next month buttons around a month select control.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7f86df"/>
+      <stop offset="100%" stop-color="#7466bf"/>
+    </linearGradient>
+    <style>
+      .bg { fill: url(#bg); }
+      .ring { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.3); stroke-width: 2; }
+      .field { fill: rgba(255, 255, 255, 0.07); stroke: rgba(255, 255, 255, 0.22); stroke-width: 2; }
+      .text { font: 600 24px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .icon { stroke: #ffffff; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="399" height="105"/>
+  <circle class="ring" cx="60" cy="52.5" r="41"/>
+  <circle class="ring" cx="339" cy="52.5" r="41"/>
+  <path class="icon" d="M67 40l-12 12 12 12"/>
+  <path class="icon" d="M332 40l12 12-12 12"/>
+  <rect class="field" x="122" y="30" width="145" height="45" rx="12"/>
+  <text class="text" x="156" y="59">Jul</text>
+  <path class="icon" d="M238 46l8 9 8-9"/>
+</svg>

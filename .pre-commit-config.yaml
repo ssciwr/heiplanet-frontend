@@ -1,3 +1,5 @@
+exclude: '^\.jscpd\.json$'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -27,5 +29,6 @@ repos:
     rev: "v2.0.0-beta.5"
     hooks:
       - id: biome-check
+        files: "^frontend/"
         additional_dependencies: ["@biomejs/biome@1.9.4"]
         exclude: ^\.jscpd\.json$

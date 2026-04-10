@@ -125,21 +125,23 @@ test.describe("MobileSideButtons Component", () => {
 		// Click the location button with force to bypass modal interference
 		await locationButton.click({ force: true });
 
+		const locationModal = page
+			.getByRole("dialog")
+			.filter({ hasText: "Finding Your Location" });
+
 		// Verify the loading modal appears (with longer timeout)
-		await expect(page.locator(".ant-modal-content")).toContainText(
-			"Finding Your Location",
-			{ timeout: 10000 },
-		);
-		await expect(page.locator(".ant-modal-content")).toContainText(
-			"Zooming to you!",
-			{ timeout: 10000 },
-		);
+		await expect(locationModal).toContainText("Finding Your Location", {
+			timeout: 10000,
+		});
+		await expect(locationModal).toContainText("Zooming to you!", {
+			timeout: 10000,
+		});
 
 		// Verify the spinner is visible
-		await expect(page.locator(".ant-spin")).toBeVisible();
+		await expect(locationModal.locator(".ant-spin")).toBeVisible();
 
 		// Wait for the modal to disappear (location found). This can for some reason take a long time on Firefox.
-		await expect(page.locator(".ant-modal-content")).not.toBeVisible({
+		await expect(locationModal).not.toBeVisible({
 			timeout: 60000,
 		});
 
@@ -156,19 +158,23 @@ test.describe("MobileSideButtons Component", () => {
 		await expect(aboutButton).toBeVisible();
 		await aboutButton.click();
 
-		// Verify the modal opens
-		await expect(page.locator(".ant-modal-content")).toBeVisible();
+		const aboutModal = page.getByRole("dialog").filter({
+			hasText: "About This Map",
+		});
 
-		await expect(page.locator("body")).toContainText("About This Map");
-		await expect(page.locator("body")).toContainText(
+		// Verify the modal opens
+		await expect(aboutModal).toBeVisible();
+
+		await expect(aboutModal).toContainText("About This Map");
+		await expect(aboutModal).toContainText(
 			"Created with disease modelling by the Hei-Planet team",
 		);
 
 		// Close the modal by clicking the X or outside
-		await page.locator(".ant-modal-close").click();
+		await aboutModal.locator(".ant-modal-close").click();
 
 		// Verify modal closes
-		await expect(page.locator(".ant-modal-content")).not.toBeVisible();
+		await expect(aboutModal).not.toBeVisible();
 	});
 
 	test("Zoom controls work correctly", async ({ page }) => {

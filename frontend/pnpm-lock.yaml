@@ -112,7 +112,7 @@ importers:
         version: 3.0.0(leaflet@1.9.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       "@vitejs/plugin-react":
         specifier: ^4.3.4
-        version: 4.5.1(vite@6.3.5(@types/node@22.15.29))
+        version: 4.5.1(vite@6.3.5(@types/node@22.15.29)(yaml@2.8.3))
       eslint:
         specifier: ^9.22.0
         version: 9.28.0
@@ -136,7 +136,10 @@ importers:
         version: 8.33.1(eslint@9.28.0)(typescript@5.7.3)
       vite:
         specifier: ^6.3.1
-        version: 6.3.5(@types/node@22.15.29)
+        version: 6.3.5(@types/node@22.15.29)(yaml@2.8.3)
+      yaml:
+        specifier: ^2.8.3
+        version: 2.8.3
 
 packages:
   "@ampproject/remapping@2.3.0":
@@ -4468,6 +4471,14 @@ packages:
         integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==,
       }
 
+  yaml@2.8.3:
+    resolution:
+      {
+        integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==,
+      }
+    engines: { node: ">= 14.6" }
+    hasBin: true
+
   yocto-queue@0.1.0:
     resolution:
       {
@@ -6320,7 +6331,7 @@ snapshots:
 
   "@ungap/structured-clone@1.3.0": {}
 
-  "@vitejs/plugin-react@4.5.1(vite@6.3.5(@types/node@22.15.29))":
+  "@vitejs/plugin-react@4.5.1(vite@6.3.5(@types/node@22.15.29)(yaml@2.8.3))":
     dependencies:
       "@babel/core": 7.27.4
       "@babel/plugin-transform-react-jsx-self": 7.27.1(@babel/core@7.27.4)
@@ -6328,7 +6339,7 @@ snapshots:
       "@rolldown/pluginutils": 1.0.0-beta.9
       "@types/babel__core": 7.20.5
       react-refresh: 0.17.0
-      vite: 6.3.5(@types/node@22.15.29)
+      vite: 6.3.5(@types/node@22.15.29)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -8042,7 +8053,7 @@ snapshots:
       "@types/unist": 3.0.3
       vfile-message: 4.0.3
 
-  vite@6.3.5(@types/node@22.15.29):
+  vite@6.3.5(@types/node@22.15.29)(yaml@2.8.3):
     dependencies:
       esbuild: 0.25.5
       fdir: 6.4.5(picomatch@4.0.2)
@@ -8053,6 +8064,7 @@ snapshots:
     optionalDependencies:
       "@types/node": 22.15.29
       fsevents: 2.3.3
+      yaml: 2.8.3
 
   which@2.0.2:
     dependencies:
@@ -8061,6 +8073,8 @@ snapshots:
   word-wrap@1.2.5: {}
 
   yallist@3.1.1: {}
+
+  yaml@2.8.3: {}
 
   yocto-queue@0.1.0: {}
 

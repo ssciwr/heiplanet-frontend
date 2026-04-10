@@ -13,9 +13,8 @@ export interface Model {
 		paperTitle: string;
 		url: string;
 	};
+	// todo: integrate units so it appears in the Legend etc.
 	output?: string[];
 	model_output_variable?: string;
-	cardMarkdown?: string;
 	cardYamlUrl?: string;
-	virusType?: string;
 }

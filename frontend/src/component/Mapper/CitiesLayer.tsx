@@ -1,8 +1,8 @@
-import type { NutsGeoJSON, WorldwideGeoJSON } from "./types";
+import type { NutsGeoJSON } from "./types";
 
 interface CitiesLayerProps {
 	zoom: number;
-	dataRegions?: NutsGeoJSON | WorldwideGeoJSON | null;
+	dataRegions?: NutsGeoJSON | null;
 }
 const CitiesLayer = (props: CitiesLayerProps) => {
 	void props;

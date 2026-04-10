@@ -39,21 +39,39 @@ export async function setupApiMocksWithFs(page: Page) {
 	const mock2025Handler = await createMockHandlerForYear(MOCK_2025_FILE_PATH);
 	const mock2026Handler = await createMockHandlerForYear(MOCK_2026_FILE_PATH);
 
-	// Mock the 2025-06 API endpoint (baseline)
-	await page.route(
-		`**/api/cartesian?requested_time_point=${BASE_YEAR}-06-01&requested_variable_type=R0`,
-		mock2025Handler,
-	);
+	await page.route("**/api/cartesian", async (route) => {
+		if (route.request().method() !== "POST") {
+			await route.continue();
+			return;
+		}
 
-	// Mock the 2025-07 API endpoint (month navigation test)
-	await page.route(
-		`**/api/cartesian?requested_time_point=${BASE_YEAR}-07-01&requested_variable_type=R0`,
-		mock2026Handler,
-	);
+		try {
+			const requestBody = route.request().postDataJSON() as {
+				requested_time_point?: string;
+			};
+			const requestedTimePoint =
+				typeof requestBody.requested_time_point === "string"
+					? requestBody.requested_time_point
+					: "";
 
-	// Mock the 2026-06 API endpoint (year navigation test)
-	await page.route(
-		`**/api/cartesian?requested_time_point=${NEXT_YEAR}-06-01&requested_variable_type=R0`,
-		mock2026Handler,
-	);
+			if (requestedTimePoint === `${BASE_YEAR}-07-01`) {
+				await mock2026Handler(route);
+				return;
+			}
+
+			if (requestedTimePoint.startsWith(`${NEXT_YEAR}-`)) {
+				await mock2026Handler(route);
+				return;
+			}
+
+			if (requestedTimePoint.startsWith(`${BASE_YEAR}-`)) {
+				await mock2025Handler(route);
+				return;
+			}
+		} catch (error) {
+			// fall back to the baseline fixture below.
+		}
+
+		await mock2025Handler(route);
+	});
 }

@@ -12,7 +12,7 @@ import {
 	ZoomIn,
 	ZoomOut,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { AboutContent } from "../../../static/Footer.tsx";
@@ -23,7 +23,7 @@ import ModelDetailsModal from "./ModelDetailsModal";
 
 const { Option } = Select;
 
-interface AdvancedTimelineSelectorProps {
+interface BottomBarProps {
 	year: number;
 	month: Month;
 	onYearChange: (value: number) => void;
@@ -33,17 +33,16 @@ interface AdvancedTimelineSelectorProps {
 	onResetZoom: () => void;
 	onLocationFind: () => void;
 	onScreenshot: () => void;
-	colorScheme: "purple" | "red";
-	legend?: ReactNode;
-	screenshoter?: L.SimpleMapScreenshoter | null;
-	models: Model[];
-	selectedModelId: string;
-	onModelSelect: (modelId: string) => void;
+	legend?: ReactNode; // the way these get passed in and whether they are required should be reviwed
+	screenshoter?: L.SimpleMapScreenshoter | null; // the way these get passed in and whether they are required should be reviwed
+	models: Model[]; // the way these get passed in and whether they are required should be reviwed
+	selectedModelId: string; // these to too
+	onModelSelect: (modelId: string) => void; // these to too
 }
 
 const hideMonthSelector = false; // Month selector is now enabled and connected to the API
 
-const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
+const BottomBar = ({
 	year,
 	month,
 	onYearChange,
@@ -53,13 +52,12 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 	onResetZoom,
 	onLocationFind,
 	onScreenshot,
-	colorScheme,
 	legend,
 	screenshoter,
 	models,
 	selectedModelId,
 	onModelSelect,
-}) => {
+}: BottomBarProps) => {
 	const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 	const [isDragging, setIsDragging] = useState(false);
 	const [dragPreviewYear, setDragPreviewYear] = useState(year);
@@ -172,12 +170,12 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 	};
 
 	// New slider event handlers
-	const handleSliderMouseDown = (e: React.MouseEvent) => {
+	const handleSliderMouseDown = (e: ReactMouseEvent<HTMLElement>) => {
 		setIsDragging(true);
 		updateSliderPosition(e);
 	};
 
-	const updateSliderPosition = (e: React.MouseEvent) => {
+	const updateSliderPosition = (e: ReactMouseEvent<HTMLElement>) => {
 		const slider = e.currentTarget as HTMLElement;
 		const rect = slider.getBoundingClientRect();
 		const x = e.clientX - rect.left;
@@ -227,9 +225,7 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 	}
 
 	const backgroundGradient =
-		colorScheme === "purple"
-			? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-			: "linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%)";
+		"linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 
 	return (
 		<div
@@ -333,7 +329,7 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 					)}
 				</div>
 			) : (
-				<div className="advanced-timeline-desktop">
+				<div className="bottom-bar">
 					{/* Main container with controls and timeline */}
 					<div
 						style={{
@@ -542,7 +538,7 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 			<style>
 				{`
 					/* Desktop Advanced Timeline Styles */
-					.advanced-timeline-desktop {
+					.bottom-bar {
 						width: 100%;
 						min-width: 100%;
 						height: 100%;
@@ -856,4 +852,4 @@ const AdvancedTimelineSelector: React.FC<AdvancedTimelineSelectorProps> = ({
 	);
 };
 
-export default AdvancedTimelineSelector;
+export default BottomBar;

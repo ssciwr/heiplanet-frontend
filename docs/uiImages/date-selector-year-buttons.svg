@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 399 119" role="img" aria-labelledby="title desc">
+  <title id="title">DateSelector year buttons</title>
+  <desc id="desc">Purple UI snippet showing previous and next year buttons with a large centered year value.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7f86df"/>
+      <stop offset="100%" stop-color="#7466bf"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#51479a" flood-opacity="0.5"/>
+    </filter>
+    <style>
+      .bg { fill: url(#bg); }
+      .ring { fill: rgba(255, 255, 255, 0.04); stroke: rgba(255, 255, 255, 0.3); stroke-width: 2; }
+      .year { font: 800 64px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .icon { stroke: #ffffff; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="399" height="119"/>
+  <circle class="ring" cx="61" cy="59.5" r="37"/>
+  <circle class="ring" cx="338" cy="59.5" r="37"/>
+  <path class="icon" d="M67 48L55 60l12 12"/>
+  <path class="icon" d="M332 48l12 12-12 12"/>
+  <text class="year" x="118" y="80" filter="url(#softShadow)">2025</text>
+</svg>
