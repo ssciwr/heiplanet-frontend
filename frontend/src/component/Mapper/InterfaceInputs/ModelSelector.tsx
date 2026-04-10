@@ -62,6 +62,7 @@ const ModelSelector = ({
 		return (
 			<span
 				className="model-selector"
+				data-testid="model-selector"
 				style={{ display: "block", width: "100%" }}
 			>
 				<Button

@@ -37,10 +37,6 @@ test.describe("Comprehensive Grid Color Analysis - Desktop Only", () => {
 			browserName !== "chromium",
 			"This test only runs on Chromium due to SVG rendering differences with react leaflet",
 		);
-		test.fixme(
-			browserName === "chromium",
-			"Temporarily skipped: timeline month selector is intermittently missing in CI.",
-		);
 
 		await page.goto("http://localhost:5174/map/citizen?notour=true");
 
@@ -162,15 +158,9 @@ test.describe("Comprehensive Grid Color Analysis - Desktop Only", () => {
 
 		// Wait for initial map data to load and stabilize
 		await waitForMapDataStability();
-		const monthSelect = page.locator(
-			'[data-testid="timeline-selector"] .ant-select-selector',
-		);
+		const monthSelect = page.locator(".month-select");
 		await expect(monthSelect).toBeVisible({ timeout: 30000 });
-		await monthSelect.scrollIntoViewIfNeeded();
-		await monthSelect.click({ force: true });
-		const juneOption = page.getByRole("option", { name: "June" });
-		await expect(juneOption).toBeVisible({ timeout: 10000 });
-		await juneOption.click();
+		await monthSelect.selectOption("6");
 		await waitForMapDataStability();
 
 		// Test multiple years
