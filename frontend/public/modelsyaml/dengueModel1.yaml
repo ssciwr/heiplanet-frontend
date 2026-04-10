@@ -5,8 +5,9 @@ title: Dengue
 description: Viral infection transmitted by Aedes mosquitoes
 emoji: 🦠
 icon: Bug
-color: '#c592bf'
-details: Multi-scale dengue transmission model using high-resolution climate data
+color: "#c592bf"
+details:
+  Multi-scale dengue transmission model using high-resolution climate data
   from weather stations and satellite remote sensing. Incorporates urban heat island
   effects and seasonal rainfall patterns to predict Aedes aegypti breeding sites.
 image: https://ichef.bbci.co.uk/images/ic/976xn/p0f8wz9c.png

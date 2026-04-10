@@ -5,8 +5,9 @@ title: COVID-19
 description: Respiratory illness caused by SARS-CoV-2
 emoji: 😷
 icon: Shield
-color: '#95fbd1'
-details: Environmental transmission risk model analyzing temperature, humidity, UV
+color: "#95fbd1"
+details:
+  Environmental transmission risk model analyzing temperature, humidity, UV
   radiation, and air quality data. Uses WHO and CDC datasets combined with local weather
   patterns to assess outdoor transmission probability.
 output:
