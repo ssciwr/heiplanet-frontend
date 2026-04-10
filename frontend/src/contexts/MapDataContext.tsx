@@ -1,12 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext } from "react";
-import { type MapDataStore, mapDataStore } from "../stores/MapDataStore";
+import {
+	type MapDisplayedDataStore,
+	mapDisplayedDataStore,
+} from "../stores/MapDisplayedDataStore";
 
-const MapDataContext = createContext<MapDataStore>(mapDataStore);
+const MapDataContext = createContext<MapDisplayedDataStore>(
+	mapDisplayedDataStore,
+);
 
 export function MapDataProvider({ children }: { children: React.ReactNode }) {
 	return (
-		<MapDataContext.Provider value={mapDataStore}>
+		<MapDataContext.Provider value={mapDisplayedDataStore}>
 			{children}
 		</MapDataContext.Provider>
 	);

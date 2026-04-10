@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 880 2560 760" role="img" aria-labelledby="title desc">
+  <title id="title">Grid</title>
+  <desc id="desc">Sequence diagram showing the current grid data flow in ClimateMap.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f4f7fb; }
+      .panel { fill: #ffffff; stroke: #d9e1ec; stroke-width: 2; rx: 28; }
+      .panelTitle { font: 700 24px 'Segoe UI', Arial, sans-serif; fill: #1f2a44; }
+      .participant { fill: #eef4ff; stroke: #5b8def; stroke-width: 2.5; rx: 18; }
+      .participantViewport { fill: #5b8def4d; stroke: #5b8def; stroke-width: 2.5; rx: 18; }
+      .participantAlt { fill: #edfdf8; stroke: #1f9d84; stroke-width: 2.5; rx: 18; }
+      .participantStore { fill: #f7efff; stroke: #8b5cf6; stroke-width: 2.5; rx: 18; }
+      .participantBackend { fill: #fff6ea; stroke: #d9822b; stroke-width: 2.5; rx: 18; }
+      .participantUi { fill: #fff1ef; stroke: #e76f51; stroke-width: 2.5; rx: 18; }
+      .name { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #1f2940; }
+      .line { stroke: #b8c4d8; stroke-width: 2.5; stroke-dasharray: 10 10; }
+      .arrow { stroke: #355fa9; stroke-width: 3.5; fill: none; }
+      .arrowAlt { stroke: #1f9d84; stroke-width: 3.5; fill: none; }
+      .arrowStore { stroke: #7a4ee0; stroke-width: 3.5; fill: none; }
+      .step { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #3d4b63; }
+      .small { font: 13px 'Segoe UI', Arial, sans-serif; fill: #617089; }
+      .labelBg { fill: rgba(255, 255, 255, 0.94); stroke: #d9e1ec; stroke-width: 1.2; rx: 12; }
+      .bubble { fill: #eef7ff; stroke: #74a7f5; stroke-width: 2; rx: 20; }
+      .bubbleTail { fill: #eef7ff; stroke: #74a7f5; stroke-width: 2; stroke-linejoin: round; }
+      .bubbleTitle { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #23406f; }
+      .bubbleText { font: 13px 'Segoe UI', Arial, sans-serif; fill: #4f688f; }
+      .note { fill: #fff9e7; stroke: #e2b84a; stroke-width: 2; rx: 18; }
+      .noteText { font: 14px 'Segoe UI', Arial, sans-serif; fill: #6b5521; }
+    </style>
+    <marker id="arrowBlue" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0 L14 7 L0 14 z" fill="#355fa9"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0 L14 7 L0 14 z" fill="#1f9d84"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0 L14 7 L0 14 z" fill="#7a4ee0"/>
+    </marker>
+    <g id="icon-map">
+      <path d="M2 5l6-2 6 2 6-2v16l-6 2-6-2-6 2z" fill="none" stroke="#5b8def" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M8 3v16M14 5v16" fill="none" stroke="#5b8def" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+    <g id="icon-mouse">
+      <rect x="6" y="3" width="12" height="18" rx="6" fill="none" stroke="#74a7f5" stroke-width="1.8"/>
+      <path d="M12 3v6M3 10h2M19 10h2M12 22v2" fill="none" stroke="#74a7f5" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <rect class="bg" x="0" y="880" width="2560" height="760"/>
+  <rect class="panel" x="60" y="880" width="2440" height="730"/>
+  <text class="panelTitle" x="92" y="924">Grid</text>
+
+  <g>
+    <rect class="participant" x="84" y="950" width="220" height="62"/>
+    <text class="name" x="138" y="988">ClimateMap</text>
+    <line class="line" x1="194" y1="1012" x2="194" y2="1540"/>
+
+    <rect class="participant" x="336" y="950" width="230" height="72"/>
+    <text class="name" x="374" y="980">useClimateDataLoader</text>
+    <text class="name" x="400" y="1002">+ useGridDataFlow</text>
+    <line class="line" x1="451" y1="1022" x2="451" y2="1540"/>
+
+    <rect class="participantViewport" x="598" y="950" width="228" height="62"/>
+    <use href="#icon-map" x="616" y="969"/>
+    <text class="name" x="648" y="988">ViewportMonitor</text>
+    <line class="line" x1="712" y1="1012" x2="712" y2="1540"/>
+
+    <rect class="participantStore" x="858" y="950" width="236" height="72"/>
+    <text class="name" x="880" y="980">MapViewportInputsStore</text>
+    <text class="small" x="892" y="1002">viewport + zoom + resolution</text>
+    <line class="line" x1="976" y1="1022" x2="976" y2="1540"/>
+
+    <rect class="participantAlt" x="1110" y="950" width="220" height="62"/>
+    <text class="name" x="1150" y="988">modelOutputLoader</text>
+    <line class="line" x1="1220" y1="1012" x2="1220" y2="1540"/>
+
+    <rect class="participantAlt" x="1362" y="950" width="220" height="62"/>
+    <text class="name" x="1420" y="988">gridDataService</text>
+    <line class="line" x1="1472" y1="1012" x2="1472" y2="1540"/>
+
+    <rect class="participantBackend" x="1614" y="950" width="220" height="62"/>
+    <text class="name" x="1676" y="988">/api/cartesian</text>
+    <line class="line" x1="1724" y1="1012" x2="1724" y2="1540"/>
+
+    <rect class="participant" x="1850" y="950" width="168" height="72"/>
+    <text class="name" x="1880" y="980">Local raw points</text>
+    <text class="small" x="1904" y="1002">hook state</text>
+    <line class="line" x1="1934" y1="1022" x2="1934" y2="1540"/>
+
+    <rect x="2038" y="938" width="458" height="96" rx="28" fill="#000000" opacity="0.2"/>
+
+    <rect class="participantStore" x="2050" y="950" width="208" height="72"/>
+    <text class="name" x="2072" y="980">MapDisplayedDataStore</text>
+    <text class="small" x="2080" y="1002">grid cells + boundary overlay</text>
+    <line class="line" x1="2154" y1="1022" x2="2154" y2="1540"/>
+
+    <rect class="participantUi" x="2300" y="950" width="176" height="72"/>
+    <text class="name" x="2352" y="980">Output</text>
+    <text class="small" x="2318" y="1002">UI / render / legend extremes</text>
+    <line class="line" x1="2368" y1="1022" x2="2368" y2="1540"/>
+  </g>
+
+  <g>
+    <rect class="bubble" x="572" y="1034" width="286" height="84"/>
+    <path class="bubbleTail" d="M698 1034 L712 1022 L726 1034 Z"/>
+    <use href="#icon-mouse" x="594" y="1047"/>
+    <text class="bubbleTitle" x="626" y="1064">User pans / zooms map</text>
+    <text class="bubbleText" x="626" y="1088">viewport trigger before</text>
+    <text class="bubbleText" x="626" y="1108">the grid query/load chain</text>
+
+    <path class="arrowStore" d="M194 1136 L712 1136" style="stroke-dasharray: 12 10; opacity: 0.65"/>
+    <path class="arrowStore" marker-end="url(#arrowPurple)" d="M712 1136 L976 1136"/>
+    <rect class="labelBg" x="612" y="1144" width="472" height="28"/>
+    <text class="step" x="634" y="1162">1/2. set viewport, zoom, resolution (reactive/inferred)</text>
+
+    <path class="arrow" marker-end="url(#arrowBlue)" d="M194 1184 L451 1184"/>
+    <rect class="labelBg" x="220" y="1150" width="370" height="30"/>
+    <text class="step" x="242" y="1170">1. Model, date, or mode(Grid) changed</text>
+
+    <path class="arrowAlt" marker-end="url(#arrowGreen)" d="M451 1240 L1220 1240"/>
+    <rect class="labelBg" x="656" y="1208" width="288" height="28"/>
+    <text class="step" x="662" y="1226">3. loadGridData(viewport, resolution)</text>
+
+    <path class="arrowAlt" marker-end="url(#arrowGreen)" d="M1220 1272 L1472 1272"/>
+    <rect class="labelBg" x="1260" y="1240" width="210" height="28"/>
+    <text class="step" x="1284" y="1258">4. fetchGridData()</text>
+
+    <path class="arrowAlt" marker-end="url(#arrowGreen)" d="M1472 1332 L1724 1332"/>
+    <rect class="labelBg" x="1500" y="1300" width="272" height="28"/>
+    <text class="step" x="1524" y="1318">5. POST area + grid resolution</text>
+
+    <path class="arrowStore" marker-end="url(#arrowPurple)" d="M451 1452 L2154 1452"/>
+    <rect class="labelBg" x="1022" y="1418" width="806" height="52"/>
+    <text class="step" x="1046" y="1438">7. generateGridCellsFromRawModelOutputData(): setRawModelOutputDataPoints(), setGridCells()</text>
+    <text class="small" x="1046" y="1458">+ manage loading state</text>
+
+    <rect class="note" x="1862" y="1482" width="468" height="52"/>
+    <text class="noteText" x="1886" y="1514">Grid UI then renders via MapLayers -&gt; AdaptiveGridLayer.</text>
+  </g>
+</svg>

@@ -34,7 +34,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
 		// Wait for the advanced timeline selector to load
-		await page.waitForSelector(".advanced-timeline-desktop", {
+		await page.waitForSelector(".bottom-bar", {
 			timeout: 30000,
 		});
 		await page.waitForSelector(".leaflet-container", { timeout: 30000 });
@@ -45,6 +45,20 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		} catch (e) {
 			// Ignore if no modal to close
 		}
+
+		const mapModeSelect = page.locator(".map-header .ant-select-selector");
+		const mapModeValue = page.locator(".map-header .ant-select-selection-item");
+		await expect(mapModeSelect).toBeVisible();
+		if ((await mapModeValue.textContent())?.trim() !== "Grid") {
+			await mapModeSelect.dispatchEvent("mousedown");
+			const gridOption = page
+				.locator(".ant-select-dropdown .ant-select-item-option")
+				.filter({ hasText: "Grid" })
+				.last();
+			await expect(gridOption).toBeVisible();
+			await gridOption.click();
+		}
+		await expect(mapModeValue).toContainText("Grid");
 
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
@@ -80,19 +94,23 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 
 		// Helper function to get colors from grid path elements
 		async function getGridColors() {
-			try {
-				await page.waitForSelector('path.leaflet-interactive[fill*="#"]', {
-					timeout: 30000,
-				});
-			} catch (e) {
-				await page.waitForSelector('path[fill*="#"]', { timeout: 30000 });
-			}
+			await page.waitForFunction(
+				() =>
+					Array.from(document.querySelectorAll('path[fill*="#"]')).some(
+						(path) =>
+							path.getAttribute("fill") !== "transparent" &&
+							path.getAttribute("fill-opacity") !== "0",
+					),
+				{ timeout: 30000 },
+			);
 
-			let gridCells = page.locator('path.leaflet-interactive[fill*="#"]');
+			let gridCells = page.locator(
+				'path.leaflet-interactive[fill*="#"]:not([fill-opacity="0"])',
+			);
 			let count = await gridCells.count();
 
 			if (count === 0) {
-				gridCells = page.locator('path[fill*="#"]');
+				gridCells = page.locator('path[fill*="#"]:not([fill-opacity="0"])');
 				count = await gridCells.count();
 			}
 
@@ -183,7 +201,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
 		// Wait for the advanced timeline selector to load
-		await page.waitForSelector(".advanced-timeline-desktop", {
+		await page.waitForSelector(".bottom-bar", {
 			timeout: 30000,
 		});
 		await page.waitForSelector(".leaflet-container", { timeout: 30000 });
@@ -194,6 +212,20 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		} catch (e) {
 			// Ignore if no modal to close
 		}
+
+		const mapModeSelect = page.locator(".map-header .ant-select-selector");
+		const mapModeValue = page.locator(".map-header .ant-select-selection-item");
+		await expect(mapModeSelect).toBeVisible();
+		if ((await mapModeValue.textContent())?.trim() !== "Grid") {
+			await mapModeSelect.dispatchEvent("mousedown");
+			const gridOption = page
+				.locator(".ant-select-dropdown .ant-select-item-option")
+				.filter({ hasText: "Grid" })
+				.last();
+			await expect(gridOption).toBeVisible();
+			await gridOption.click();
+		}
+		await expect(mapModeValue).toContainText("Grid");
 
 		// Wait for initial map data to load
 		await page.waitForTimeout(10000);
@@ -226,19 +258,23 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 
 		// Helper function to get colors from grid path elements
 		async function getGridColors() {
-			try {
-				await page.waitForSelector('path.leaflet-interactive[fill*="#"]', {
-					timeout: 30000,
-				});
-			} catch (e) {
-				await page.waitForSelector('path[fill*="#"]', { timeout: 30000 });
-			}
+			await page.waitForFunction(
+				() =>
+					Array.from(document.querySelectorAll('path[fill*="#"]')).some(
+						(path) =>
+							path.getAttribute("fill") !== "transparent" &&
+							path.getAttribute("fill-opacity") !== "0",
+					),
+				{ timeout: 30000 },
+			);
 
-			let gridCells = page.locator('path.leaflet-interactive[fill*="#"]');
+			let gridCells = page.locator(
+				'path.leaflet-interactive[fill*="#"]:not([fill-opacity="0"])',
+			);
 			let count = await gridCells.count();
 
 			if (count === 0) {
-				gridCells = page.locator('path[fill*="#"]');
+				gridCells = page.locator('path[fill*="#"]:not([fill-opacity="0"])');
 				count = await gridCells.count();
 			}
 
@@ -325,7 +361,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		await page.goto("http://localhost:5174/map/expert?notour=true");
 
 		// Wait for the advanced timeline selector to load
-		await page.waitForSelector(".advanced-timeline-desktop", {
+		await page.waitForSelector(".bottom-bar", {
 			timeout: 30000,
 		});
 

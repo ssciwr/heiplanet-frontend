@@ -1,0 +1,429 @@
+import { useEffect, useRef, useState } from "react";
+import type {
+	DataExtremes,
+	ModelOutputDataPoint,
+} from "../../component/Mapper/types";
+import { regionProcessor } from "../../services/RegionProcessor";
+import { modelOutputLoader } from "../../services/modelOutputLoader";
+import { errorStore } from "../../stores/ErrorStore";
+import { gridProcessingStore } from "../../stores/GridProcessingStore";
+import { loadingStore } from "../../stores/LoadingStore";
+import { mapDisplayedDataStore } from "../../stores/MapDisplayedDataStore";
+import type { MapUIInteractionsStore } from "../../stores/MapUIInteractionsStore";
+import { mapViewportInputsStore } from "../../stores/MapViewportInputsStore";
+import type { UserSelectionsForClimateQueryStore } from "../../stores/UserSelectionsForClimateQueryStore";
+import type { Model } from "../../types/model";
+
+type UseClimateDataLoaderArgs = {
+	selectedModelData?: Model;
+	setProcessedDataExtremes: (extremes: DataExtremes | null) => void;
+	uiStore: MapUIInteractionsStore;
+	userStore: UserSelectionsForClimateQueryStore;
+};
+
+type ClimateQueryInput = {
+	mapMode: UserSelectionsForClimateQueryStore["mapMode"];
+	currentYear: UserSelectionsForClimateQueryStore["currentYear"];
+	currentMonth: UserSelectionsForClimateQueryStore["currentMonth"];
+	selectedModel: UserSelectionsForClimateQueryStore["selectedModel"];
+};
+
+type ClimateQueryAwareArgs = {
+	climateQueryInput: ClimateQueryInput;
+	climateQueryInputKey: string;
+};
+
+type UseGridDataArgs = UseClimateDataLoaderArgs &
+	Pick<ClimateQueryAwareArgs, "climateQueryInput" | "climateQueryInputKey"> & {
+		mapViewportBounds: typeof mapViewportInputsStore.mapViewportBounds;
+		dataResolution: typeof mapViewportInputsStore.dataResolution;
+	};
+
+const startRawDataLoad = () => {
+	loadingStore.start();
+	mapDisplayedDataStore.setIsLoadingRawData(true);
+};
+
+const completeRawDataLoad = () => {
+	loadingStore.complete();
+	mapDisplayedDataStore.setIsLoadingRawData(false);
+};
+
+const getClimateQueryInput = (
+	userStore: UserSelectionsForClimateQueryStore,
+): ClimateQueryInput => ({
+	mapMode: userStore.mapMode,
+	currentYear: userStore.currentYear,
+	currentMonth: userStore.currentMonth,
+	selectedModel: userStore.selectedModel,
+});
+
+const getClimateQueryInputKey = ({
+	mapMode,
+	currentYear,
+	currentMonth,
+	selectedModel,
+}: ClimateQueryInput) =>
+	[mapMode, currentYear, currentMonth, selectedModel].join("|");
+
+const useResetMapProcessingErrorOnQueryChange = (
+	uiStore: MapUIInteractionsStore,
+	climateQueryInputKey: string,
+) => {
+	const lastInputKeyRef = useRef<string | null>(null);
+
+	useEffect(() => {
+		if (!uiStore.dataProcessingError) {
+			lastInputKeyRef.current = climateQueryInputKey;
+			return;
+		}
+
+		if (lastInputKeyRef.current === null) {
+			lastInputKeyRef.current = climateQueryInputKey;
+			return;
+		}
+
+		if (lastInputKeyRef.current === climateQueryInputKey) return;
+
+		uiStore.setDataProcessingError(false);
+		uiStore.setGeneralError(null);
+		lastInputKeyRef.current = climateQueryInputKey;
+	}, [
+		uiStore,
+		climateQueryInputKey,
+		uiStore.dataProcessingError,
+		uiStore.setDataProcessingError,
+		uiStore.setGeneralError,
+	]);
+};
+
+const useGridDataFlow = ({
+	selectedModelData,
+	setProcessedDataExtremes,
+	uiStore,
+	userStore,
+	climateQueryInput,
+	climateQueryInputKey,
+	mapViewportBounds,
+	dataResolution,
+}: UseGridDataArgs) => {
+	const [rawModelOutputDataPoints, setRawModelOutputDataPoints] = useState<
+		ModelOutputDataPoint[]
+	>([]);
+	const latestGridLoadRequestRef = useRef(0);
+	const lastNoDataQueryKeyRef = useRef<string | null>(null);
+	const rawModelOutputDataPointsLength = rawModelOutputDataPoints.length;
+
+	useEffect(() => {
+		if (
+			lastNoDataQueryKeyRef.current &&
+			lastNoDataQueryKeyRef.current !== climateQueryInputKey
+		) {
+			lastNoDataQueryKeyRef.current = null;
+		}
+
+		if (!selectedModelData) {
+			return;
+		}
+
+		const loadData = async () => {
+			if (climateQueryInput.mapMode === "grid" && !mapViewportBounds) {
+				setProcessedDataExtremes(null);
+				console.log("Skipping grid data load until viewport is available");
+				return;
+			}
+
+			if (climateQueryInput.mapMode !== "grid") {
+				return;
+			}
+
+			if (lastNoDataQueryKeyRef.current === climateQueryInputKey) {
+				return;
+			}
+			const requestId = ++latestGridLoadRequestRef.current;
+
+			try {
+				startRawDataLoad();
+
+				const { dataPoints, extremes, requestedVariableValue, safeMonth } =
+					await modelOutputLoader.loadGridData({
+						year: climateQueryInput.currentYear,
+						month: climateQueryInput.currentMonth,
+						selectedModelData,
+						viewportBounds: mapViewportBounds,
+						requestedGridResolution: dataResolution,
+					});
+				if (requestId !== latestGridLoadRequestRef.current) {
+					return;
+				}
+
+				userStore.setCurrentVariableType(requestedVariableValue);
+				uiStore.setUserRequestedYear(climateQueryInput.currentYear);
+				uiStore.setUserRequestedMonth(safeMonth);
+				setRawModelOutputDataPoints(dataPoints);
+				setProcessedDataExtremes(extremes);
+
+				if (!mapDisplayedDataStore.countryBoundaryOverlay) {
+					await mapDisplayedDataStore.loadCountryBoundaryOverlay();
+				}
+			} catch (err: unknown) {
+				const error = err as Error;
+				if (requestId !== latestGridLoadRequestRef.current) {
+					return;
+				}
+
+				setProcessedDataExtremes(null);
+
+				if (error.message.includes("API_ERROR:")) {
+					setRawModelOutputDataPoints((previousDataPoints) =>
+						previousDataPoints.length === 0 ? previousDataPoints : [],
+					);
+					uiStore.setUserRequestedYear(climateQueryInput.currentYear);
+					uiStore.setUserRequestedMonth(climateQueryInput.currentMonth);
+					uiStore.setDataFetchErrorMessage(
+						error.message.replace("API_ERROR: ", ""),
+					);
+					lastNoDataQueryKeyRef.current = climateQueryInputKey;
+					uiStore.setNoDataModalVisible(true);
+					uiStore.setGeneralError(null);
+				} else {
+					errorStore.showError(
+						"Model Output Error",
+						`Failed to load model output data: ${error.message}`,
+					);
+					uiStore.setGeneralError(
+						`Failed to load model output data: ${error.message}`,
+					);
+				}
+			} finally {
+				if (requestId === latestGridLoadRequestRef.current) {
+					completeRawDataLoad();
+				}
+			}
+		};
+
+		loadData();
+	}, [
+		uiStore,
+		userStore,
+		climateQueryInput.mapMode,
+		climateQueryInput.currentYear,
+		climateQueryInput.currentMonth,
+		selectedModelData,
+		mapViewportBounds,
+		dataResolution,
+		setProcessedDataExtremes,
+		climateQueryInputKey,
+	]);
+
+	useEffect(() => {
+		if (climateQueryInput.mapMode !== "grid") {
+			setRawModelOutputDataPoints((previousDataPoints) =>
+				previousDataPoints.length === 0 ? previousDataPoints : [],
+			);
+			mapDisplayedDataStore.setGridCells([]);
+			return;
+		}
+
+		if (uiStore.dataProcessingError) {
+			return;
+		}
+
+		const processGridData = () => {
+			if (rawModelOutputDataPointsLength > 0) {
+				const nextGridCells =
+					gridProcessingStore.generateGridCellsFromRawModelOutputData(
+						rawModelOutputDataPoints,
+						mapViewportBounds,
+						dataResolution,
+					);
+				mapDisplayedDataStore.setGridCells(nextGridCells);
+				return;
+			}
+
+			mapDisplayedDataStore.setGridCells([]);
+		};
+
+		processGridData();
+	}, [
+		uiStore,
+		climateQueryInput.mapMode,
+		uiStore.dataProcessingError,
+		rawModelOutputDataPoints,
+		rawModelOutputDataPointsLength,
+		mapViewportBounds,
+		dataResolution,
+	]);
+};
+
+const useEuropeNutsFlow = ({
+	selectedModelData,
+	setProcessedDataExtremes,
+	uiStore,
+	userStore,
+	climateQueryInput,
+	climateQueryInputKey,
+}: UseClimateDataLoaderArgs &
+	Pick<
+		ClimateQueryAwareArgs,
+		"climateQueryInput" | "climateQueryInputKey"
+	>) => {
+	const latestEuropeLoadRequestRef = useRef(0);
+	const lastNoDataQueryKeyRef = useRef<string | null>(null);
+
+	useEffect(() => {
+		if (
+			lastNoDataQueryKeyRef.current &&
+			lastNoDataQueryKeyRef.current !== climateQueryInputKey
+		) {
+			lastNoDataQueryKeyRef.current = null;
+		}
+
+		if (
+			climateQueryInput.mapMode !== "europe-only" ||
+			uiStore.dataProcessingError ||
+			!selectedModelData
+		) {
+			return;
+		}
+
+		const clearEuropeMapDataState = () => {
+			mapDisplayedDataStore.setProcessedEuropeNutsRegions(null);
+			mapDisplayedDataStore.setIsProcessingEuropeNutsData(true);
+			setProcessedDataExtremes(null);
+		};
+
+		const processEuropeData = async () => {
+			const requestId = ++latestEuropeLoadRequestRef.current;
+			let rawDataLoadCompleted = false;
+
+			try {
+				clearEuropeMapDataState();
+				startRawDataLoad();
+
+				const { nutsApiData, requestedVariableValue, safeMonth } =
+					await modelOutputLoader.loadEuropeNutsData({
+						year: climateQueryInput.currentYear,
+						month: climateQueryInput.currentMonth,
+						selectedModelData,
+					});
+				if (requestId !== latestEuropeLoadRequestRef.current) {
+					return;
+				}
+
+				userStore.setCurrentVariableType(requestedVariableValue);
+				uiStore.setUserRequestedYear(climateQueryInput.currentYear);
+				uiStore.setUserRequestedMonth(safeMonth);
+				if (Object.keys(nutsApiData).length === 0) {
+					throw new Error("NO_DATA");
+				}
+				completeRawDataLoad();
+				rawDataLoadCompleted = true;
+
+				const { nutsGeoJSON, extremes } =
+					await regionProcessor.processEuropeOnlyRegionsFromApi(
+						nutsApiData,
+						climateQueryInput.currentYear,
+					);
+				if (requestId !== latestEuropeLoadRequestRef.current) {
+					return;
+				}
+				mapDisplayedDataStore.setProcessedEuropeNutsRegions(nutsGeoJSON);
+				setProcessedDataExtremes(extremes);
+			} catch (error) {
+				if (requestId !== latestEuropeLoadRequestRef.current) {
+					return;
+				}
+
+				if (!rawDataLoadCompleted) {
+					completeRawDataLoad();
+					rawDataLoadCompleted = true;
+				}
+
+				console.error("Failed to load/process Europe-only NUTS data:", error);
+				setProcessedDataExtremes(null);
+				if (
+					error instanceof Error &&
+					(error.message === "NO_DATA" || error.message.includes("API_ERROR:"))
+				) {
+					uiStore.setUserRequestedYear(climateQueryInput.currentYear);
+					uiStore.setUserRequestedMonth(climateQueryInput.currentMonth);
+					uiStore.setDataFetchErrorMessage(
+						error.message === "NO_DATA"
+							? "No data found for this request."
+							: error.message.replace("API_ERROR: ", ""),
+					);
+					lastNoDataQueryKeyRef.current = climateQueryInputKey;
+					uiStore.setNoDataModalVisible(true);
+					uiStore.setDataProcessingError(false);
+					uiStore.setGeneralError(null);
+				} else {
+					uiStore.setDataProcessingError(true);
+					uiStore.setGeneralError("Failed to process Europe-only NUTS data");
+				}
+			} finally {
+				if (requestId === latestEuropeLoadRequestRef.current) {
+					mapDisplayedDataStore.setIsProcessingEuropeNutsData(false);
+					if (!rawDataLoadCompleted) {
+						completeRawDataLoad();
+					}
+				}
+			}
+		};
+
+		processEuropeData();
+	}, [
+		uiStore,
+		climateQueryInput.mapMode,
+		climateQueryInput.currentYear,
+		climateQueryInput.currentMonth,
+		uiStore.dataProcessingError,
+		selectedModelData,
+		userStore,
+		setProcessedDataExtremes,
+		climateQueryInputKey,
+	]);
+};
+
+const useClearMapHoverTimeoutOnUnmount = (uiStore: MapUIInteractionsStore) => {
+	useEffect(() => {
+		return () => {
+			if (uiStore.mapHoverTimeout) {
+				clearTimeout(uiStore.mapHoverTimeout);
+			}
+		};
+	}, [uiStore, uiStore.mapHoverTimeout]);
+};
+
+export const useClimateDataLoader = ({
+	selectedModelData,
+	setProcessedDataExtremes,
+	uiStore,
+	userStore,
+}: UseClimateDataLoaderArgs) => {
+	const mapViewportBounds = mapViewportInputsStore.mapViewportBounds;
+	const dataResolution = mapViewportInputsStore.dataResolution;
+	const climateQueryInput = getClimateQueryInput(userStore);
+	const climateQueryInputKey = getClimateQueryInputKey(climateQueryInput);
+
+	useResetMapProcessingErrorOnQueryChange(uiStore, climateQueryInputKey);
+	useGridDataFlow({
+		selectedModelData,
+		setProcessedDataExtremes,
+		uiStore,
+		userStore,
+		climateQueryInput,
+		climateQueryInputKey,
+		mapViewportBounds,
+		dataResolution,
+	});
+	useEuropeNutsFlow({
+		selectedModelData,
+		setProcessedDataExtremes,
+		uiStore,
+		userStore,
+		climateQueryInput,
+		climateQueryInputKey,
+	});
+	useClearMapHoverTimeoutOnUnmount(uiStore);
+};

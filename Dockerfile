@@ -6,7 +6,6 @@ LABEL org.opencontainers.image.licenses=MIT
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-ENV VITE_NUTS_API_BASE="http://api:8000"
 RUN corepack enable
 
 WORKDIR /app
@@ -16,10 +15,14 @@ FROM base AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m pip install --no-cache-dir uv
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY frontend/ .
 ENV NODE_ENV=production
-RUN VITE_NUTS_API_BASE=$VITE_NUTS_API_BASE pnpm build
+RUN pnpm build
 
 FROM nginx:alpine
 

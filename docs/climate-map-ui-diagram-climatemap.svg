@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2440 560" role="img" aria-labelledby="title desc">
+  <title id="title">ClimateMap UI diagram ClimateMap section</title>
+  <desc id="desc">Focused crop of the ClimateMap and key stores portion of the ClimateMap UI component diagram.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f4f7fb; }
+      .panel { fill: #ffffff; stroke: #d9e1ec; stroke-width: 2; rx: 28; }
+      .panelTitle { font: 700 24px 'Segoe UI', Arial, sans-serif; fill: #1f2a44; }
+      .component { fill: #eef4ff; stroke: #5b8def; stroke-width: 2.5; rx: 18; }
+      .store { fill: #f7efff; stroke: #8b5cf6; stroke-width: 2.5; rx: 18; }
+      .note { fill: #fff9e7; stroke: #e2b84a; stroke-width: 2; rx: 18; }
+      .labelBg { fill: rgba(255, 255, 255, 0.95); stroke: #d9e1ec; stroke-width: 1.2; rx: 12; }
+      .name { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #1f2940; }
+      .small { font: 13px 'Segoe UI', Arial, sans-serif; fill: #617089; }
+      .noteText { font: 14px 'Segoe UI', Arial, sans-serif; fill: #6b5521; }
+      .step { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #3d4b63; }
+      .arrowPurple { stroke: #7a4ee0; stroke-width: 3.5; fill: none; }
+    </style>
+    <marker id="arrowPurple" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0 L14 7 L0 14 z" fill="#7a4ee0"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="2440" height="560"/>
+  <g transform="translate(-60 -600)">
+    <rect class="panel" x="60" y="600" width="2440" height="560"/>
+    <text class="panelTitle" x="92" y="644">ClimateMap + Key Stores</text>
+
+    <rect class="store" x="120" y="720" width="620" height="136"/>
+    <text class="name" x="150" y="756">UserSelectionsForClimateQueryStore</text>
+    <text class="small" x="150" y="784">selectedModel, currentYear, currentMonth, currentVariableType, mapMode</text>
+    <text class="small" x="150" y="808">Primary query input store touched by Header and BottomBar</text>
+
+    <rect class="store" x="120" y="900" width="620" height="132"/>
+    <text class="name" x="150" y="936">MapViewportInputsStore</text>
+    <text class="small" x="150" y="964">mapViewportBounds, mapZoomLevel, dataResolution</text>
+    <text class="small" x="150" y="988">Only matters for grid requests and zoom-dependent rendering</text>
+
+    <rect class="component" x="860" y="760" width="840" height="220"/>
+    <text class="name" x="1172" y="800">ClimateMap</text>
+    <text class="small" x="938" y="836">Root map screen that wires Header, BottomBar, MapContainer, MapLayers, ViewportMonitor,</text>
+    <text class="small" x="938" y="860">LoadingSkeleton, NoDataModal, Footer, and the device split through isMobile.</text>
+    <text class="small" x="938" y="900">Runs useClimateDataLoader, owns local processedDataExtremes for the legend,</text>
+    <text class="small" x="938" y="924">and binds the shared Leaflet map instance through MapDisplayedDataStore.</text>
+
+    <rect class="store" x="1820" y="720" width="620" height="136"/>
+    <text class="name" x="1850" y="756">MapUIInteractionsStore</text>
+    <text class="small" x="1850" y="784">generalError, dataProcessingError, noDataModalVisible, mapScreenshoter, hover state</text>
+    <text class="small" x="1850" y="808">Transient feedback and interaction state that ClimateMap surfaces to the user</text>
+
+    <rect class="store" x="1820" y="900" width="620" height="164"/>
+    <text class="name" x="1850" y="936">MapDisplayedDataStore</text>
+    <text class="small" x="1850" y="964">leafletMapInstance, isLoadingRawData, isProcessingEuropeNutsData</text>
+    <text class="small" x="1850" y="988">processedEuropeNutsRegions, gridCells, countryBoundaryOverlay</text>
+    <text class="small" x="1850" y="1012">Renderable map state for both NUTS and grid outputs</text>
+
+    <path class="arrowPurple" marker-end="url(#arrowPurple)" d="M860 820 L740 800"/>
+    <rect class="labelBg" x="708" y="766" width="176" height="28"/>
+    <text class="step" x="724" y="785">query state in/out</text>
+
+    <path class="arrowPurple" marker-end="url(#arrowPurple)" d="M860 930 L740 960"/>
+    <rect class="labelBg" x="702" y="924" width="194" height="28"/>
+    <text class="step" x="718" y="943">grid viewport input</text>
+
+    <path class="arrowPurple" marker-end="url(#arrowPurple)" d="M1700 820 L1820 800"/>
+    <rect class="labelBg" x="1646" y="766" width="168" height="28"/>
+    <text class="step" x="1664" y="785">feedback state</text>
+
+    <path class="arrowPurple" marker-end="url(#arrowPurple)" d="M1700 930 L1820 980"/>
+    <rect class="labelBg" x="1638" y="952" width="184" height="28"/>
+    <text class="step" x="1658" y="971">renderable data</text>
+
+    <rect class="note" x="860" y="1010" width="840" height="110"/>
+    <text class="noteText" x="892" y="1046">UI focus only: LoadingStore and GridProcessingStore sit behind useClimateDataLoader.</text>
+    <text class="noteText" x="892" y="1072">They still matter, but this diagram keeps the visible UI shell and its primary store edges on one screen.</text>
+  </g>
+</svg>

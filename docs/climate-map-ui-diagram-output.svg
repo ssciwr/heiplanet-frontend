@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2440 430" role="img" aria-labelledby="title desc">
+  <title id="title">ClimateMap UI diagram output side</title>
+  <desc id="desc">Focused crop of the output-side portion of the ClimateMap UI component diagram.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f4f7fb; }
+      .panel { fill: #ffffff; stroke: #d9e1ec; stroke-width: 2; rx: 28; }
+      .panelTitle { font: 700 24px 'Segoe UI', Arial, sans-serif; fill: #1f2a44; }
+      .output { fill: #fff6ea; stroke: #d9822b; stroke-width: 2.5; rx: 18; }
+      .labelBg { fill: rgba(255, 255, 255, 0.95); stroke: #d9e1ec; stroke-width: 1.2; rx: 12; }
+      .name { font: 700 16px 'Segoe UI', Arial, sans-serif; fill: #1f2940; }
+      .small { font: 13px 'Segoe UI', Arial, sans-serif; fill: #617089; }
+      .step { font: 700 14px 'Segoe UI', Arial, sans-serif; fill: #3d4b63; }
+      .arrowOrange { stroke: #d9822b; stroke-width: 3.5; fill: none; }
+      .arrowPurple { stroke: #7a4ee0; stroke-width: 3.5; fill: none; }
+    </style>
+    <marker id="arrowOrange" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0 L14 7 L0 14 z" fill="#d9822b"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0 0 L14 7 L0 14 z" fill="#7a4ee0"/>
+    </marker>
+    <g id="icon-phone">
+      <rect x="3" y="2" width="18" height="30" rx="5" fill="none" stroke="#5b8def" stroke-width="2"/>
+      <rect x="8" y="6" width="8" height="1.8" rx="0.9" fill="#5b8def"/>
+      <circle cx="12" cy="27" r="1.6" fill="#5b8def"/>
+    </g>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="2440" height="430"/>
+  <g transform="translate(-60 -1200)">
+    <rect class="panel" x="60" y="1200" width="2440" height="430"/>
+    <text class="panelTitle" x="92" y="1244">Output Side</text>
+
+    <rect class="output" x="120" y="1300" width="660" height="170"/>
+    <text class="name" x="322" y="1338">Leaflet Map Rendering</text>
+    <text class="small" x="150" y="1368">MapContainer plus the shared leafletMapInstance, zoom controls, and device layout width.</text>
+    <text class="small" x="150" y="1392">Desktop keeps a left gutter; mobile uses a full-width map.</text>
+
+    <rect class="output" x="930" y="1300" width="700" height="170"/>
+    <text class="name" x="1152" y="1338">Mode-Specific Layers</text>
+    <text class="small" x="960" y="1368">MapLayers renders the Europe-only GeoJSON layer or the grid branch.</text>
+    <text class="small" x="960" y="1392">Grid uses AdaptiveGridLayer plus the country boundary overlay.</text>
+
+    <rect class="output" x="1780" y="1300" width="660" height="170"/>
+    <text class="name" x="2046" y="1338">Legend</text>
+    <text class="small" x="1810" y="1368">processedDataExtremes are owned locally in ClimateMap, not in a store.</text>
+    <text class="small" x="1810" y="1392">Desktop shows an overlay; mobile passes the legend into BottomBar.</text>
+    <use href="#icon-phone" x="1810" y="1410"/>
+    <text class="small" x="1844" y="1433">Legend placement changes with the mobile branch</text>
+
+    <path class="arrowOrange" marker-end="url(#arrowOrange)" d="M1120 980 L450 1300"/>
+    <rect class="labelBg" x="628" y="1128" width="268" height="28"/>
+    <text class="step" x="648" y="1147">shared map shell output</text>
+
+    <path class="arrowPurple" marker-end="url(#arrowPurple)" d="M2130 1064 L1280 1300"/>
+    <rect class="labelBg" x="1624" y="1144" width="256" height="28"/>
+    <text class="step" x="1644" y="1163">NUTS or grid layer payload</text>
+
+    <path class="arrowOrange" marker-end="url(#arrowOrange)" d="M1440 980 L2110 1300"/>
+    <rect class="labelBg" x="1638" y="1120" width="258" height="28"/>
+    <text class="step" x="1658" y="1139">legend render decision</text>
+  </g>
+</svg>

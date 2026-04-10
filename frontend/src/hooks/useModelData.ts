@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { fetchModelCards } from "../services/modelCardService";
+import {
+	FALLBACK_MODEL_CARDS,
+	fetchModelCards,
+} from "../services/modelCardService";
 import type { Model } from "../types/model";
 
 export interface UseModelDataReturn {
 	models: Model[];
-	setModels: (models: Model[]) => void;
-	getOptimismLevels: () => string[];
+	modelMetadataError: string | null;
+	modelMetadataLoading: boolean;
 }
 
 export const useModelData = (
@@ -13,18 +16,28 @@ export const useModelData = (
 	setSelectedModel: (model: string) => void,
 ): UseModelDataReturn => {
 	const [models, setModels] = useState<Model[]>([]);
-
-	const getOptimismLevels = () => ["optimistic", "realistic", "pessimistic"];
+	const [modelMetadataLoading, setModelMetadataLoading] = useState(true);
+	const [modelMetadataError, setModelMetadataError] = useState<string | null>(
+		null,
+	);
 
 	// Load models for ModelDetailsModal
 	useEffect(() => {
 		const loadModels = async () => {
 			try {
+				setModelMetadataLoading(true);
+				setModelMetadataError(null);
 				const loadedModels = await fetchModelCards();
+				if (loadedModels.length === 0) {
+					throw new Error("No model metadata found in artifact payload");
+				}
 				setModels(loadedModels);
 			} catch (error) {
 				console.error("Error loading model cards:", error);
-				setModels([]);
+				setModelMetadataError("Failed to load models from metadata artifact");
+				setModels(FALLBACK_MODEL_CARDS);
+			} finally {
+				setModelMetadataLoading(false);
 			}
 		};
 
@@ -40,7 +53,7 @@ export const useModelData = (
 
 	return {
 		models,
-		setModels,
-		getOptimismLevels,
+		modelMetadataError,
+		modelMetadataLoading,
 	};
 };
