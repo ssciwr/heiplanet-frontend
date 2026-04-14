@@ -16,10 +16,9 @@ test.describe("ModelDetailsModal", () => {
 	test("Model details dropdown should open and allow the user to view all models", async ({
 		page,
 	}, testInfo) => {
-		test.skip(
-			testInfo.project.name === "Mobile Chrome",
-			"Temporarily skipped on Mobile Chrome: model selector not found in CI.",
-		);
+		const isMobileProject = testInfo.project.name
+			.toLowerCase()
+			.includes("mobile");
 		const modelSelector = page.getByTestId("model-selector");
 		await expect(modelSelector).toBeVisible();
 		const dropdownTrigger = modelSelector
@@ -28,20 +27,23 @@ test.describe("ModelDetailsModal", () => {
 
 		await expect(dropdownTrigger).toBeVisible();
 		await dropdownTrigger.dispatchEvent("click");
+		if (!isMobileProject) {
+			const dropdown = page.locator(".model-dropdown");
+			await expect(dropdown).toBeVisible();
 
-		const dropdown = page.locator(".model-dropdown");
-		await expect(dropdown).toBeVisible();
+			const modelCardsUnavailable = dropdown.getByText(
+				"Model Cards Unavailable",
+			);
+			if (await modelCardsUnavailable.isVisible()) {
+				await expect(modelCardsUnavailable).toBeVisible();
+				return;
+			}
 
-		const modelCardsUnavailable = dropdown.getByText("Model Cards Unavailable");
-		if (await modelCardsUnavailable.isVisible()) {
-			await expect(modelCardsUnavailable).toBeVisible();
-			return;
+			const viewAllModelsOption = dropdown.getByTestId("view-all-models");
+			await expect(viewAllModelsOption).toBeVisible();
+			await expect(viewAllModelsOption).toBeEnabled();
+			await viewAllModelsOption.dispatchEvent("click");
 		}
-
-		const viewAllModelsOption = dropdown.getByTestId("view-all-models");
-		await expect(viewAllModelsOption).toBeVisible();
-		await expect(viewAllModelsOption).toBeEnabled();
-		await viewAllModelsOption.dispatchEvent("click");
 
 		const modal = page.locator('[data-testid="model-details-modal"]');
 
