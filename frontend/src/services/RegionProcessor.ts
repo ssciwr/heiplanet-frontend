@@ -1,25 +1,24 @@
 import * as turf from "@turf/turf";
 import type {
+	ModelOutputDataPoint,
 	NutsGeoJSON,
-	TemperatureDataPoint,
-	WorldwideGeoJSON,
 } from "../component/Mapper/types";
 import { nutsConverter } from "../component/Mapper/utilities/NutsConverter";
 
 export interface RegionTemperatureResult {
-	temperature: number | null;
+	modelOutputValue: number | null;
 	isFallback: boolean;
 	currentPosition: { lat: number; lng: number };
 	nearestDataPoint: { lat: number; lng: number } | null;
-	dataPoints: TemperatureDataPoint[];
+	dataPoints: ModelOutputDataPoint[];
 }
 
 export class RegionProcessor {
 	// Sample temperature data to reduce processing load
 	public sampleTemperatureData(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 		sampleRate = 0.5,
-	): TemperatureDataPoint[] {
+	): ModelOutputDataPoint[] {
 		const sampleSize = Math.max(
 			1,
 			Math.floor(temperatureData.length * sampleRate),
@@ -43,7 +42,7 @@ export class RegionProcessor {
 	// Calculate temperature and coordinate info for a region
 	public calculateRegionTemperatureWithCoords(
 		regionFeature: GeoJSON.Feature,
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 	): RegionTemperatureResult {
 		const regionName =
 			regionFeature.properties?.name ||
@@ -81,11 +80,11 @@ export class RegionProcessor {
 			);
 			console.log(
 				`Region ${regionName}: using nearest point fallback, temp: ${
-					nearestPoint ? nearestPoint.temperature : "null"
+					nearestPoint ? nearestPoint.modelOutputValue : "null"
 				}`,
 			);
 			return {
-				temperature: nearestPoint ? nearestPoint.temperature : null,
+				modelOutputValue: nearestPoint ? nearestPoint.modelOutputValue : null,
 				isFallback: true,
 				currentPosition,
 				nearestDataPoint: nearestPoint
@@ -100,13 +99,13 @@ export class RegionProcessor {
 
 		// Calculate average temperature
 		const avgTemp =
-			pointsInRegion.reduce((sum, point) => sum + point.temperature, 0) /
+			pointsInRegion.reduce((sum, point) => sum + point.modelOutputValue, 0) /
 			pointsInRegion.length;
 		console.log(
 			`Region ${regionName}: calculated average temp: ${avgTemp} from ${pointsInRegion.length} points`,
 		);
 		return {
-			temperature: avgTemp,
+			modelOutputValue: avgTemp,
 			isFallback: false,
 			currentPosition,
 			nearestDataPoint: null,
@@ -200,8 +199,8 @@ export class RegionProcessor {
 	// Find nearest temperature point to a region using turf.js
 	public findNearestPoint(
 		regionFeature: GeoJSON.Feature,
-		temperatureData: TemperatureDataPoint[],
-	): TemperatureDataPoint | null {
+		temperatureData: ModelOutputDataPoint[],
+	): ModelOutputDataPoint | null {
 		try {
 			// Get centroid of the region using turf.js
 			const polygon = turf.feature(regionFeature.geometry);
@@ -228,146 +227,6 @@ export class RegionProcessor {
 			console.error("Error finding nearest point:", error);
 			return null;
 		}
-	}
-
-	// Process worldwide regions
-	public async processWorldwideRegions(
-		temperatureData: TemperatureDataPoint[],
-		worldwideRegionsGeoJSON: WorldwideGeoJSON,
-	): Promise<{
-		processedGeoJSON: WorldwideGeoJSON;
-		extremes: { min: number; max: number } | null;
-	}> {
-		console.log("Converting grid data to global administrative regions...");
-		console.log(
-			`Processing ${worldwideRegionsGeoJSON.features.length} global regions`,
-		);
-
-		// Sample temperature data to 0.5% for better performance
-		const sampledTemperatureData = this.sampleTemperatureData(
-			temperatureData,
-			0.005,
-		);
-		console.log(
-			"Temperature data sample: first few points:",
-			sampledTemperatureData.slice(0, 5),
-		);
-
-		// Debug: Show bounds of temperature data
-		if (sampledTemperatureData.length > 0) {
-			const tempBounds = {
-				minLat: Math.min(...sampledTemperatureData.map((p) => p.lat)),
-				maxLat: Math.max(...sampledTemperatureData.map((p) => p.lat)),
-				minLon: Math.min(...sampledTemperatureData.map((p) => p.lng)),
-				maxLon: Math.max(...sampledTemperatureData.map((p) => p.lng)),
-			};
-			console.log(
-				`Temperature data bounds: lat(${tempBounds.minLat} to ${tempBounds.maxLat}), lon(${tempBounds.minLon} to ${tempBounds.maxLon})`,
-			);
-		}
-
-		// Process each global region and calculate temperature
-		const processedFeatures = [];
-
-		for (
-			let index = 0;
-			index < worldwideRegionsGeoJSON.features.length;
-			index++
-		) {
-			const feature = worldwideRegionsGeoJSON.features[index];
-			const regionName =
-				feature.properties?.name ||
-				feature.properties?.name_en ||
-				feature.properties?.admin ||
-				`Region-${index}`;
-
-			try {
-				console.log(`Processing region ${index + 1}: ${regionName}`);
-
-				const tempResult = this.calculateRegionTemperatureWithCoords(
-					feature as GeoJSON.Feature,
-					sampledTemperatureData,
-				);
-				const result = {
-					...feature,
-					properties: {
-						...feature.properties,
-						intensity: tempResult.temperature, // this label should be in some kind of mobx store or passed as prop.
-						// todo: Check this again. This relates to Ingas suggested changes today
-						// Cruically, the label here in this concept may become the yaml "model output yaml" or so
-						// Created Forntend issue #77 for this.
-						WORLDWIDE_ID:
-							feature.properties?.name ||
-							feature.properties?.NAM_0 ||
-							feature.properties?.name_en ||
-							"Unknown",
-						countryName:
-							feature.properties?.NAM_0 ||
-							feature.properties?.admin ||
-							feature.properties?.name ||
-							feature.properties?.name_en ||
-							"Unknown Country",
-						pointCount: sampledTemperatureData.filter((point) =>
-							this.isPointInRegion(
-								point.lat,
-								point.lng,
-								feature.geometry as GeoJSON.Geometry,
-							),
-						).length,
-						isFallback: tempResult.isFallback,
-						currentPosition: tempResult.currentPosition,
-						nearestDataPoint: tempResult.nearestDataPoint,
-						dataPoints: tempResult.dataPoints,
-					},
-				};
-
-				if (result.properties.intensity !== null) {
-					processedFeatures.push(result);
-					console.log(
-						`Region ${regionName} processed successfully: intensity=${result.properties.intensity}`,
-					);
-				} else {
-					console.log(`Region ${regionName} has null intensity, skipping`);
-				}
-			} catch (regionError) {
-				console.error(`Error processing region ${regionName}:`, regionError);
-				throw regionError;
-			}
-		}
-
-		console.log(
-			`Processed ${processedFeatures.length} regions with valid temperature data`,
-		);
-
-		const processedGeoJSON = {
-			type: "FeatureCollection" as const,
-			features: processedFeatures,
-		};
-
-		// Calculate extremes from processed data
-		const temperatures = processedFeatures
-			.map((f) => f.properties.intensity)
-			.filter((t) => t !== null);
-		console.log("Temperature values for extremes calculation:", temperatures);
-
-		let extremes = null;
-		if (temperatures.length > 0) {
-			extremes = {
-				min: Math.min(...temperatures),
-				max: Math.max(...temperatures),
-			};
-			console.log("Set worldwide regions extremes:", extremes);
-			console.log(
-				`Total regions with temperature data: ${temperatures.length}`,
-			);
-		} else {
-			console.warn("No temperature data found for any region!");
-		}
-
-		return {
-			processedGeoJSON: processedGeoJSON as WorldwideGeoJSON,
-			extremes,
-		};
 	}
 
 	// Process Europe-only regions using direct API data (no lat/lon conversion needed)
@@ -398,7 +257,7 @@ export class RegionProcessor {
 
 	// Process Europe-only regions (legacy method - kept for backward compatibility)
 	public async processEuropeOnlyRegions(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 		currentYear: number,
 	): Promise<{
 		nutsGeoJSON: NutsGeoJSON;

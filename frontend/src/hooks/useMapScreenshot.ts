@@ -18,7 +18,6 @@ interface UseMapScreenshotProps {
 	selectedModel: string;
 	currentYear: number;
 	currentMonth: Month;
-	selectedOptimism: string;
 }
 
 export const useMapScreenshot = ({
@@ -29,7 +28,6 @@ export const useMapScreenshot = ({
 	selectedModel,
 	currentYear,
 	currentMonth,
-	selectedOptimism,
 }: UseMapScreenshotProps): UseMapScreenshotReturn => {
 	// Initialize screenshoter when map is ready
 	useEffect(() => {
@@ -87,7 +85,7 @@ export const useMapScreenshot = ({
 			// Get month name
 			const monthName = getMonthInfo(currentMonth).label;
 			const timeText = `${monthName} ${currentYear}`;
-			const overlayText = `Model: ${modelName} | Time: ${timeText} | Optimism: ${selectedOptimism}`;
+			const overlayText = `Model: ${modelName} | Time: ${timeText}`; // | Optimism: ${selectedOptimism} not implemented.
 
 			// Take screenshot first
 			const blob = (await screenshoter.takeScreen("blob", {
@@ -166,7 +164,6 @@ export const useMapScreenshot = ({
 					a.click();
 					document.body.removeChild(a);
 					URL.revokeObjectURL(url);
-					console.log("Screenshot with overlay saved successfully");
 				}
 			}, "image/png");
 

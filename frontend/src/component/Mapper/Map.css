@@ -4,10 +4,14 @@
 
 .climate-map-container {
 	font-family: var(--font-inter);
-	background: rgb(235, 235, 235);
+	background: white;
 	min-height: 100vh;
 	min-width: 100vw;
 	padding: 10px;
+}
+
+.climate-map-container-mobile {
+	background: rgb(235, 235, 235);
 }
 
 .map-content-wrapper {
@@ -152,7 +156,7 @@
 	transition: all 0.2s;
 }
 
-/* Mobile modal button overrides for purple/red modes */
+/* Mobile modal button overrides */
 @media (max-width: 768px) {
 	/* Make optimism selector full width on mobile */
 	[data-testid="optimism-selector"] .model-selector {
@@ -166,48 +170,41 @@
 	}
 
 	/* Fix ALL model selector buttons - including OptimismSelector */
-	[data-theme="purple"] .model-selector-button,
-	[data-theme="purple"]
-		[data-testid="optimism-selector"]
-		.model-selector-button {
+	.model-selector-button,
+	[data-testid="optimism-selector"] .model-selector-button {
 		background: white !important;
 		color: var(--text-primary) !important;
 		border: 1px solid var(--border-light) !important;
 	}
 
 	/* Fix chevron color on mobile */
-	[data-theme="purple"] .model-selector-button .chevron,
-	[data-theme="purple"]
-		[data-testid="optimism-selector"]
-		.model-selector-button
-		.chevron {
+	.model-selector-button .chevron,
+	[data-testid="optimism-selector"] .model-selector-button .chevron {
 		color: var(--text-primary) !important;
 	}
 
-	[data-theme="purple"] .model-selector-button:hover,
-	[data-theme="purple"]
-		[data-testid="optimism-selector"]
-		.model-selector-button:hover {
+	.model-selector-button:hover,
+	[data-testid="optimism-selector"] .model-selector-button:hover {
 		background: var(--surface-overlay) !important;
 		color: var(--text-primary) !important;
 		border-color: var(--border-medium) !important;
 	}
 
 	/* Fix modal dropdown background and items */
-	[data-theme="purple"] .model-dropdown {
+	.model-dropdown {
 		background: var(--surface-raised) !important;
 	}
 
-	[data-theme="purple"] .virus-item {
+	.virus-item {
 		background: var(--surface-raised) !important;
 		color: var(--text-primary) !important;
 	}
 
-	[data-theme="purple"] .virus-item:hover {
+	.virus-item:hover {
 		background: var(--surface-overlay) !important;
 	}
 
-	[data-theme="purple"] .virus-item.selected {
+	.virus-item.selected {
 		background: #deebff !important;
 		color: var(--text-primary) !important;
 	}
@@ -371,37 +368,14 @@
 	border: 1px solid rgba(23, 43, 77, 0.18);
 }
 
+.leaflet-popup.grid-popup .leaflet-popup-content {
+	min-width: 240px;
+}
+
 .leaflet-popup.grid-popup .leaflet-popup-content p {
 	color: var(--text-primary) !important;
 	font-weight: 500;
 	word-break: break-word;
-}
-
-.popup-close-btn {
-	position: absolute;
-	top: 8px;
-	right: 8px;
-	background: rgba(255, 255, 255, 0.9);
-	border: 1px solid #ddd;
-	border-radius: 50%;
-	width: 24px;
-	height: 24px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	font-size: 16px;
-	font-weight: bold;
-	color: #666;
-	transition: all 0.2s ease;
-	z-index: 10001;
-}
-
-.popup-close-btn:hover {
-	background: #fff;
-	color: #333;
-	border-color: #999;
-	transform: scale(1.1);
 }
 
 .leaflet-popup-content {
@@ -410,29 +384,43 @@
 }
 
 .base-popup,
-.worldwide-popup,
 .nuts-popup,
-.grid-popup {
-	padding: 0.75rem;
+.grid-popup,
+.europe-only-popup {
+	padding: 0.55rem 2.1rem 0.85rem 0.95rem;
 }
 
 .base-popup h4,
-.worldwide-popup h4,
 .nuts-popup h4,
-.grid-popup h4 {
-	font-size: 1rem;
+.grid-popup h4,
+.europe-only-popup h4 {
+	font-size: 1.15rem;
 	font-weight: 600;
 	color: var(--text-primary);
-	margin: 0 0 0.5rem 0;
+	margin: 0 0 0.65rem 0;
 }
 
 .base-popup p,
-.worldwide-popup p,
 .nuts-popup p,
-.grid-popup p {
+.grid-popup p,
+.europe-only-popup p {
 	font-size: 0.95rem;
 	color: var(--text-secondary);
 	margin: 0.25rem 0;
+}
+
+.grid-popup__value {
+	font-size: 1rem;
+}
+
+.grid-popup__meta {
+	color: var(--text-secondary) !important;
+	font-weight: 400 !important;
+}
+
+.grid-popup__meta strong {
+	color: var(--text-primary);
+	font-weight: 600;
 }
 
 .tertiary {
@@ -511,10 +499,6 @@
 	}
 }
 
-.europe-only-popup {
-	padding: 15px;
-}
-
 .text-gray-800 {
 	color: rgb(110, 110, 110);
 }
@@ -530,22 +514,7 @@
 }
 
 .mobile-side-buttons-mobile {
-	right: 16px;
-	top: 18%;
-}
-
-.mobile-side-buttons-desktop {
-	right: 16px;
-	top: 18%;
-}
-
-.mobile-side-buttons-bottom-right {
-	right: 16px;
-	top: 18%;
-}
-
-.mobile-side-buttons-top-left {
-	left: 16px;
+	right: 26px;
 	top: 18%;
 }
 

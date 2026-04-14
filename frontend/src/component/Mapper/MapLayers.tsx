@@ -2,79 +2,41 @@ import { observer } from "mobx-react-lite";
 import type React from "react";
 import { useCallback } from "react";
 import { GeoJSON, Pane } from "react-leaflet";
-import { useMapDataStore } from "../../contexts/MapDataContext";
-import { useMapUIInteractionsStore } from "../../contexts/MapUIInteractionsContext";
-import { useUserSelectionsStore } from "../../contexts/UserSelectionsContext";
+import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
+import { useEuropeFeatureInteractions } from "../../hooks/useEuropeFeatureInteractions";
+import { useMapUIInteractions } from "../../hooks/useMapUIInteractions";
 import { mapStyleService } from "../../services/MapStyleService";
-import { temperatureDataStore } from "../../stores/TemperatureDataStore";
-import * as MapInteractionHandlers from "../../utils/MapInteractionHandlers";
+import { mapDisplayedDataStore } from "../../stores/MapDisplayedDataStore";
+import { mapViewportInputsStore } from "../../stores/MapViewportInputsStore";
 import AdaptiveGridLayer from "./AdaptiveGridLayer";
 import CitiesLayer from "./CitiesLayer";
 
-import type { DataExtremes, NutsGeoJSON, WorldwideGeoJSON } from "./types";
+import type { DataExtremes } from "./types";
 
 interface MapLayersProps {
-	processedEuropeNutsRegions?: NutsGeoJSON | null;
-	processedWorldwideRegions?: WorldwideGeoJSON | null;
 	processedDataExtremes?: DataExtremes | null;
 }
 
 const MapLayers: React.FC<MapLayersProps> = observer(
-	({
-		processedEuropeNutsRegions: propsProcessedEuropeNutsRegions,
-		processedWorldwideRegions: propsProcessedWorldwideRegions,
-		processedDataExtremes: propsProcessedDataExtremes,
-	}) => {
+	({ processedDataExtremes: propsProcessedDataExtremes }) => {
 		// Use stores for UI state and data
-		const userStore = useUserSelectionsStore();
-		const mapUIStore = useMapUIInteractionsStore();
-		const mapDataStore = useMapDataStore();
+		const userStore = useUserSelectionsForClimateQueryStore();
+		const mapUIStore = useMapUIInteractions();
 
 		// Use processed data from props (from ClimateMap) rather than hook instances
 		const processedDataExtremes = propsProcessedDataExtremes ?? null;
-		const processedWorldwideRegions = propsProcessedWorldwideRegions ?? null;
-		const processedEuropeNutsRegions = propsProcessedEuropeNutsRegions ?? null;
+		const processedEuropeNutsRegions =
+			mapDisplayedDataStore.processedEuropeNutsRegions;
 
 		// Create interaction handlers
-		const highlightFeature = MapInteractionHandlers.createHighlightFeature(
-			userStore.mapMode,
-			mapUIStore.borderStyle,
-			processedDataExtremes,
-			processedWorldwideRegions,
-			processedEuropeNutsRegions,
-			mapDataStore.baseWorldGeoJSON,
-			mapUIStore.mapHoverTimeout,
-			mapUIStore.setMapHoverTimeout,
-			mapUIStore.mapHoveredLayer,
-			mapUIStore.setMapHoveredLayer,
-		);
-
-		const resetHighlight = MapInteractionHandlers.createResetHighlight(
-			userStore.mapMode,
-			mapUIStore.borderStyle,
-			processedDataExtremes,
-			processedWorldwideRegions,
-			processedEuropeNutsRegions,
-			mapDataStore.baseWorldGeoJSON,
-			mapUIStore.mapHoverTimeout,
-			mapUIStore.setMapHoverTimeout,
-			mapUIStore.mapHoveredLayer,
-			mapUIStore.setMapHoveredLayer,
-		);
-
-		const onEachWorldwideFeature =
-			MapInteractionHandlers.createOnEachWorldwideFeature(
-				userStore.currentVariableType,
-				highlightFeature,
-				resetHighlight,
-			);
-
-		const onEachEuropeOnlyFeature =
-			MapInteractionHandlers.createOnEachEuropeOnlyFeature(
-				userStore.currentVariableType,
-				highlightFeature,
-				resetHighlight,
-			);
+		const { onEachEuropeOnlyFeature } = useEuropeFeatureInteractions({
+			currentVariableType: userStore.currentVariableType,
+			dataExtremes: processedDataExtremes,
+			mapHoverTimeout: mapUIStore.mapHoverTimeout,
+			setMapHoverTimeout: mapUIStore.setMapHoverTimeout,
+			mapHoveredLayer: mapUIStore.mapHoveredLayer,
+			setMapHoveredLayer: mapUIStore.setMapHoveredLayer,
+		});
 
 		// Memoize style functions to prevent recreation on every render
 		const nutsStyleFunction = useCallback(
@@ -82,50 +44,22 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 				f ? mapStyleService.getNutsStyle(f, processedDataExtremes) : {},
 			[processedDataExtremes],
 		);
-
-		const worldwideStyleFunction = useCallback(
-			(f?: GeoJSON.Feature) =>
-				f
-					? mapStyleService.getWorldwideStyle(
-							f,
-							mapUIStore.borderStyle,
-							processedDataExtremes,
-						)
-					: {},
-			[mapUIStore.borderStyle, processedDataExtremes],
-		);
 		return (
 			<>
 				{/* Cities Layer - always rendered, but filtered by data regions, and only over the rendered regions */}
 				<CitiesLayer
-					zoom={mapDataStore.mapZoomLevel}
+					zoom={mapViewportInputsStore.mapZoomLevel}
 					dataRegions={
 						userStore.mapMode === "europe-only"
 							? processedEuropeNutsRegions
-							: userStore.mapMode === "grid"
-								? null
-								: processedWorldwideRegions
+							: null
 					}
 				/>
-
-				{/* Worldwide Mode Layer */}
-				{userStore.mapMode === "worldwide" && (
-					<Pane name="worldwidePane" style={{ zIndex: 30, opacity: 0.9 }}>
-						{processedWorldwideRegions?.features &&
-							processedWorldwideRegions.features.length > 0 && (
-								<GeoJSON
-									data={processedWorldwideRegions}
-									style={worldwideStyleFunction}
-									onEachFeature={onEachWorldwideFeature}
-								/>
-							)}
-					</Pane>
-				)}
 
 				{/* Europe-only Mode Layer */}
 				{userStore.mapMode === "europe-only" && (
 					<Pane name="europeOnlyPane" style={{ zIndex: 30, opacity: 0.9 }}>
-						{!mapDataStore.isProcessingEuropeNutsData &&
+						{!mapDisplayedDataStore.isProcessingEuropeNutsData &&
 							processedEuropeNutsRegions?.features &&
 							processedEuropeNutsRegions.features.length > 0 && (
 								<GeoJSON
@@ -141,10 +75,10 @@ const MapLayers: React.FC<MapLayersProps> = observer(
 				{/* Grid Mode Layer */}
 				{userStore.mapMode === "grid" && (
 					<Pane name="gridPane" style={{ zIndex: 340, opacity: 1.0 }}>
-						<AdaptiveGridLayer />
-						{temperatureDataStore.worldwideRegionBoundaries?.features && (
+						<AdaptiveGridLayer processedDataExtremes={processedDataExtremes} />
+						{mapDisplayedDataStore.countryBoundaryOverlay?.features && (
 							<GeoJSON
-								data={temperatureDataStore.worldwideRegionBoundaries}
+								data={mapDisplayedDataStore.countryBoundaryOverlay}
 								style={() => ({
 									color: "#111111",
 									weight: 1,

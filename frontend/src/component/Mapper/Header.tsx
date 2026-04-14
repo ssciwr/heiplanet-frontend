@@ -1,0 +1,364 @@
+import { Select } from "antd";
+import { Map as MapIcon } from "lucide-react";
+
+const { Option } = Select;
+import { observer } from "mobx-react-lite";
+import { isMobile } from "react-device-detect";
+import mobileLogo from "../../assets/heiplanet-circle-only-logo.jpg";
+import { useUserSelectionsForClimateQueryStore } from "../../contexts/UserSelectionsForClimateQueryContext";
+import { viewingMode } from "../../stores/ViewingModeStore.ts";
+import type { Model } from "../../types/model";
+import GeneralCard from "../General/GeneralCard.tsx";
+import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
+
+const Header = observer(
+	({
+		modelMetadataError,
+		modelMetadataLoading,
+		models,
+	}: {
+		modelMetadataError: string | null;
+		modelMetadataLoading: boolean;
+		models: Model[];
+	}) => {
+		const userStore = useUserSelectionsForClimateQueryStore();
+
+		const handleModelSelect = (modelId: string) => {
+			userStore.setSelectedModel(modelId);
+		};
+
+		if (isMobile) {
+			return (
+				<div className="map-header">
+					<div
+						style={{
+							position: "fixed",
+							top: "0.75em",
+							left: "50%",
+							transform: "translateX(-50%)",
+							width: "calc(100vw - 24px)",
+							opacity: 1,
+							zIndex: 500,
+							padding: 0,
+						}}
+					>
+						<GeneralCard
+							style={{
+								margin: 0,
+								border: "1px solid rgba(220, 220, 220, 0.7)",
+								borderRadius: 20,
+							}}
+							bodyStyle={{
+								padding: "10px 12px",
+							}}
+						>
+							<div
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "space-between",
+									gap: "10px",
+								}}
+							>
+								<div
+									style={{
+										width: "30px",
+										height: "30px",
+										display: "flex",
+										justifyContent: "center",
+										alignItems: "center",
+										flexShrink: 0,
+									}}
+								>
+									<img
+										alt="Hei-Planet logo"
+										className="hei-planet-logo"
+										style={{
+											height: "30px",
+											width: "30px",
+										}}
+										src={mobileLogo}
+									/>
+								</div>
+
+								<div
+									style={{
+										flex: 1,
+										display: "flex",
+										alignItems: "center",
+										gap: "12px",
+										minWidth: 0,
+									}}
+								>
+									<div style={{ flex: 1, minWidth: 0 }}>
+										<ModelSelector
+											error={modelMetadataError}
+											loading={modelMetadataLoading}
+											models={models}
+											selectedModel={userStore.selectedModel}
+											onModelSelect={handleModelSelect}
+										/>
+									</div>
+									<div style={{ flex: 1, minWidth: 0 }}>
+										<Select
+											value={userStore.mapMode}
+											onChange={(v) => {
+												console.log("Map mode should be updated as such:", v);
+												userStore.setMapMode(v);
+											}}
+											style={{ width: "100%", fontSize: "14px" }}
+											popupMatchSelectWidth={false}
+											size="middle"
+											aria-label="Map mode"
+										>
+											<Option value="europe-only">
+												<span
+													style={{
+														display: "inline-flex",
+														alignItems: "center",
+														gap: "6px",
+													}}
+												>
+													<span aria-hidden="true">🌍</span>
+													<span>Eur</span>
+												</span>
+											</Option>
+											<Option value="grid">
+												<span
+													style={{
+														display: "inline-flex",
+														alignItems: "center",
+														gap: "6px",
+													}}
+												>
+													<span aria-hidden="true">🗺️</span>
+													<span>Grid</span>
+												</span>
+											</Option>
+										</Select>
+									</div>
+								</div>
+							</div>
+						</GeneralCard>
+					</div>
+				</div>
+			);
+		}
+
+		return (
+			<div
+				className="map-header header-section center min-w-100"
+				style={{
+					position: "fixed",
+					top: 0,
+					left: 0,
+					right: 0,
+					background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+					boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25)",
+					zIndex: 999,
+					backdropFilter: "blur(20px)",
+					borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+					margin: 0,
+				}}
+			>
+				<div
+					style={{
+						position: "absolute",
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						background: "rgba(255, 255, 255, 0.1)",
+						backdropFilter: "blur(10px)",
+						pointerEvents: "none",
+						color: "white",
+					}}
+				/>
+
+				<GeneralCard
+					style={{
+						border: "0px solid",
+						marginBottom: "0px",
+						marginTop: "0px",
+						background: "transparent",
+						position: "relative",
+						zIndex: 1,
+					}}
+					bodyStyle={{
+						paddingTop: "16px",
+						paddingBottom: "16px",
+					}}
+				>
+					<div className="logo-section">
+						<h1 hidden className="map-title">
+							<span className="title-one">Hei-</span>
+							<span className="title-health">Planet</span>
+							<span className="title-platform">Platform</span>
+							<small className="tertiary">
+								<i>&nbsp;{viewingMode.isExpert && "Expert Mode"}</i>
+							</small>
+						</h1>
+					</div>
+					<div
+						className="header-font-size"
+						style={{
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							gap: "8px",
+							flexWrap: "wrap",
+						}}
+					>
+						<img
+							style={{
+								height: "48px",
+								width: "auto",
+								marginRight: "10px",
+							}}
+							className="hei-planet-logo"
+							alt="Hei-Planet logo"
+							src="/images/hei-planet-logo.png"
+						/>
+						<div
+							className="glass-button"
+							style={{
+								background: "rgba(255, 255, 255, 0.2)",
+								border: "1px solid rgba(255, 255, 255, 0.3)",
+								borderRadius: "12px",
+								padding: "10px 16px",
+								backdropFilter: "blur(10px)",
+								transition: "all 0.3s ease",
+								display: "flex",
+								alignItems: "center",
+								gap: "4px",
+							}}
+						>
+							<span
+								style={{
+									color: "white",
+									fontWeight: "500",
+								}}
+							>
+								Display&nbsp;
+							</span>
+							<ModelSelector
+								error={modelMetadataError}
+								loading={modelMetadataLoading}
+								models={models}
+								selectedModel={userStore.selectedModel}
+								onModelSelect={handleModelSelect}
+							/>
+						</div>
+						<div
+							className="glass-button"
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: "10px",
+								padding: "12px 16px",
+								background: "rgba(255, 255, 255, 0.2)",
+								border: "1px solid rgba(255, 255, 255, 0.3)",
+								borderRadius: "12px",
+								backdropFilter: "blur(10px)",
+								transition: "all 0.3s ease",
+								color: "white",
+								fontWeight: "500",
+							}}
+						>
+							<MapIcon size={20} />
+							<Select
+								value={userStore.mapMode}
+								onChange={(v) => {
+									console.log("Map mode should be updated as such:", v);
+									userStore.setMapMode(v);
+								}}
+								style={{ minWidth: 120 }}
+								size="middle"
+							>
+								<Option value="europe-only">Europe-only</Option>
+								<Option value="grid">Grid</Option>
+							</Select>
+						</div>
+						<small
+							className="tertiary glass-button"
+							style={{
+								background: "rgba(255, 255, 255, 0.2)",
+								border: "1px solid rgba(255, 255, 255, 0.3)",
+								borderRadius: "12px",
+								padding: "8px 12px",
+								backdropFilter: "blur(10px)",
+								transition: "all 0.3s ease",
+								color: "white",
+								fontWeight: "500",
+							}}
+							hidden={viewingMode.isExpert === false}
+						>
+							Expert Mode
+						</small>
+					</div>
+
+					<style>
+						{`
+							.glass-button:hover {
+								background: rgba(255, 255, 255, 0.3) !important;
+								border-color: rgba(255, 255, 255, 0.5) !important;
+								transform: translateY(-1px);
+								box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+							}
+
+							.glass-button .ant-select-selector {
+								background: rgba(255, 255, 255, 0.1) !important;
+								border: 1px solid rgba(255, 255, 255, 0.3) !important;
+								color: white !important;
+							}
+
+							.glass-button .ant-select-selection-item,
+							.glass-button .ant-select-arrow,
+							.glass-button .anticon {
+								color: white !important;
+							}
+
+							.glass-button button {
+								background: transparent !important;
+								border: none !important;
+								color: white;
+							}
+
+							.glass-button button:hover {
+								background: rgba(255, 255, 255, 0.1) !important;
+							}
+
+							.glass-button .ant-select-selector:hover {
+								background: rgba(255, 255, 255, 0.2) !important;
+								border-color: rgba(255, 255, 255, 0.4) !important;
+							}
+
+							.glass-button .ant-select-focused .ant-select-selector {
+								background: rgba(255, 255, 255, 0.2) !important;
+								border-color: rgba(255, 255, 255, 0.4) !important;
+								box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+							}
+
+							.glass-button .model-selector-button {
+								background: rgba(255, 255, 255, 0.1) !important;
+								border: 1px solid rgba(255, 255, 255, 0.3) !important;
+								color: white !important;
+							}
+
+							.glass-button .model-selector-button:hover {
+								background: rgba(255, 255, 255, 0.2) !important;
+								border-color: rgba(255, 255, 255, 0.4) !important;
+							}
+
+							.glass-button .model-selector-button .chevron {
+								color: white !important;
+							}
+						`}
+					</style>
+				</GeneralCard>
+			</div>
+		);
+	},
+);
+
+export default Header;

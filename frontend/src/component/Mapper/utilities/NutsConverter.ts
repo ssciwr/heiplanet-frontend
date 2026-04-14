@@ -5,14 +5,16 @@ import type {
 	MultiPolygon,
 	Polygon,
 } from "geojson";
-import { nutsApiUrl } from "../../../services/nutsApi.ts";
+
 import type {
 	DataExtremes,
+	ModelOutputDataPoint,
 	NutsFeature,
 	NutsGeoJSON,
 	NutsGeometry,
-	TemperatureDataPoint,
 } from "../types";
+
+const NUTS_REGIONS_API_URL = "/api/nuts_regions";
 
 export class NutsConverter {
 	private nutsGeoJSON: FeatureCollection | null = null;
@@ -24,9 +26,11 @@ export class NutsConverter {
 		}
 
 		const gridResolution = `NUTS${level}`;
-		const nutsRegionsUrl = nutsApiUrl("/nuts_regions", {
+		const nutsRegionsParams = new URLSearchParams({
 			grid_resolution: gridResolution,
 		});
+		const nutsRegionsUrl = `${NUTS_REGIONS_API_URL}?${nutsRegionsParams.toString()}`;
+		// e.g.  /api/nuts_regions?grid_resolution=NUTS3
 
 		const response = await fetch(nutsRegionsUrl, {
 			headers: {
@@ -46,10 +50,10 @@ export class NutsConverter {
 	}
 
 	private createSpatialIndex(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 		bucketSize: number,
-	): { [key: string]: TemperatureDataPoint[] } {
-		const index: { [key: string]: TemperatureDataPoint[] } = {};
+	): { [key: string]: ModelOutputDataPoint[] } {
+		const index: { [key: string]: ModelOutputDataPoint[] } = {};
 
 		for (const dataPoint of temperatureData) {
 			if (
@@ -134,11 +138,11 @@ export class NutsConverter {
 
 	private findNearestDataPoint(
 		centroidCoords: [number, number],
-		spatialIndex: { [key: string]: TemperatureDataPoint[] },
+		spatialIndex: { [key: string]: ModelOutputDataPoint[] },
 		bucketSize: number,
-	): TemperatureDataPoint | null {
+	): ModelOutputDataPoint | null {
 		const [lng, lat] = centroidCoords;
-		let nearestPoint: TemperatureDataPoint | null = null;
+		let nearestPoint: ModelOutputDataPoint | null = null;
 		let minDistance = Number.POSITIVE_INFINITY;
 
 		// Start with the bucket containing the centroid
@@ -216,7 +220,7 @@ export class NutsConverter {
 	}
 
 	async convertDataToNuts(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 	): Promise<{ nutsGeoJSON: NutsGeoJSON; extremes: DataExtremes }> {
 		try {
 			console.log("Starting Europe-only NUTS conversion...");
@@ -268,7 +272,7 @@ export class NutsConverter {
 					const polygonBounds = this.getPolygonBounds(polygon);
 					const relevantBuckets = this.getRelevantBuckets(polygonBounds, 5);
 
-					const pointsInRegion: TemperatureDataPoint[] = [];
+					const pointsInRegion: ModelOutputDataPoint[] = [];
 					let totalCandidatePoints = 0;
 
 					// Only check points in relevant buckets
@@ -304,7 +308,7 @@ export class NutsConverter {
 					// Calculate average temperature if we have points
 					if (pointsInRegion.length > 0) {
 						const temperatureSum = pointsInRegion.reduce(
-							(sum, point) => sum + point.temperature,
+							(sum, point) => sum + point.modelOutputValue,
 							0,
 						);
 						const avgTemperature = temperatureSum / pointsInRegion.length;
@@ -334,7 +338,7 @@ export class NutsConverter {
 								dataPoints: pointsInRegion.slice(0, 3).map((point) => ({
 									lat: point.lat,
 									lng: point.lng,
-									temperature: point.temperature,
+									modelOutputValue: point.modelOutputValue,
 								})),
 							},
 							geometry: nutsFeature.geometry as NutsGeometry,
@@ -360,15 +364,15 @@ export class NutsConverter {
 
 						if (nearestPoint) {
 							console.log(
-								`NUTS region ${nutsId}: no points inside, using nearest point (${nearestPoint.temperature.toFixed(1)}°C)`,
+								`NUTS region ${nutsId}: no points inside, using nearest point (${nearestPoint.modelOutputValue.toFixed(1)}°C)`,
 							);
-							temperatures.push(nearestPoint.temperature);
+							temperatures.push(nearestPoint.modelOutputValue);
 
 							const nutsFeatureResult: NutsFeature = {
 								type: "Feature",
 								properties: {
 									NUTS_ID: nutsId,
-									intensity: nearestPoint.temperature,
+									intensity: nearestPoint.modelOutputValue,
 									countryName: this.getNutsDisplayName(nutsId),
 									pointCount: 0, // Mark as fallback
 									nutsLevel: 2,
@@ -382,7 +386,7 @@ export class NutsConverter {
 										{
 											lat: nearestPoint.lat,
 											lng: nearestPoint.lng,
-											temperature: nearestPoint.temperature,
+											modelOutputValue: nearestPoint.modelOutputValue,
 										},
 									],
 								},
@@ -563,7 +567,7 @@ export class NutsConverter {
 							{
 								lat: currentPosition.lat,
 								lng: currentPosition.lng,
-								temperature: apiValue,
+								modelOutputValue: apiValue,
 							},
 						],
 					},
@@ -660,7 +664,7 @@ export class NutsConverter {
 
 	// Method to reset to calculated data only
 	async resetToCalculatedData(
-		temperatureData: TemperatureDataPoint[],
+		temperatureData: ModelOutputDataPoint[],
 	): Promise<{ nutsGeoJSON: NutsGeoJSON; extremes: DataExtremes }> {
 		return this.convertDataToNuts(temperatureData);
 	}

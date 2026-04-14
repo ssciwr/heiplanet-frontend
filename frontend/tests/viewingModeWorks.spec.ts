@@ -13,26 +13,24 @@ test("Expert mode can be selected from modal on /map", async ({ page }) => {
 	await page.goto("http://localhost:5174/map?notour=true");
 
 	// Wait for modal to appear
-	await expect(page.locator("text=Choose Your Experience")).toBeVisible({
+	const expertiseModal = page.getByRole("dialog", {
+		name: /choose your experience/i,
+	});
+	await expect(expertiseModal).toBeVisible({
 		timeout: 120000,
 	});
-	const expertiseModal = page
-		.locator(".ant-modal")
-		.filter({ hasText: "Choose Your Experience" });
 	await expect(page.locator("body")).toContainText("Guided Mode");
 	await expect(page.locator("body")).toContainText("Expert Mode");
 
-	// Click the expert mode card using data-testid
-	// Use force click to bypass modal interference
-	await page.waitForTimeout(1000) // clickability was iffy
-	await page.getByTestId("expert-mode-card").click({ force: true });
+	await page.getByTestId("expert-mode-card").dispatchEvent("click");
 
 	// Wait for modal to close
 	await expect(expertiseModal).toBeHidden({ timeout: 15000 });
 
 	// Verify expert mode is active
-	await expect(page.locator("text=Choose Your Experience")).not.toBeVisible();
-	await expect(page.locator("body")).toContainText("Expert Mode", {
+	await expect(
+		page.locator("small").filter({ hasText: /^Expert Mode$/ }),
+	).toBeVisible({
 		timeout: 10000,
 	});
 });

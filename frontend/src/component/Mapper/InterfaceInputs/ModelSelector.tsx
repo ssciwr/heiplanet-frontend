@@ -1,15 +1,10 @@
 import { Button } from "antd";
 import { Plug } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { isMobile } from "react-device-detect";
-import { fetchModelCards } from "../../../services/modelCardService";
 import type { Model } from "../../../types/model";
 import Selector from "../../General/Selector.tsx";
 import ModelDetailsModal from "./ModelDetailsModal";
-
-const loadModels = async (): Promise<Model[]> => {
-	return fetchModelCards();
-};
 
 // Helper function to truncate text
 const truncateText = (text: string, maxLength: number): string => {
@@ -18,53 +13,19 @@ const truncateText = (text: string, maxLength: number): string => {
 };
 
 const ModelSelector = ({
+	error,
+	loading,
+	models,
 	selectedModel,
 	onModelSelect,
 }: {
+	error: string | null;
+	loading: boolean;
+	models: Model[];
 	selectedModel: string;
 	onModelSelect: (newModelId: string) => void;
 }) => {
-	const [models, setModels] = useState<Model[]>([]);
 	const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				setLoading(true);
-				setError(null);
-				const loadedModels = await loadModels();
-
-				if (loadedModels.length === 0) {
-					throw new Error("No models could be loaded");
-				}
-
-				setModels(loadedModels);
-			} catch (err) {
-				console.error("Error loading models:", err);
-				setError("Failed to load models from metadata artifact");
-
-				console.log("Falling back to hardcoded model data");
-				setModels([
-					{
-						id: "model-cards-unavailable",
-						modelName: "Model Cards Unavailable",
-						title: "Model Cards Unavailable",
-						description: "Unable to load model metadata from artifact source.",
-						emoji: "⚠️",
-						color: "#D14343",
-						details:
-							"Check artifact generation and metadata artifact URL configuration.",
-					},
-				]);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadData();
-	}, []);
 
 	const selectedModelData = models.find((m) => m.id === selectedModel);
 
@@ -90,43 +51,48 @@ const ModelSelector = ({
 
 	// Create display text with proper truncation
 	const getDisplayText = (modelData: Model) => {
-		const fullText = modelData.modelName;
-		return truncateText(fullText, isMobile ? 12 : 30);
+		const fullText = modelData.modelName.trim();
+		return isMobile
+			? fullText.slice(0, 3).toUpperCase()
+			: truncateText(fullText, 30);
 	};
 
 	if (isMobile) {
 		// On mobile, just show button that opens modal
 		return (
-			<span className="model-selector">
+			<span
+				className="model-selector"
+				style={{ display: "block", width: "100%" }}
+			>
 				<Button
 					className="header-font-size bg-surface-raised border-light"
 					style={{
 						display: "inline-flex",
 						alignItems: "center",
-						gap: "8px",
-						padding: "8px 16px",
-						borderRadius: "8px",
+						justifyContent: "center",
+						padding: "0 12px",
+						borderRadius: "10px",
 						color: "var(--text-primary)",
-						height: "auto",
-						maxWidth: "140px",
+						height: "34px",
+						width: "100%",
+						fontSize: "14px",
+						fontWeight: 500,
 					}}
 					loading={loading}
 					onClick={() => setIsDetailsModalOpen(true)}
 				>
 					{selectedModelData ? (
-						<>
-							<span>{selectedModelData.emoji}</span>
-							<span
-								style={{
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-								title={selectedModelData.modelName}
-							>
-								{getDisplayText(selectedModelData)}
-							</span>
-						</>
+						<span
+							title={selectedModelData.modelName}
+							style={{
+								display: "inline-flex",
+								alignItems: "center",
+								gap: "6px",
+							}}
+						>
+							<span aria-hidden="true">🦠</span>
+							<span>{getDisplayText(selectedModelData)}</span>
+						</span>
 					) : (
 						<>
 							<Plug size={18} style={{ color: "#0052CC" }} />

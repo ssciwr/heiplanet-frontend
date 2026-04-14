@@ -3,11 +3,19 @@ import {
 	FileTextOutlined,
 	UserOutlined,
 } from "@ant-design/icons";
-import { Badge, Button, Image, List, Modal, Space, Typography } from "antd";
+import {
+	Badge,
+	Button,
+	Image,
+	List,
+	Modal,
+	Space,
+	Tag,
+	Typography,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import type { Model } from "../../../types/model";
-import SimpleMarkdown from "../../General/SimpleMarkdown";
 
 const { Title, Text, Paragraph, Link } = Typography;
 
@@ -19,6 +27,10 @@ interface ModelDetailsModalProps {
 	onModelSelect: (modelId: string) => void;
 	showCurrentModelFirst?: boolean; // New prop to show current model details first
 }
+
+const getRequestedVariable = (model: Model): string => {
+	return model.model_output_variable || model.output?.[0] || "R0"; // default for now, maybe egg_density in reality.
+};
 
 const ModelDetailsModal: React.FC<ModelDetailsModalProps> = React.memo(
 	({
@@ -247,17 +259,29 @@ const ModelDetailsModal: React.FC<ModelDetailsModalProps> = React.memo(
 										)}
 								</div>
 
-								{/* Model Card Section */}
+								{/* Used model_output_variable for requests for debugging and readability, will be needed if we support switching in the future */}
 								<div style={{ marginBottom: "32px" }}>
-									{selectedDetailModel.cardMarkdown ? (
-										<SimpleMarkdown
-											markdown={selectedDetailModel.cardMarkdown}
-										/>
-									) : (
-										<Text type="secondary">
-											No model card content is available for this model.
-										</Text>
-									)}
+									<div
+										style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}
+									>
+										{(
+											selectedDetailModel.output || [
+												getRequestedVariable(selectedDetailModel),
+											]
+										).map((outputName) => (
+											<Tag
+												key={outputName}
+												color={
+													outputName ===
+													getRequestedVariable(selectedDetailModel)
+														? "blue"
+														: "default"
+												}
+											>
+												{outputName}
+											</Tag>
+										))}
+									</div>
 								</div>
 
 								{/* Authors Section */}

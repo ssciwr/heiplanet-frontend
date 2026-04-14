@@ -1,18 +1,26 @@
 import type { Model } from "../types/model";
 
 const DEFAULT_OUTPUT_VARIABLE = "R0";
-const LOCAL_ARTIFACT_URL = "/model-metadata/models.v1.json";
+const MODEL_METADATA_URL = "/model-metadata/models.v1.json";
 
 type ModelApiPayload = Model[] | { models?: Model[] };
 
-const getConfiguredArtifactUrl = (): string | null => {
-	const configured = import.meta.env.VITE_MODELS_ARTIFACT_URL;
-	if (typeof configured !== "string") return null;
-	const trimmed = configured.trim();
-	return trimmed ? trimmed : null;
-};
+export const FALLBACK_MODEL_CARDS: Model[] = [
+	{
+		id: "model-cards-unavailable",
+		modelName: "Model Cards Unavailable",
+		title: "Model Cards Unavailable",
+		description:
+			"Unable to load model metadata from artifact source, may require regeneration.",
+		emoji: "⚠️",
+		color: "#D14343",
+		details: "",
+		output: [DEFAULT_OUTPUT_VARIABLE],
+		model_output_variable: DEFAULT_OUTPUT_VARIABLE,
+	},
+];
 
-const resolveOutputVariable = (model: Model): string => {
+export const resolveOutputVariable = (model: Model): string => {
 	const apiOutput =
 		typeof model.model_output_variable === "string"
 			? model.model_output_variable.trim()
@@ -24,6 +32,10 @@ const resolveOutputVariable = (model: Model): string => {
 			? model.output[0].trim()
 			: "";
 	return firstOutput || DEFAULT_OUTPUT_VARIABLE;
+};
+
+export const resolveRequestVariable = (model: Model): string => {
+	return resolveOutputVariable(model);
 };
 
 const normalizeModel = (model: Model): Model => {
@@ -68,29 +80,6 @@ const fetchModelsFromUrl = async (url: string): Promise<Model[]> => {
 		.sort((a, b) => a.modelName.localeCompare(b.modelName));
 };
 
-const getModelSourceUrls = (): string[] => {
-	const configuredArtifactUrl = getConfiguredArtifactUrl();
-	const urls = configuredArtifactUrl
-		? [
-				configuredArtifactUrl,
-				...(import.meta.env.DEV ? [LOCAL_ARTIFACT_URL] : []),
-			]
-		: [LOCAL_ARTIFACT_URL];
-	return [...new Set(urls)];
-};
-
 export const fetchModelCards = async (): Promise<Model[]> => {
-	const errors: string[] = [];
-	for (const sourceUrl of getModelSourceUrls()) {
-		try {
-			return await fetchModelsFromUrl(sourceUrl);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			errors.push(message);
-		}
-	}
-
-	throw new Error(
-		`Failed to load model metadata from artifact source(s). ${errors.join(" | ")}`,
-	);
+	return fetchModelsFromUrl(MODEL_METADATA_URL);
 };

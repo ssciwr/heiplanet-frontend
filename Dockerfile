@@ -6,7 +6,6 @@ LABEL org.opencontainers.image.licenses=MIT
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-ENV VITE_NUTS_API_BASE="http://api:8000"
 RUN corepack enable
 
 WORKDIR /app
@@ -16,10 +15,14 @@ FROM base AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m pip install --no-cache-dir uv
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY frontend/ .
 ENV NODE_ENV=production
-RUN VITE_NUTS_API_BASE=$VITE_NUTS_API_BASE pnpm build
+RUN pnpm build
 
 FROM nginx:alpine
 
@@ -32,6 +35,13 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Copy your custom nginx config
 COPY ./nginx/conf/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80 443
+RUN chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx /usr/share/nginx/html
+
+USER nginx
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8080/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
