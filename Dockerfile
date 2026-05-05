@@ -20,6 +20,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 COPY frontend/ .
 ENV NODE_ENV=production
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm build
 
 FROM nginx:alpine
