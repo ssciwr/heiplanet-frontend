@@ -11,6 +11,8 @@ import type { Model } from "../../types/model";
 import GeneralCard from "../General/GeneralCard.tsx";
 import ModelSelector from "./InterfaceInputs/ModelSelector.tsx";
 
+const desktopLogo = `${import.meta.env.BASE_URL}images/hei-planet-logo.png`;
+
 const Header = observer(
 	({
 		modelMetadataError,
@@ -217,7 +219,7 @@ const Header = observer(
 							}}
 							className="hei-planet-logo"
 							alt="Hei-Planet logo"
-							src="/images/hei-planet-logo.png"
+							src={desktopLogo}
 						/>
 						<div
 							className="glass-button"

@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import GeneralCard from "../component/General/GeneralCard.tsx";
 import Footer from "../static/Footer.tsx";
 
+const logoPath = `${import.meta.env.BASE_URL}images/hei-planet-logo.png`;
+
 const NotFound = () => (
 	<div
 		style={{
@@ -25,7 +27,7 @@ const NotFound = () => (
 			}}
 		>
 			<img
-				src="/images/hei-planet-logo.png"
+				src={logoPath}
 				alt="Hei-Planet logo"
 				className="hei-planet-logo"
 				style={{

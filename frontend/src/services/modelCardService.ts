@@ -1,7 +1,7 @@
 import type { Model } from "../types/model";
 
 const DEFAULT_OUTPUT_VARIABLE = "R0";
-const MODEL_METADATA_URL = "/model-metadata/models.v1.json";
+const MODEL_METADATA_URL = `${import.meta.env.BASE_URL}model-metadata/models.v1.json`;
 
 type ModelApiPayload = Model[] | { models?: Model[] };
 
