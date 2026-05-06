@@ -46,9 +46,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
-        run: pnpm build
+        run: pnpm build && cp dist/index.html dist/404.html
         env:
           NODE_ENV: production
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact

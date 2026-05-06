@@ -32,7 +32,7 @@ if (rootElement) {
 	ReactDOM.createRoot(rootElement).render(
 		<React.StrictMode>
 			<UserSelectionsForClimateQueryProvider>
-				<BrowserRouter>
+				<BrowserRouter basename={import.meta.env.BASE_URL}>
 					<App />
 				</BrowserRouter>
 			</UserSelectionsForClimateQueryProvider>
