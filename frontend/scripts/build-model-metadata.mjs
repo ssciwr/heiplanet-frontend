@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { isMap, parseDocument } from "yaml";
+import { parse } from "yaml";
 
 const DATASET_REPO =
 	process.env.HEIPLANET_MODELS_DATASET_REPO ??
@@ -34,43 +34,6 @@ export const resolveOutputVariable = (modelYaml) => {
 	}
 
 	return "R0";
-};
-
-// Due to some properties currently not being valid yaml
-// long term solution: Delete this, add a github action flow which runs yaml parser on the model files.
-export const parseRootLevelYamlProperties = (rawText) => {
-	const document = parseDocument(rawText, {
-		keepSourceTokens: true,
-		prettyErrors: false,
-		uniqueKeys: false,
-	});
-	if (!isMap(document.contents)) {
-		return {};
-	}
-
-	const pairs = document.contents.items.filter(
-		(item) => typeof item.key?.toString?.() === "string",
-	);
-	const invalidKeys = new Set(
-		document.errors
-			.map((error) => {
-				const errorPosition = Math.max((error.pos?.[0] ?? 1) - 1, 0);
-				return pairs
-					.find((item, index) => {
-						const start = item.key.range?.[0] ?? -1;
-						const end = pairs[index + 1]?.key.range?.[0] ?? rawText.length + 1;
-						return start <= errorPosition && errorPosition < end;
-					})
-					?.key.toString();
-			})
-			.filter(Boolean),
-	);
-
-	return Object.fromEntries(
-		pairs
-			.filter((item) => !invalidKeys.has(item.key.toString()))
-			.map((item) => [item.key.toString(), item.value?.toJSON()]),
-	);
 };
 
 export const buildDetailsJson = (modelYaml) => {
@@ -145,7 +108,7 @@ export const fetchRequiredText = async (url) => {
 };
 
 export const loadModel = async (sourceFile) => {
-	const yamlContent = parseRootLevelYamlProperties(
+	const yamlContent = parse(
 		await fetchRequiredText(`${MODEL_METADATA_URL}/${sourceFile}`),
 	);
 	return normalizeModel(yamlContent, sourceFile);
