@@ -74,4 +74,20 @@ export async function setupApiMocksWithFs(page: Page) {
 
 		await mock2025Handler(route);
 	});
+
+	await page.route("**/api/nuts_data**", async (route) => {
+		const variable = new URL(route.request().url()).searchParams.get(
+			"requested_variable_type",
+		);
+		await route.fulfill({
+			status: 200,
+			contentType: "application/json",
+			body: JSON.stringify(
+				variable === "R0" || variable === "r0_estimate"
+					? { result: { DE111: 0.1 } } // for R0, aka for WNV-R0, the main model used in Playwright, return one fake datapoint
+					: { error: "Missing variable type for requested time point." }, // For other models, e.g. AA model, return no data
+				// due to changes to useModelData.ts cycling through models from the first until it finds one with > 0 data points
+			),
+		});
+	});
 }
