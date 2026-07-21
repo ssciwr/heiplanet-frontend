@@ -9,19 +9,18 @@ This repository contains the frontend for the Climate Map. The user can browse f
 It can be configured to request and display NUTS3 regions, or worldwide equivalent regions, which is dependent upon the underlying model.
 
 ## Background context on the view types (technically specific)
-For the worldwide view, the data is projected from individual points into polygons on the frontend.
+For the worldwide view, the data is projected from individual points into Grids on the frontend; the country borders are a background layer.
+The NUTS regions are processed on the backend. The NUTS regions meta data is parsed via an API from a backend. NUTS regions not in the meta data list, or without data, are not shown. The default NUTS level is NUTS3, but the backend supports providing different NUTS region levels.
+
+## Example: NUTS3 regions version for WNV-R0(Shown via data from the small dataset mode):
+<img width="3707" height="1933" alt="image" src="https://github.com/user-attachments/assets/a5709143-88ff-4f4a-9b28-99801570f376" />
+
+
+## Example: Worldwide Grid Simple R0 example(Also from the small dataset mode):
+<img width="3707" height="1933" alt="image" src="https://github.com/user-attachments/assets/c885efe1-4507-4c4a-88e5-27e7364ac963" />
 
 ## Main components diagram:
-(Out of date, new diagram needed)
-
-## Example: Worldwide Simple R0 example:
-<img width="3700" height="1648" alt="image" src="https://github.com/user-attachments/assets/625d4432-faad-4e5f-b60f-4af96d6848b1" />
-
-
-## Example: NUTS version:
-![image](https://github.com/user-attachments/assets/b7273a78-15a7-4304-88ea-d4b537f7c03e)
-
-
+(New Diagram needed)
 
 # Installation guide
 - First, make sure the `onehealth-db` repository is running with the API accessible. It depends upon a running postgres database, typically docker name `my-postgres`. The API must be able to return generated data for 2016 and 2017.
