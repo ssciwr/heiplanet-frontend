@@ -65,10 +65,18 @@ ClimateMap - contains these components:
 > Legend (R0 estimate etc)
 > Bottom bar with month+year + timeline(changes month)
 
+## Inputs
+
+![Input components: model and map mode selectors in the header, and month and year controls in the bottom bar](docs/architectureImages/inputs.png)
+
 Broadly speaking changes in the top bar / bottom bar trigger state changes.
 The two layers in the map display the data
 A state variable like mapMode changing from "NUTS" to "GRID" causes a new API request for that new map mode type of data
 ... using the same existing `model ID` and `model output variable`.
+
+## Outputs
+
+![Output components: map cells and polygons, legend, map controls and bottom bar actions](docs/architectureImages/outputs.png)
 
 Those update the MapDisplayedDataStore, which when it changes rerenders the map layers and ClimateMap (and therefore as that changes the min/max data, the legend).
 
