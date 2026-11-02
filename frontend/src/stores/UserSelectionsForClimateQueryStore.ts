@@ -17,10 +17,6 @@ export class UserSelectionsForClimateQueryStore {
 		this.selectedModel = model;
 	};
 
-	setSelectedOptimism = (optimism: string) => {
-		this.selectedOptimism = optimism;
-	};
-
 	setCurrentYear = (year: number) => {
 		this.currentYear = year;
 	};
