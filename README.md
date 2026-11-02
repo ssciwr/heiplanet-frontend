@@ -44,7 +44,8 @@ MIT, see LICENSE.md
 Deployed example as the [Hei-Planet Platform](http://platform.hei-planet.com/)
 
 # Architecture explained
-This app uses React and relies on a correspodning model data API backend.
+## Summary
+This app uses React and relies on a corresponding model data API backend.
 
 Data flows through stores in react which are mostly like object oriented classes with getters-and-setters.
 In this implementation, all stores are universal so if you import a store (via a "hook" technically) and run a setter value, it updates it in one place.
@@ -55,7 +56,7 @@ The main role of the app is to **render data from the API into a map**. The map 
 NUTS (European Regions) data or grid data. This can load from the API to render suspectibility or other variables (e.g. R0 estimate)
 for different infectious disease models with climate and population inputs.
 
-# React Components
+## React Components
 ClimateMap - contains these components:
 > Top bar with Model and Map mode dropdowns (UserSelectionStore)
 > Leaflet Map
@@ -71,8 +72,11 @@ ClimateMap - contains these components:
 
 Broadly speaking changes in the top bar / bottom bar trigger state changes.
 The two layers in the map display the data
-A state variable like mapMode changing from "NUTS" to "GRID" causes a new API request for that new map mode type of data
-... using the same existing `model ID` and `model output variable`.
+A state variable like mapMode changing from "NUTS" to "GRID" causes a new API request for that new map modes respective API(*),
+using the `model output variable` for the model
+
+\* Each map mode has it's own API url, e.g. api//nuts_data or /api/cartesian
+These map modes reflect what the scientists involved in this project use in paper figures. The UI also includes a way to export screenshots of the map, which are similar.
 
 ## Outputs
 
@@ -81,15 +85,38 @@ A state variable like mapMode changing from "NUTS" to "GRID" causes a new API re
 Those update the MapDisplayedDataStore, which when it changes rerenders the map layers and ClimateMap (and therefore as that changes the min/max data, the legend).
 
 **Main data flow components**
-UserSelectionQueryStore - a set of getter/setter properties in a store for the month/date/model
-MapViewportInputStore - "Input" is key here - this is where the map is zoomed to (zoom amount + lat/lon) which is used for fetching data. It is connected to the leaflet map so when the user pans or zooms, it updates that information and calls useClimateDataLoader when change has been detected
-MapDisplayedDataStore - handles and stores all final data that gets rendered - the provided NUTS regions, the actual data values for grids and NUTS data when applicable to be rendered in to the screen("viewport"). ClimateMap listens to this for min/max values to display the legend directly
-useClimateDataLoader - sends/processes out for new map data
-modelOutputLoader - Calls the API, processes the data into the final form (merging NUTS data for example), and puts it into the MapDisplayedDataStore.
 
-Auxiliary/minor:
-mapDataUtils - manages the Legend and keeping it consistent with the rendered data point colours on the map
-useModelData - renders model data from last start up the webserver and this data can then be seen in the model viewer and is used for data queries (e.g. requested_variable_type only presently)
+- `UserSelectionsForClimateQuery` - a set of getter/setter properties in a store for the month/date/model
+
+- `MapViewportInputStore` - "Input" is key here - this is where the map is zoomed to (zoom amount + lat/lon) which is used for fetching data. It is connected to the leaflet map so when the user pans or zooms, it updates that information and calls useClimateDataLoader when change has been detected
+
+- `MapDisplayedDataStore` - handles and stores all final data that gets rendered - the provided NUTS regions, the actual data values for grids and NUTS data when applicable to be rendered in to the screen("viewport"). ClimateMap listens to this for min/max values to display the legend directly
+
+- `useClimateDataLoader` - sends/processes out for new map data
+
+- `modelOutputLoader` - Calls the API, processes the data into the final form (merging NUTS data for example), and puts it into the MapDisplayedDataStore.
+
+**Auxiliary/minor:**
+
+- `mapDataUtils` - manages the Legend and keeping it consistent with the rendered data point colours on the map
+
+- `useModelData` - renders model data from last start up the webserver and this data can then be seen in the model viewer and is used for data queries (e.g. requested_variable_type only presently)
+
+## Data flow full "toolchain"
+Inputs change(e.g. UserSelectionsForClimateQuery) → useClimateDataLoader → modelOutputLoader
+
+
+```text
+
+modelOutputLoader handles the API call:
+|
+├─ NUTS: GET /api/nuts_data → region IDs + values
+│    + GET /api/nuts_regions → geo polygon data (not viable to send with every timeline month change and keep responsiveness)
+│    = both are used in MapDisplayedData which is rendered on the map
+│
+└─ GRID: POST /api/cartesian → latitude, longitude, value
+→ GridProcessingStore crates cells(Leaflet Rectangles) and renders them as a layer on the map
+```
 
 # To extend this repository with new features:
 
