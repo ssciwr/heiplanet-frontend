@@ -68,11 +68,12 @@ ClimateMap - contains these components:
 
 ## Inputs
 
-![Input components: model and map mode selectors in the header, and month and year controls in the bottom bar](docs/architectureImages/inputs.png)
+![img_1.png](img_1.png)
 
-Broadly speaking changes in the top bar / bottom bar trigger state changes.
-The two layers in the map display the data
-A state variable like mapMode changing from "NUTS" to "GRID" causes a new API request for that new map modes respective API(*),
+Changes in the top bar / bottom bar trigger state changes by changing values in "UserSelectionsForClimateQuery".
+Other parts of the codebase listen to the properties in "UserSelectionsForClimateQuery" changing.
+
+For exmaple, A state variable like mapMode changing from "NUTS" to "GRID" causes a new API request for that new map modes respective API(*),
 using the `model output variable` for the model
 
 \* Each map mode has it's own API url, e.g. api//nuts_data or /api/cartesian
@@ -80,9 +81,11 @@ These map modes reflect what the scientists involved in this project use in pape
 
 ## Outputs
 
-![Output components: map cells and polygons, legend, map controls and bottom bar actions](docs/architectureImages/outputs.png)
+![img.png](img.png)
 
 Those update the MapDisplayedDataStore, which when it changes rerenders the map layers and ClimateMap (and therefore as that changes the min/max data, the legend).
+
+The two layers in the map display the data depending on which mode is active (NUTS/GRID)
 
 **Main data flow components**
 
@@ -117,6 +120,9 @@ modelOutputLoader handles the API call:
 └─ GRID: POST /api/cartesian → latitude, longitude, value
 → GridProcessingStore crates cells(Leaflet Rectangles) and renders them as a layer on the map
 ```
+
+Here is an AI-generated diagram explaining how data flows from an API response to displaying in the UI:
+![docs/architectureImages/api-data-flow.svg](docs/architectureImages/api-data-flow.svg)
 
 # To extend this repository with new features:
 
