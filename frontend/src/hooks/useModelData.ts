@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { STARTUP_MONTH, STARTUP_YEAR } from "../constants/startupDate";
 import {
 	FALLBACK_MODEL_CARDS,
 	fetchModelCards,
@@ -39,8 +40,8 @@ export const useModelData = (
 					for (const model of loadedModels) {
 						try {
 							const data = await fetchNutsData(
-								2025,
-								7,
+								STARTUP_YEAR,
+								STARTUP_MONTH,
 								resolveRequestVariable(model),
 								"NUTS3",
 							);

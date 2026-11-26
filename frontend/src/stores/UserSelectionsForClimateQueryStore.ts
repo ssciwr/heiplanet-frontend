@@ -1,11 +1,12 @@
 import { makeAutoObservable } from "mobx";
 import type { Month } from "../component/Mapper/types";
+import { STARTUP_MONTH, STARTUP_YEAR } from "../constants/startupDate";
 
 export class UserSelectionsForClimateQueryStore {
 	selectedModel = "";
 	selectedOptimism = "optimistic";
-	currentYear = 2025;
-	currentMonth: Month = 7;
+	currentYear = STARTUP_YEAR;
+	currentMonth: Month = STARTUP_MONTH;
 	currentVariableType = "R0";
 	mapMode: "europe-only" | "grid" = "europe-only";
 
