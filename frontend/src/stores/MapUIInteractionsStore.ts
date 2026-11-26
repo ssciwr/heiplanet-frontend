@@ -1,5 +1,6 @@
 import type * as L from "leaflet";
 import { makeAutoObservable } from "mobx";
+import { STARTUP_MONTH, STARTUP_YEAR } from "../constants/startupDate";
 
 export class MapUIInteractionsStore {
 	generalError: string | null = null;
@@ -8,8 +9,8 @@ export class MapUIInteractionsStore {
 	mapHoveredLayer: L.Layer | null = null;
 	mapScreenshoter: L.SimpleMapScreenshoter | null = null;
 	noDataModalVisible = false;
-	userRequestedYear = 2025;
-	userRequestedMonth = 1;
+	userRequestedYear = STARTUP_YEAR;
+	userRequestedMonth: number = STARTUP_MONTH;
 	dataFetchErrorMessage = "";
 
 	constructor() {

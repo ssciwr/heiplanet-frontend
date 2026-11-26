@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Page } from "@playwright/test";
 
-const MOCK_2025_FILE_PATH = "/tests/setup/MockResponse2258.json";
-const MOCK_2026_FILE_PATH = "/tests/setup/MockResponse4823.json";
-const BASE_YEAR = 2025;
+const MOCK_BASE_YEAR_FILE_PATH = "/tests/setup/MockResponse2258.json";
+const MOCK_NEXT_YEAR_FILE_PATH = "/tests/setup/MockResponse4823.json";
+const BASE_YEAR = 2016;
 const NEXT_YEAR = BASE_YEAR + 1;
 
 // Helper function to create route handler that loads mock data
@@ -36,8 +36,12 @@ async function createMockHandlerForYear(mockFilePath: string) {
 
 // Sets up mocks for all routes
 export async function setupApiMocksWithFs(page: Page) {
-	const mock2025Handler = await createMockHandlerForYear(MOCK_2025_FILE_PATH);
-	const mock2026Handler = await createMockHandlerForYear(MOCK_2026_FILE_PATH);
+	const mockBaseYearHandler = await createMockHandlerForYear(
+		MOCK_BASE_YEAR_FILE_PATH,
+	);
+	const mockNextYearHandler = await createMockHandlerForYear(
+		MOCK_NEXT_YEAR_FILE_PATH,
+	);
 
 	await page.route("**/api/cartesian", async (route) => {
 		if (route.request().method() !== "POST") {
@@ -55,24 +59,24 @@ export async function setupApiMocksWithFs(page: Page) {
 					: "";
 
 			if (requestedTimePoint === `${BASE_YEAR}-07-01`) {
-				await mock2026Handler(route);
+				await mockNextYearHandler(route);
 				return;
 			}
 
 			if (requestedTimePoint.startsWith(`${NEXT_YEAR}-`)) {
-				await mock2026Handler(route);
+				await mockNextYearHandler(route);
 				return;
 			}
 
 			if (requestedTimePoint.startsWith(`${BASE_YEAR}-`)) {
-				await mock2025Handler(route);
+				await mockBaseYearHandler(route);
 				return;
 			}
 		} catch (error) {
 			// fall back to the baseline fixture below.
 		}
 
-		await mock2025Handler(route);
+		await mockBaseYearHandler(route);
 	});
 
 	await page.route("**/api/nuts_data**", async (route) => {

@@ -128,7 +128,7 @@ test.describe("AdvancedTimelineSelector Year Navigation - Desktop Only", () => {
 		// Helper function to get current year from display
 		async function getCurrentYear() {
 			const yearText = await page.locator(".year-text").textContent();
-			return Number.parseInt(yearText?.trim() || "2025");
+			return Number.parseInt(yearText?.trim() || "2016");
 		}
 
 		// Wait for initial data to load

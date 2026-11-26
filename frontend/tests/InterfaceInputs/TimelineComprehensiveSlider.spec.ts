@@ -205,7 +205,7 @@ test.describe("Comprehensive Grid Color Analysis - Desktop Only", () => {
 		await waitForMapDataStability();
 
 		// Test multiple years
-		const testYears = [2025, 2026];
+		const testYears = [2016, 2017];
 		const yearColorMaps = new Map();
 		const yearSnapshots = new Map();
 
@@ -221,9 +221,9 @@ test.describe("Comprehensive Grid Color Analysis - Desktop Only", () => {
 			console.log(`Year ${year} colors:`, colors);
 		}
 
-		const snapshot2025 = yearSnapshots.get(2025);
-		const snapshot2026 = yearSnapshots.get(2026);
-		expect(Buffer.compare(snapshot2025, snapshot2026)).not.toBe(0);
+		const snapshotFirstYear = yearSnapshots.get(2016);
+		const snapshotSecondYear = yearSnapshots.get(2017);
+		expect(Buffer.compare(snapshotFirstYear, snapshotSecondYear)).not.toBe(0);
 
 		// Validate hex color format
 		yearColorMaps.forEach((colors, year) => {
