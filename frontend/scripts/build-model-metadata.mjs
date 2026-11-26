@@ -19,27 +19,39 @@ export const cleanText = (value) => {
 	return trimmed || null;
 };
 
-export const resolveOutputVariable = (modelYaml) => {
-	const outputsMapping = modelYaml.outputs;
-	if (
-		outputsMapping &&
-		typeof outputsMapping === "object" &&
-		!Array.isArray(outputsMapping)
-	) {
-		for (const key of Object.keys(outputsMapping)) {
-			if (typeof key === "string" && key.trim()) {
+const firstMappingKey = (value) => {
+	if (value && typeof value === "object" && !Array.isArray(value)) {
+		for (const key of Object.keys(value)) {
+			if (key.trim()) {
 				return key.trim();
 			}
 		}
 	}
+	return null;
+};
 
-	return "R0";
+export const resolveOutputVariable = (modelYaml) => {
+	// the database variable to show for this model; it can differ from the
+	// model's own outputs (e.g. "adults_log10" for the P-Model output "adults").
+	// Given either as a string or as a mapping {name: {description, ...}}.
+	const explicitOutputVariable =
+		cleanText(modelYaml.model_output_variable) ??
+		firstMappingKey(modelYaml.model_output_variable);
+	if (explicitOutputVariable) return explicitOutputVariable;
+
+	return firstMappingKey(modelYaml.outputs) ?? "R0";
 };
 
 export const buildDetailsJson = (modelYaml) => {
 	const details = Object.fromEntries(
 		Object.entries(modelYaml).filter(
-			([key]) => !["model_name", "description", "outputs"].includes(key),
+			([key]) =>
+				![
+					"model_name",
+					"description",
+					"outputs",
+					"model_output_variable",
+				].includes(key),
 		),
 	);
 
